@@ -288,21 +288,26 @@ class SFFormPrinter {
 		global $sfgScriptPath;
 
 		if ( $form_is_disabled ) {
-			$addAboveButton = $removeButton = '';
+			$addAboveButton = $removeButton = $rearranger = '';
 		} else {
-			$addAboveButton = Html::element( 'a', array( 'class' => "addAboveButton", 'title' => wfMessage( 'sf_formedit_addanotherabove' )->text() ) );
-			$removeButton = Html::element( 'a', array( 'class' => "removeButton", 'title' => wfMessage( 'sf_formedit_remove' )->text() ) );
+			$addAboveButton = Html::element( 'img', array( 'src' => "$sfgScriptPath/skins/add-icon.png", 'class' => "addAboveButton" ) );
+			$removeButton = Html::element( 'img', array( 'src' => "$sfgScriptPath/skins/delete-icon.png", 'class' => "removeButton" ) );
+			$rearranger = Html::element( 'img', array( 'src' => "$sfgScriptPath/skins/move-icon.png", 'class' => "rearrangerImage" ) );
 		}
 
 		$text = <<<END
-			<table>
-			<tr>
-			<td class="instanceRearranger"></td>
-			<td class="instanceMain">$mainText</td>
-			<td class="instanceAddAbove">$addAboveButton</td>
-			<td class="instanceRemove">$removeButton</td>
-			</tr>
-			</table>
+
+		<div class="row">
+		<div class="col-md-11 col-sm-11 col-xs-12">
+		$mainText
+		</div>
+		<div class="col-md-1 col-sm-1 col-xs-12 step-nav">
+		<p>$addAboveButton</p>
+		<p>$removeButton</p>
+		<p>$rearranger </p>
+		</div>
+		</div>
+
 END;
 
 		return $text;

@@ -106,7 +106,7 @@ class SFTextInput extends SFFormInput {
 			'prop' => 'imageinfo',
 			'iiprop' => 'url',
 			'titles' => $imageTitle->getFullText(),
-			'iiurlwidth' => 200
+			'iiurlwidth' => 800
 		), true ), true );
 
 		$api->execute();
