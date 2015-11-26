@@ -292,7 +292,7 @@ class SFFormPrinter {
 		} else {
 			$addAboveButton = Html::element( 'img', array( 'src' => "$sfgScriptPath/skins/add-icon.png", 'class' => "addAboveButton" ) );
 			$removeButton = Html::element( 'img', array( 'src' => "$sfgScriptPath/skins/delete-icon.png", 'class' => "removeButton" ) );
-			$rearranger = Html::element( 'img', array( 'src' => "$sfgScriptPath/skins/move-icon.png", 'class' => "rearrangerImage" ) );
+			$rearranger = Html::element( 'img', array( 'src' => "$sfgScriptPath/skins/move-icon.png", 'class' => "rearrangerImage instanceRearranger" ) );
 		}
 
 		$text = <<<END
