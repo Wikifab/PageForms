@@ -161,12 +161,12 @@ class SFFormLinker {
 
 		$store = SFUtils::getSMWStore();
 		$subject = Title::makeTitleSafe( $page_namespace, $page_name );
-		$form_names = SFUtils::getSMWPropertyValues( $store, $subject, $prop_smw_id );
+		$form_names = SFValuesUtils::getSMWPropertyValues( $store, $subject, $prop_smw_id );
 
 		// If we're using a non-English language, check for the English
 		// string as well.
 		if ( ! class_exists( 'SF_LanguageEn' ) || ! $sfgContLang instanceof SF_LanguageEn ) {
-			$backup_form_names = SFUtils::getSMWPropertyValues( $store, $subject, $backup_prop_smw_id );
+			$backup_form_names = SFValuesUtils::getSMWPropertyValues( $store, $subject, $backup_prop_smw_id );
 			$form_names = array_merge( $form_names, $backup_form_names );
 		}
 
@@ -224,7 +224,7 @@ class SFFormLinker {
 		// Allow outside code to set/change the preloaded text.
 		Hooks::run( 'sfEditFormPreloadText', array( &$preloadContent, $title, $formTitle ) );
 
-		list ( $formText, $javascriptText, $dataText, $formPageTitle, $generatedPageName ) =
+		list ( $formText, $pageText, $formPageTitle, $generatedPageName ) =
 			$sfgFormPrinter->formHTML( $formDefinition, false, false, null, $preloadContent, 'Some very long page name that will hopefully never get created ABCDEF123', null );
 		$params = array();
 
@@ -239,7 +239,7 @@ class SFFormLinker {
 			}
 		}
 		$params['user_id'] = $userID;
-		$params['page_text'] = $dataText;
+		$params['page_text'] = $pageText;
 		$job = new SFCreatePageJob( $title, $params );
 
 		$jobs = array( $job );
@@ -323,7 +323,7 @@ class SFFormLinker {
 	 */
 	static function setBrokenLink( $linker, $target, $options, $text, &$attribs, &$ret ) {
 		// If it's not a broken (red) link, exit.
-		if ( !in_array( 'broken', $options ) ) {
+		if ( !in_array( 'broken', $options, true ) ) {
 			return true;
 		}
 		// If the link is to a special page, exit.
@@ -355,7 +355,9 @@ class SFFormLinker {
 		}
 
 		global $sfgLinkAllRedLinksToForms;
-		if ( $sfgLinkAllRedLinksToForms ) {
+		// Don't do this is it it's a category page - it probably
+		// won't have an associated form.
+		if ( $sfgLinkAllRedLinksToForms && $target->getNamespace() != NS_CATEGORY ) {
 			$attribs['href'] = $target->getLinkURL( array( 'action' => 'formedit', 'redlink' => '1' ) );
 			return true;
 		}
@@ -391,7 +393,7 @@ class SFFormLinker {
 		$namespace = $title->getNamespace();
 		if ( NS_CATEGORY !== $namespace ) {
 			$default_forms = array();
-			$categories = SFUtils::getCategoriesForPage( $title );
+			$categories = SFValuesUtils::getCategoriesForPage( $title );
 			foreach ( $categories as $category ) {
 				if ( class_exists( 'PSSchema' ) ) {
 					// Check the Page Schema, if one exists.

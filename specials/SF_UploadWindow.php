@@ -479,7 +479,7 @@ END;
 		if ( $local && $local->exists() ) {
 			// We're uploading a new version of an existing file.
 			// No creation, so don't watch it if we're not already.
-			return $local->getTitle()->userIsWatching();
+			return $this->getUser()->isWatched( $local->getTitle() );
 		} else {
 			// New page should get watched if that's our option.
 			return $this->getUser()->getOption( 'watchcreations' );
@@ -513,6 +513,9 @@ END;
 				break;
 
 			/** Statuses that require reuploading **/
+			case UploadBase::FILE_TOO_LARGE:
+				$this->showUploadForm(  $this->getUploadForm( wfMessage( 'file-too-large' )->escaped() ) );
+				break;
 			case UploadBase::EMPTY_FILE:
 				$this->showUploadForm( $this->getUploadForm( wfMessage( 'emptyfile' )->escaped() ) );
 				break;
@@ -710,7 +713,7 @@ class SFUploadForm extends HTMLForm {
 			+ $this->getDescriptionSection()
 			+ $this->getOptionsSection();
 
-		Hooks::run( 'UploadFormInitDescriptor', array( $descriptor ) );
+		Hooks::run( 'UploadFormInitDescriptor', array( &$descriptor ) );
 		parent::__construct( $descriptor, 'upload' );
 
 		# Set some form properties
@@ -784,7 +787,7 @@ class SFUploadForm extends HTMLForm {
 		if ( $canUploadByUrl ) {
 			global $wgMaxUploadSize;
 			$descriptor['UploadFileURL'] = array(
-				'class' => 'SFUploadSourceField',
+				'class' => 'UploadSourceField',
 				'section' => 'source',
 				'id' => 'wpUploadFileURL',
 				'label-message' => 'sourceurl',
@@ -1004,29 +1007,32 @@ END;
 	}
 
 	/**
-	 * Add upload JS to OutputPage
-	 * 
-	 * @param bool $autofill Whether or not to autofill the destination
-	 * 	filename text box
+	 * Add upload JS to the OutputPage
 	 */
-	protected function addUploadJS( $autofill = true ) {
-		global $wgUseAjax, $wgAjaxUploadDestCheck, $wgAjaxLicensePreview;
-		global $wgStrictFileExtensions, $wgMaxUploadSize;
+	protected function addUploadJS() {
+		$config = $this->getConfig();
+
+		$useAjaxDestCheck = $config->get( 'UseAjax' ) && $config->get( 'AjaxUploadDestCheck' );
+		$useAjaxLicensePreview = $config->get( 'UseAjax' ) &&
+			$config->get( 'AjaxLicensePreview' ) && $config->get( 'EnableAPI' );
+		$this->mMaxUploadSize['*'] = UploadBase::getMaxUploadSize();
 
 		$scriptVars = array(
-			'wgAjaxUploadDestCheck' => $wgUseAjax && $wgAjaxUploadDestCheck,
-			'wgAjaxLicensePreview' => $wgUseAjax && $wgAjaxLicensePreview,
-			'wgUploadAutoFill' => (bool)$autofill &&
+			'wgAjaxUploadDestCheck' => $useAjaxDestCheck,
+			'wgAjaxLicensePreview' => $useAjaxLicensePreview,
+			'wgUploadAutoFill' => !$this->mForReUpload &&
 				// If we received mDestFile from the request, don't autofill
 				// the wpDestFile textbox
 				$this->mDestFile === '',
 			'wgUploadSourceIds' => $this->mSourceIds,
-			'wgStrictFileExtensions' => $wgStrictFileExtensions,
+			'wgCheckFileExtensions' => $config->get( 'CheckFileExtensions' ),
+			'wgStrictFileExtensions' => $config->get( 'StrictFileExtensions' ),
 			'wgCapitalizeUploads' => MWNamespace::isCapitalized( NS_FILE ),
-			'wgMaxUploadSize' => $wgMaxUploadSize,
+			'wgMaxUploadSize' => $this->mMaxUploadSize,
 		);
 
-		$this->getOutput()->addScript( Skin::makeVariablesScript( $scriptVars ) );
+		$out = $this->getOutput();
+		$out->addJsConfigVars( $scriptVars );
 	}
 
 	/**

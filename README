@@ -35,9 +35,9 @@ Cindy Cicalese, Daniel Friesen, Daniel Hansch, Eugene Mednikov,
 Harold Solbrig, Ilmārs Poikāns, Jayson Harshbarger, Jeffrey Stuckman,
 Joel Natividad, Jeroen De Dauw, Joel Natividad, Louis Gerbarg, LY Meng,
 Mathias Lidal, Matt Williamson, MWJames, Niklas Laxstrom, Nils
-Opperman, Patrick Nagel, Remco de Boer, Sebastian Richter, Sergey
-Chernyshev, Siebrand Mazeland, Simon Heimler, Solitarius, Vedmaka,
-wheresmytab and others.
+Opperman, Paladox, Patrick Nagel, Remco de Boer, Sebastian Richter,
+Sergey Chernyshev, Siebrand Mazeland, Simon Heimler, Solitarius,
+Vedmaka, wheresmytab and others.
 
 Language translations were provided by many people; see the files in
 the /i18n and /languages directories for the full listings.
@@ -59,14 +59,19 @@ Bug reports should be submitted at the Wikimedia Phabricator site:
 
 == Credits to other projects ==
 
-* Semantic Forms includes the FancyBox JavaScript library by
-Janis Skarnelis (http://fancybox.net). FancyBox is distributed
+Semantic Forms includes the following JavaScript libraries:
+
+* FancyBox (http://fancybox.net) by Janis Skarnelis, distributed
 under both the MIT and GPL licenses.
 
-* Semantic Forms also includes the Dynatree JavaScript library by
-Martin Wendt (https://code.google.com/p/dynatree/). Dynatree is also
+* Dynatree (https://github.com/mar10/dynatree) by Martin Wendt,
 distributed under both the MIT and GPL licenses.
 
-* Semantic Forms also includes the Select2 JavaScript library by Igor
-Vaynberg (https://github.com/ivaynberg/select2). Select2 is
-distributed under both the Apache and GPL licenses.
+* jsGrid (http://js-grid.com) by Artem Tabalin, distributed under
+the MIT license.
+
+* Select2 (https://select2.github.io) by Igor Vaynberg, distributed
+under both the Apache and GPL licenses.
+
+Semantic Forms also makes extensive use of the jQuery and jQuery UI
+JavaScript libraries, included within MediaWiki.

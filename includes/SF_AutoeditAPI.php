@@ -307,8 +307,13 @@ class SFAutoeditAPI extends ApiBase {
 
 			$this->logMessage( 'Form ' . $this->mOptions['form'] . ' is a redirect. Finding target.', self::DEBUG );
 
-			// FIXME: Title::newFromRedirectRecurse is deprecated as of MW 1.21
-			$formTitle = Title::newFromRedirectRecurse( WikiPage::factory( $formTitle )->getRawText() );
+			$formWikiPage = WikiPage::factory( $formTitle );
+			if ( method_exists( $formWikiPage, 'getContent' ) ) {
+				// MW 1.21+
+				$formTitle = $formWikiPage->getContent( Revision::RAW )->getUltimateRedirectTarget();
+			} else {
+				$formTitle = Title::newFromRedirectRecurse( $formWikiPage->getRawText() );
+			}
 
 			// if we exeeded $wgMaxRedirects or encountered an invalid redirect target, give up
 			if ( $formTitle->isRedirect() ) {
@@ -515,8 +520,15 @@ class SFAutoeditAPI extends ApiBase {
 				$query = $resultDetails['redirect'] ? 'redirect=no' : '';
 				$anchor = isset( $resultDetails['sectionanchor'] ) ? $resultDetails['sectionanchor'] : '';
 
-				$this->getOutput()->redirect( $title->getFullURL( $query ) . $anchor );
-				$this->getResult()->addValue( NULL, 'redirect', $title->getFullURL( $query ) . $anchor );
+				$redirect = $title->getFullURL( $query ) . $anchor;
+
+				$returnto = Title::newFromText( $this->getRequest()->getText( 'returnto' ) );
+				if ( $returnto !== null ) {
+					$redirect = $returnto->getFullURL();
+				}
+
+				$this->getOutput()->redirect( $redirect );
+				$this->getResult()->addValue( NULL, 'redirect', $redirect );
 				return false; // success
 
 			case EditPage::AS_SUCCESS_UPDATE: // Article successfully updated
@@ -535,8 +547,15 @@ class SFAutoeditAPI extends ApiBase {
 					}
 				}
 
-				$this->getOutput()->redirect( $title->getFullURL( $extraQuery ) . $sectionanchor );
-				$this->getResult()->addValue( NULL, 'redirect', $title->getFullURL( $extraQuery ) . $sectionanchor );
+				$redirect = $title->getFullURL( $extraQuery ) . $sectionanchor;
+
+				$returnto = Title::newFromText( $this->getRequest()->getText( 'returnto' ) );
+				if ( $returnto !== null ) {
+					$redirect = $returnto->getFullURL();
+				}
+
+				$this->getOutput()->redirect( $redirect );
+				$this->getResult()->addValue( NULL, 'redirect', $redirect );
 
 				return false; // success
 
@@ -587,12 +606,6 @@ class SFAutoeditAPI extends ApiBase {
 				throw new MWException( $status->getHTML() );
 		}
 	}
-
-	protected function doFormEdit( $formHTML, $formJS ) {
-		// return form html and js in the result
-		$this->getResult()->addValue( array('form'), 'HTML', $formHTML );
-		$this->getResult()->addValue( array('form'), 'JS', $formJS );
-}
 
 	protected function finalizeResults() {
 
@@ -723,19 +736,28 @@ class SFAutoeditAPI extends ApiBase {
 				throw new MWException( wfMessage( 'sf_autoedit_invalidtargetspecified', trim( preg_replace( '/<unique number(.*)>/', $titleNumber, $targetNameFormula ) ) )->parse() );
 			}
 
-			// if title exists already cycle through numbers for this tag until
-			// we find one that gives a nonexistent page title;
-			//
-			// can not use $targetTitle->exists(); it does not use
-			// Title::GAID_FOR_UPDATE, which is needed to get correct data from
-			// cache; use $targetTitle->getArticleID() instead
+			// If title exists already, cycle through numbers for
+			// this tag until we find one that gives a nonexistent
+			// page title.
+			// We cannot use $targetTitle->exists(); it does not use
+			// Title::GAID_FOR_UPDATE, which is needed to get
+			// correct data from cache; use
+			// $targetTitle->getArticleID() instead.
+			$numAttemptsAtTitle = 0;
 			while ( $targetTitle->getArticleID( Title::GAID_FOR_UPDATE ) !== 0 ) {
+				$numAttemptsAtTitle++;
 
 				if ( $isRandom ) {
+					// If the set of pages is "crowded"
+					// already, go one digit higher.
+					if ( $numAttemptsAtTitle > 20 ) {
+						$randomNumDigits++;
+					}
 					$titleNumber = SFUtils::makeRandomNumber( $randomNumDigits, $randomNumHasPadding );
 				}
-				// if title number is blank, change it to 2; otherwise,
-				// increment it, and if necessary pad it with leading 0s as well
+				// If title number is blank, change it to 2;
+				// otherwise, increment it, and if necessary
+				// pad it with leading 0s as well.
 				elseif ( $titleNumber == "" ) {
 					$titleNumber = 2;
 				} else {
@@ -749,6 +771,36 @@ class SFAutoeditAPI extends ApiBase {
 		}
 
 		return $targetName;
+	}
+
+	/**
+	 * Helper function, for backwards compatibility.
+	 */
+	function getTextForPage( $title ) {
+		$wikiPage = WikiPage::factory( $title );
+		if ( method_exists( $wikiPage, 'getContent' ) ) {
+			// MW 1.21+
+			return $wikiPage->getContent( Revision::RAW )->getNativeData();
+		} else {
+			return $wikiPage->getRawText();
+		}
+	}
+
+	/**
+	 * Returns a formatted (pseudo) random number
+	 *
+	 * @param number $numDigits the min width of the random number
+	 * @param boolean $hasPadding should the number should be padded with zeros instead of spaces?
+	 * @return number
+	 */
+	static function makeRandomNumber( $numDigits = 1, $hasPadding = false ) {
+		$maxValue = pow( 10, $numDigits ) - 1;
+		if ( $maxValue > getrandmax() ) {
+			$maxValue = getrandmax();
+		}
+		$value = rand( 0, $maxValue );
+		$format = '%' . ($hasPadding ? '0' : '') . $numDigits . 'd';
+		return trim( sprintf( $format, $value ) ); // trim needed, when $hasPadding == false
 	}
 
 	/**
@@ -788,7 +840,7 @@ class SFAutoeditAPI extends ApiBase {
 						'<noinclude>', // start delimiter
 						'</noinclude>', // end delimiter
 						'', // replace by
-						WikiPage::factory( $formTitle )->getRawText() // subject
+						$this->getTextForPage( $formTitle ) // subject
 		);
 
 		// signals that the form was submitted
@@ -837,7 +889,7 @@ class SFAutoeditAPI extends ApiBase {
 			if ( $preloadTitle !== null && $preloadTitle->exists() ) {
 
 				// the content of the page that was specified to be used for preloading
-				$preloadContent = WikiPage::factory( $preloadTitle )->getRawText();
+				$preloadContent = $this->getTextForPage( $preloadTitle );
 
 				$pageExists = true;
 
@@ -871,7 +923,7 @@ class SFAutoeditAPI extends ApiBase {
 			}
 			// Call SFFormPrinter::formHTML() to get at the form
 			// HTML of the existing page.
-			list ( $formHTML, $formJS, $targetContent, $form_page_title, $generatedTargetNameFormula ) =
+			list ( $formHTML, $targetContent, $form_page_title, $generatedTargetNameFormula ) =
 				$sfgFormPrinter->formHTML(
 					$formContent, $isFormSubmitted, $pageExists, $formArticleId, $preloadContent, $targetName, $targetNameFormula
 				);
@@ -901,9 +953,14 @@ class SFAutoeditAPI extends ApiBase {
 			$wgRequest = new FauxRequest( $this->mOptions, true );
 		}
 
-		// get wikitext for submitted data and form
-		list ( $formHTML, $formJS, $targetContent, $generatedFormName, $generatedTargetNameFormula ) =
+		// Get wikitext for submitted data and form - call formHTML(),
+		// if we haven't called it already.
+		if ( $preloadContent == '' ) {
+			list ( $formHTML, $targetContent, $generatedFormName, $generatedTargetNameFormula ) =
 				$sfgFormPrinter->formHTML( $formContent, $isFormSubmitted, $pageExists, $formArticleId, $preloadContent, $targetName, $targetNameFormula );
+		} else {
+			$generatedFormName = $form_page_title;
+		}
 
 		// Restore original request.
 		$wgRequest = $oldRequest;
@@ -914,7 +971,6 @@ class SFAutoeditAPI extends ApiBase {
 		}
 
 		$this->mOptions['formHTML'] = $formHTML;
-		$this->mOptions['formJS'] = $formJS;
 
 		if ( $isFormSubmitted ) {
 
@@ -952,7 +1008,7 @@ class SFAutoeditAPI extends ApiBase {
 				$wgOut->addParserOutputNoText( $parserOutput );
 			}
 
-			$this->doFormEdit( $formHTML, $formJS );
+			$this->getResult()->addValue( array( 'form' ), 'HTML', $formHTML );
 		}
 	}
 

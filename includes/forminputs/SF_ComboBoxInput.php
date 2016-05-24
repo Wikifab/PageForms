@@ -29,13 +29,6 @@ class SFComboBoxInput extends SFFormInput {
 	}
 
 	public static function getHTML( $cur_value, $input_name, $is_mandatory, $is_disabled, $other_args ) {
-		// For backward compatibility with pre-SF-2.1 forms
-		if ( array_key_exists( 'no autocomplete', $other_args ) &&
-				$other_args['no autocomplete'] == true ) {
-			unset( $other_args['autocompletion source'] );
-			return SFTextInput::getHTML( $cur_value, $input_name, $is_mandatory, $is_disabled, $other_args );
-		}
-
 		global $sfgTabIndex, $sfgFieldNum, $sfgEDSettings;
 
 		$className = 'sfComboBox';
@@ -113,6 +106,9 @@ class SFComboBoxInput extends SFFormInput {
 		if ( !is_null( $remoteDataType ) ) {
 			$inputAttrs['autocompletedatatype'] = $remoteDataType;
 		}
+ 		if ( array_key_exists( 'namespace', $other_args ) ) {
+ 			$inputAttrs['data-namespace'] = $other_args['namespace'];
+ 		}
 
 		$inputText = Html::rawElement( 'input', $inputAttrs);
 
@@ -132,7 +128,8 @@ class SFComboBoxInput extends SFFormInput {
 			SFTextWithAutocompleteInput::getAutocompletionTypeAndSource( $field_args );
 
 		$remoteDataType = null;
-		if ( array_key_exists( 'remote autocompletion', $field_args ) && $field_args['remote autocompletion'] == true ) {
+		if ( $autocompleteFieldType == 'external_url' ) {
+			// Autocompletion from URL is always done remotely.
 			$remoteDataType = $autocompleteFieldType;
 		} elseif ( $autocompletionSource !== '' ) {
 			// @TODO - that count() check shouldn't be necessary
@@ -142,13 +139,14 @@ class SFComboBoxInput extends SFFormInput {
 			} elseif ( $autocompleteFieldType == 'values' ) {
 				$autocompleteValues = explode( ',', $field_args['values'] );
 			} else {
-				$autocompleteValues = SFUtils::getAutocompleteValues( $autocompletionSource, $autocompleteFieldType );
+				$autocompleteValues = SFValuesUtils::getAutocompleteValues( $autocompletionSource, $autocompleteFieldType );
 			}
-			if( count($autocompleteValues) > $sfgMaxLocalAutocompleteValues &&
+			if ( count( $autocompleteValues ) > $sfgMaxLocalAutocompleteValues &&
 			$autocompleteFieldType != 'values' && !array_key_exists( 'values dependent on', $field_args ) && !array_key_exists( 'mapping template', $field_args ) ) {
 				$remoteDataType = $autocompleteFieldType;
+			} else {
+				$sfgAutocompleteValues[$autocompletionSource] = $autocompleteValues;
 			}
-			$sfgAutocompleteValues[$autocompletionSource] = $autocompleteValues;
 		}
 		$autocompletionSource = str_replace( "'", "\'", $autocompletionSource );
 		return array( $autocompletionSource, $remoteDataType );
