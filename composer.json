@@ -1,5 +1,5 @@
 {
-	"name": "mediawiki/semantic-forms",
+	"name": "wikifab/semantic-forms",
 	"type": "mediawiki-extension",
 	"description": "Forms for creating and editing wiki pages.",
 	"keywords": [
