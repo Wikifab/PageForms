@@ -57,12 +57,12 @@ class SFFormPrinter {
 		$this->registerInputType( 'SFCategoriesInput' );
 		$this->registerInputType( 'SFTokensInput' );
 		$this->registerInputType( 'SFRegExpInput' );
-		// Only add these if the Semantic Maps extension is not
+		// Only add this if the Semantic Maps extension is not
 		// included.
 		if ( !defined( 'SM_VERSION' ) ) {
 			$this->registerInputType( 'SFGoogleMapsInput' );
-			$this->registerInputType( 'SFOpenLayersInput' );
 		}
+		$this->registerInputType( 'SFOpenLayersInput' );
 
 		// All-purpose setup hook.
 		Hooks::run( 'sfFormPrinterSetup', array( $this ) );
@@ -383,11 +383,66 @@ END;
 		<p>$button</p>
 		<div class="sfErrorMessages"></div>
 	</div><!-- multipleTemplateWrapper -->
+</fieldset>
 END;
 		return $text;
 	}
 
-	function jsGridHTML( $tif ) {
+	function tableHTML( $tif, $instanceNum ) {
+		global $sfgFieldNum;
+
+		$allGridValues = $tif->getGridValues();
+		if ( array_key_exists( $instanceNum, $allGridValues ) ) {
+			$gridValues = $allGridValues[$instanceNum];
+		} else {
+			$gridValues = null;
+		}
+
+		$html = '';
+		foreach ( $tif->getFields() as $formField ) {
+			$fieldName = $formField->template_field->getFieldName();
+			if ( $gridValues == null ) {
+				$curValue = null;
+			} else {
+				$curValue = $gridValues[$fieldName];
+			}
+
+			$sfgFieldNum++;
+			if ( $formField->getLabel() !== null ) {
+				$labelText = $formField->getLabel();
+			} else {
+				$labelText = $fieldName . ': ';
+			}
+			$label = Html::element( 'label',
+				array( 'for' => "input_$sfgFieldNum" ),
+				$labelText );
+
+			// If a 'tooltip' parameter was set, add a tooltip
+			// right after the label.
+			if ( $formField->hasFieldArg( 'tooltip' ) ) {
+				global $wgOut, $wgScriptPath;
+
+				$wgOut->addModules( 'ext.semanticforms.balloon' );
+				$tooltipText = $formField->getFieldArg( 'tooltip' );
+				$label .= ' ' . Html::element( 'button', array(
+					'data-balloon-length' => 'medium',
+					'data-balloon' => $tooltipText,
+					'disabled' => true,
+					'style' => "height: 13px; width: 13px; background: url($wgScriptPath/resources/src/mediawiki/images/question.png); border: none;"
+					), '' );
+			}
+
+			$labelCell = Html::rawElement( 'th', null, $label );
+			$inputCell = Html::rawElement( 'td', null, $this->formFieldHTML( $formField, $curValue ) );
+			$html .= Html::rawElement( 'tr', null, $labelCell . $inputCell ) . "\n";
+		}
+
+		$html = Html::rawElement( 'table', array( 'class' => 'formtable' ), $html );
+
+		return $html;
+	}
+
+	function spreadsheetHTML( $tif ) {
 		global $wgOut, $sfgGridValues, $sfgGridParams;
 		global $sfgScriptPath;
 
@@ -598,10 +653,10 @@ END;
 		global $sfgTabIndex; // used to represent the current tab index in the form
 		global $sfgFieldNum; // used for setting various HTML IDs
 
-		// initialize some variables
+		// Initialize some variables.
 		$wiki_page = new SFWikiPage();
-		$sfgTabIndex = 1;
-		$sfgFieldNum = 1;
+		$sfgTabIndex = 0;
+		$sfgFieldNum = 0;
 		$source_page_matches_this_form = false;
 		$form_page_title = null;
 		$generated_page_name = $page_name_formula;
@@ -860,10 +915,11 @@ END;
 					// among others.
 					$field_name = trim( $tag_components[1] );
 					$form_field = SFFormField::newFromFormFieldTag( $tag_components, $template, $tif, $form_is_disabled );
-					// For spreadsheet/grid displays, add
-					// in the form fields, so we know the
-					// data structure.
-					if ( $tif->getDisplay() == 'spreadsheet' && $tif->allowsMultiple() && $tif->getInstanceNum() == 0 ) {
+					// For special displays, add in the
+					// form fields, so we know the data
+					// structure.
+					if ( ( $tif->getDisplay() == 'table' && ( !$tif->allowsMultiple() || $tif->getInstanceNum() == 0 ) ) ||
+						( $tif->getDisplay() == 'spreadsheet' && $tif->allowsMultiple() && $tif->getInstanceNum() == 0 ) ) {
 						$tif->addField( $form_field );
 					}
 					$cur_value = $form_field->getCurrentValue( $tif->getValuesFromSubmit(), $form_submitted, $source_is_page, $tif->allInstancesPrinted() );
@@ -1068,6 +1124,9 @@ END;
 								$cur_value = false;
 							}
 						}
+					}
+
+					if ( $tif->getDisplay() != null && ( !$tif->allowsMultiple() || !$tif->allInstancesPrinted() ) ) {
 						$tif->addGridValue( $field_name, $cur_value );
 					}
 
@@ -1136,6 +1195,9 @@ END;
 				// for section processing
 				// =====================================================
 				} elseif ( $tag_title == 'section' ) {
+					$sfgFieldNum++;
+					$sfgTabIndex++;
+
 					$section_name = trim( $tag_components[1] );
 					$page_section_in_form = SFPageSection::newFromFormTag( $tag_components );
 					$section_text = null;
@@ -1301,9 +1363,15 @@ END;
 			if ( $tif && $tif->allowsMultiple() ) {
 				if ( $tif->getDisplay() == 'spreadsheet' ) {
 					if ( $tif->allInstancesPrinted() ) {
-						$multipleTemplateHTML .= $this->jsGridHTML( $tif );
+						$multipleTemplateHTML .= $this->spreadsheetHTML( $tif );
+						// For spreadsheets, this needs
+						// to be specially inserted.
+						$multipleTemplateHTML .= "</fieldset>\n";
 					}
 				} else {
+					if ( $tif->getDisplay() == 'table' ) {
+						$section = $this->tableHTML( $tif, $tif->getInstanceNum() );
+					}
 					if ( $tif->getInstanceNum() == 0 ) {
 						$multipleTemplateHTML .= $this->multipleTemplateStartHTML( $tif );
 					}
@@ -1342,11 +1410,10 @@ END;
 					$section_num--;
 					$tif->incrementInstanceNum();
 				}
+			} elseif ( $tif && $tif->getDisplay() == 'table' ) {
+				$form_text .= $this->tableHTML( $tif, 0 );
 			} else {
 				$form_text .= $section;
-			}
-			if ( $tif && $tif->getLabel() != null && ( !$tif->allowsMultiple() || $tif->allowsMultiple() && $tif->allInstancesPrinted() ) ) {
-				$form_text .= "</fieldset>\n";
 			}
 		} // end for
 

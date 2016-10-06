@@ -8,6 +8,8 @@
 ( function ( $, mw ) {
 
 	$( '.sfJSGrid' ).each( function() {
+		var sfgGridParams = mw.config.get( 'sfgGridParams' ),
+			sfgGridValues = mw.config.get( 'sfgGridValues' );
 		var $gridDiv = $( this );
 		var templateName = $gridDiv.attr( 'data-template-name' );
 		var gridHeight = $gridDiv.attr( 'height' );
@@ -91,7 +93,7 @@
 			var rowNum = 1;
 			$grid.find( "tr" ).each( function() {
 				var $row = $( this );
-				if ( $row.hasClass( 'jsgrid-edit-row' ) ) {
+				if ( $row.hasClass( 'jsgrid-edit-row' ) || $row.hasClass( 'jsgrid-nodata-row' ) ) {
 					// Continue.
 					return;
 				}

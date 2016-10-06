@@ -27,10 +27,22 @@ class SFCreatePageJob extends Job {
 			$this->error = "createPage: Invalid title";
 			return false;
 		}
-		$article = new Article( $this->title, 0 );
-		if ( !$article ) {
-			$this->error = 'createPage: Article not found "' . $this->title->getPrefixedDBkey() . '"';
-			return false;
+
+		if ( method_exists( 'WikiPage', 'doEditContent' ) ) {
+			// MW 1.21+
+			$wikiPage = new WikiPage( $this->title );
+			if ( !$wikiPage ) {
+				$this->error = 'createPage: Wiki page not found "' . $this->title->getPrefixedDBkey() . '"';
+				wfProfileOut( __METHOD__ );
+				return false;
+			}
+		} else {
+			$article = new Article( $this->title, 0 );
+			if ( !$article ) {
+				$this->error = 'createPage: Article not found "' . $this->title->getPrefixedDBkey() . '"';
+				wfProfileOut( __METHOD__ );
+				return false;
+			}
 		}
 
 		$page_text = $this->params['page_text'];
@@ -41,13 +53,27 @@ class SFCreatePageJob extends Job {
 		$actual_user = $wgUser;
 		$wgUser = User::newFromId( $this->params['user_id'] );
 		$edit_summary = '';
-		if( array_key_exists( 'edit_summary', $this->params ) ) {
+		if ( array_key_exists( 'edit_summary', $this->params ) ) {
 			$edit_summary = $this->params['edit_summary'];
 		}
-		$article->doEdit( $page_text, $edit_summary );
-		$wgUser = $actual_user;
 
+		// It's strange that doEditContent() doesn't
+		// automatically attach the 'bot' flag when the user
+		// is a bot...
+		if ( $wgUser->isAllowed( 'bot' ) ) {
+			$flags = EDIT_FORCE_BOT;
+		} else {
+			$flags = 0;
+		}
+
+		if ( method_exists( 'WikiPage', 'doEditContent' ) ) {
+			$new_content = new WikitextContent( $text );
+			$wikiPage->doEditContent( $new_content, $edit_summary, $flags );
+		} else {
+			$article->doEditContent( $page_text, $edit_summary, $flags );
+		}
+
+		$wgUser = $actual_user;
 		return true;
 	}
 }
-

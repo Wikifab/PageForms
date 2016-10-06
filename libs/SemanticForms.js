@@ -10,7 +10,7 @@
  * @author Harold Solbrig
  * @author Eugene Mednikov
  */
-/*global sfgShowOnSelect, sfgFieldProperties, sfgCargoFields, validateAll, alert, sf*/
+/*global sfgShowOnSelect, sfgFieldProperties, sfgCargoFields, sfgDependentFields, validateAll, alert, sf*/
 
 // Activate autocomplete functionality for the specified field
 ( function ( $, mw ) {
@@ -388,7 +388,6 @@ function showDiv(div_id, instanceWrapperDiv, speed) {
 			for ( var i = 0; i < showOnSelectVals.length; i++ ) {
 				var options = showOnSelectVals[i][0];
 				var div_id2 = showOnSelectVals[i][1];
-				hideDiv(div_id2, instanceWrapperDiv, 'fast' );
 				if ( uncoveredInput.hasClass( 'sfShowIfSelected' ) ) {
 					showDivIfSelected( options, div_id2, inputVal, instanceWrapperDiv, false );
 				} else {
@@ -1060,6 +1059,7 @@ var num_elements = 0;
  * Functions for multiple-instance templates.
  */
 $.fn.addInstance = function( addAboveCurInstance ) {
+	var sfgShowOnSelect = mw.config.get( 'sfgShowOnSelect' );
 	var wrapper = this.closest(".multipleTemplateWrapper");
 	var multipleTemplateList = wrapper.find('.multipleTemplateList');
 
@@ -1171,6 +1171,10 @@ $.fn.addInstance = function( addAboveCurInstance ) {
 		return this.id.replace(/span_/g, 'span_' + num_elements + '_');
 	});
 
+	new_div.find('label').attr('for', function() {
+		return this.htmlFor.replace(/input_/g, 'input_' + num_elements + '_');
+	});
+
 	// Add the new instance.
 	if ( addAboveCurInstance ) {
 		new_div.insertBefore(this.closest(".multipleTemplateInstance"));
@@ -1221,7 +1225,9 @@ $.fn.addInstance = function( addAboveCurInstance ) {
 // templates.
 $.fn.setDependentAutocompletion = function( dependentField, baseField, baseValue ) {
 	// Get data from either Cargo or Semantic MediaWiki.
-	var myServer = mw.config.get( 'wgScriptPath' ) + "/api.php";
+	var myServer = mw.config.get( 'wgScriptPath' ) + "/api.php",
+		sfgCargoFields = mw.config.get( 'sfgCargoFields' ),
+		sfgFieldProperties = mw.config.get( 'sfgFieldProperties' );
 	myServer += "?action=sfautocomplete&format=json";
 	if ( sfgCargoFields.hasOwnProperty( dependentField ) ) {
 		var cargoTableAndFieldStr = sfgCargoFields[dependentField];

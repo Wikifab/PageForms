@@ -126,13 +126,8 @@ class SFAutoeditAPI extends ApiBase {
 	 */
 	function prepareAction() {
 
-		// get options from the request, but keep the explicitly set options
-		global $wgVersion;
-		if ( version_compare( $wgVersion, '1.20', '>=' ) ) {
-			$data = $this->getRequest()->getValues();
-		} else { // TODO: remove else branch when raising supported version to MW 1.20, getValues() was buggy before
-			$data = $_POST + $_GET;
-		}
+		// Get options from the request, but keep the explicitly set options.
+		$data = $this->getRequest()->getValues();
 		$this->mOptions = SFUtils::array_merge_recursive_distinct( $data, $this->mOptions );
 
 		global $wgParser;
@@ -167,17 +162,17 @@ class SFAutoeditAPI extends ApiBase {
 			// set action to 'save' if requested
 			$this->mAction = self::ACTION_SAVE;
 			unset( $this->mOptions['wpSave'] );
-		} else if ( array_key_exists( 'wpPreview', $this->mOptions ) ) {
+		} elseif ( array_key_exists( 'wpPreview', $this->mOptions ) ) {
 
 			// set action to 'preview' if requested
 			$this->mAction = self::ACTION_PREVIEW;
 			unset( $this->mOptions['wpPreview'] );
-		} else if ( array_key_exists( 'wpDiff', $this->mOptions ) ) {
+		} elseif ( array_key_exists( 'wpDiff', $this->mOptions ) ) {
 
 			// set action to 'preview' if requested
 			$this->mAction = self::ACTION_DIFF;
 			unset( $this->mOptions['wpDiff'] );
-		} else if ( array_key_exists( 'action', $this->mOptions ) ) {
+		} elseif ( array_key_exists( 'action', $this->mOptions ) ) {
 
 			switch ( $this->mOptions['action'] ) {
 
@@ -695,8 +690,8 @@ class SFAutoeditAPI extends ApiBase {
 		$targetName = str_replace( ' ', '_', $targetName );
 
 		// now run the parser on it
-		global $wgParser;
-		$targetName = $wgParser->transformMsg( $targetName, ParserOptions::newFromUser( null ) );
+		global $wgParser, $wgTitle;
+		$targetName = $wgParser->transformMsg( $targetName, new ParserOptions(), $wgTitle );
 
 		$titleNumber = '';
 		$isRandom = false;
@@ -709,8 +704,8 @@ class SFAutoeditAPI extends ApiBase {
 				$isRandom = true;
 				$randomNumHasPadding = array_key_exists( 2, $matches );
 				$randomNumDigits = ( array_key_exists( 3, $matches ) ? $matches[3] : $randomNumDigits );
-				$titleNumber = SFUtils::makeRandomNumber( $randomNumDigits, $randomNumHasPadding );
-			} else if ( preg_match( '/{num.*start[_]*=[_]*([^;]*).*}/', $targetName, $matches ) ) {
+				$titleNumber = SFAutoeditAPI::makeRandomNumber( $randomNumDigits, $randomNumHasPadding );
+			} elseif ( preg_match( '/{num.*start[_]*=[_]*([^;]*).*}/', $targetName, $matches ) ) {
 				// get unique number start value
 				// from target name; if it's not
 				// there, or it's not a positive
@@ -753,7 +748,7 @@ class SFAutoeditAPI extends ApiBase {
 					if ( $numAttemptsAtTitle > 20 ) {
 						$randomNumDigits++;
 					}
-					$titleNumber = SFUtils::makeRandomNumber( $randomNumDigits, $randomNumHasPadding );
+					$titleNumber = SFAutoeditAPI::makeRandomNumber( $randomNumDigits, $randomNumHasPadding );
 				}
 				// If title number is blank, change it to 2;
 				// otherwise, increment it, and if necessary

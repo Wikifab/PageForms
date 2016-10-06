@@ -255,7 +255,11 @@ class SFFormField {
 						$f->mPossibleValues[] = $page_name_for_values;
 					}
 				} elseif ( $sub_components[0] == 'values from category' ) {
-					$category_name = ucfirst( $sub_components[1] );
+					global $wgCapitalLinks;
+					$category_name = $sub_components[1];
+					if ( $wgCapitalLinks ) {
+						$category_name = ucfirst( $category_name );
+					}
 					$f->mPossibleValues = SFValuesUtils::getAllPagesForCategory( $category_name, 10 );
 				} elseif ( $sub_components[0] == 'values from concept' ) {
 					$f->mPossibleValues = SFValuesUtils::getAllPagesForConcept( $sub_components[1] );
@@ -280,7 +284,18 @@ class SFFormField {
 				} elseif ( $sub_components[0] == 'cargo field' ) {
 					$cargo_field = $sub_components[1];
 				} elseif ( $sub_components[0] == 'default filename' ) {
-					$default_filename = str_replace( '&lt;page name&gt;', $page_name, $sub_components[1] );
+					global $wgTitle;
+					$page_name = $wgTitle->getText();
+					if ( $wgTitle->isSpecialPage() ) {
+						// If it's of the form
+						// Special:FormEdit/form/target,
+						// get just the target.
+						$pageNameComponents = explode( '/', $page_name, 3 );
+						if ( count( $pageNameComponents ) == 3 ) {
+							$page_name = $pageNameComponents[2];
+						}
+					}
+					$default_filename = str_replace( '<page name>', $page_name, $sub_components[1] );
 					// Parse value, so default filename can
 					// include parser functions.
 					$default_filename = $wgParser->recursiveTagParse( $default_filename );
@@ -441,9 +456,9 @@ class SFFormField {
 						// this should be replaced with an input type neutral way of
 						// figuring out if this scalar input type is a list
 						if ( $this->mInputType == "tokens" ) {
-							$is_list = true;
+							$this->mIsList = true;
 						}
-						if ( $is_list ) {
+						if ( $this->mIsList ) {
 							$cur_values = array_map( 'trim', explode( $delimiter, $field_query_val ) );
 							foreach ( $cur_values as $key => $val ) {
 								$cur_values[$key] = $this->labelToValue( $val );

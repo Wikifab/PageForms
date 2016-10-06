@@ -10,7 +10,9 @@
 			"青子守歌",
 			"Rxy",
 			"Sujiniku",
-			"Otokoume"
+			"Otokoume",
+			"아라",
+			"Ochaochaocha3"
 		]
 	},
 	"semanticforms-desc": "ウィキのページを作成および編集するフォーム",
@@ -21,6 +23,7 @@
 	"sf_createproperty_allowedvalsinput": "ある値を許可するには、許可する値をカンマで区切って列挙します (値がカンマを含む場合は「\\,」に置換):",
 	"sf_createproperty_propname": "プロパティ名:",
 	"sf_createproperty_proptype": "型:",
+	"sf_createproperty_editsummary": "型 [[Has type::$1]] のプロパティを作成",
 	"templates": "テンプレート一覧",
 	"sf_templates_docu": "以下のテンプレートがウィキに存在します。",
 	"sf_templates_definescat": "定義するカテゴリ: $1",
@@ -197,7 +200,7 @@
 	"sf-datepicker-prev": "前へ",
 	"sf-datepicker-next": "次へ",
 	"sf-datepicker-today": "今日",
-	"sf-datepicker-dateformatlong": "yy年mm月dd日",
+	"sf-datepicker-dateformatlong": "yy年m月d日",
 	"sf-datepicker-dateformatshort": "yy/mm/dd",
 	"sf-datepicker-dateformat": "日付の書式の文字列です。詳細情報は[https://www.mediawiki.org/w/index.php?title=Extension:Semantic_Forms_Inputs&fromsection=Date_picker#Parameters オンライン説明文書]を参照してください。",
 	"sf-datepicker-weekstart": "週の初日の曜日 (0: 日曜日、1: 月曜日、...)",

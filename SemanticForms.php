@@ -51,7 +51,7 @@ if ( array_key_exists( 'wgWikimediaJenkinsCI', $GLOBALS ) ) {
 // extension.json. For simplicity's sake, don't load extensions unless we're
 // at version 1.27 or higher.
 //if ( function_exists( 'wfLoadExtension' ) ) {
-if ( version_compare( $GLOBALS['wgVersion'], '1.27c', '>' ) ) {
+if ( version_compare( $GLOBALS['wgVersion'], '1.28c', '>' ) ) {
 	if ( function_exists( 'wfLoadExtension' ) ) {
 		wfLoadExtension( 'SemanticForms' );
 		// Keep i18n globals so mergeMessageFileList.php doesn't break
@@ -77,10 +77,10 @@ if ( defined( 'SF_VERSION' ) ) {
 	return 1;
 }
 
-define( 'SF_VERSION', '3.6' );
+define( 'SF_VERSION', '3.7' );
 
-if ( !defined( 'SMW_VERSION' ) ) {
-	// SMW defines these namespaces itself.
+// SMW defines these namespaces itself.
+if ( !defined( 'SF_NS_FORM' ) ) {
 	define( 'SF_NS_FORM', 106 );
 	define( 'SF_NS_FORM_TALK', 107 );
 }
@@ -411,6 +411,11 @@ $GLOBALS['wgResourceModules'] += array(
 			'htmlform-no',
 		),
 	),
+	'ext.semanticforms.balloon' => $sfgResourceTemplate + array(
+		'styles' => array(
+			'skins/balloon.css',
+		),
+	),
 	'ext.semanticforms' => $sfgResourceTemplate + array(
 		'scripts' => array(
 			'libs/ext.sf.js',
@@ -585,6 +590,8 @@ $GLOBALS['sfgShowTabsForAllHelperForms'] = true;
 # (This is actually an undocumented variable, used by the code.)
 # ##
 $GLOBALS['sfgRunQueryFormAtTop'] = false;
+
+$GLOBALS['sfgGoogleMapsKey'] = null;
 
 // Include default settings for form inputs
 require_once 'includes/SF_DatePickerSettings.php';
