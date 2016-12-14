@@ -3,22 +3,23 @@
 		"authors": [
 			"Fluence",
 			"Ricardo gs",
-			"Teòtlalili"
+			"Teòtlalili",
+			"Akapochtli"
 		]
 	},
-	"sf_createproperty_propname": "Āxcāitl tōcāitl:",
-	"templates": "Nemachiyōtīlli",
+	"pf_createproperty_propname": "Āxcāitl tōcāitl:",
+	"templates": "Nemachiyotilli",
 	"createtemplate": "Ticchīhuāz cē nemachiyōtīlli",
-	"sf_createtemplate_namelabel": "Nemachiyōtīlli ītōca:",
-	"sf_createtemplate_deletefield": "Ticpolōz",
-	"sf_createform_inputtypedefault": "(ic default)",
-	"sf_createform_hidden": "Ichtac",
-	"sf_createform_atend": "Tlamilizpan",
-	"sf_createform_add": "Ticcētilīz",
-	"sf_createcategory_name": "Tlaìxmatkàyòtlàlilòtokâtli:",
-	"sf_formstart_createoredit": "Titlayōcoyāz ahnozo titlapatlāz",
-	"sf_formedit_createtitle": "Ticyōcoyāz $1: $2",
-	"sf_formedit_edittitle": "Ticpatlāz $1: $2",
-	"sf_formedit_addanother": "Titlacēntilīz occē",
-	"sf_formedit_none": "Ahtlein"
+	"pf_createtemplate_namelabel": "Nemachiyōtīlli ītōca:",
+	"pf_createtemplate_deletefield": "Ticpolōz",
+	"pf_createform_inputtypedefault": "(ic default)",
+	"pf_createform_hidden": "Ichtac",
+	"pf_createform_atend": "Tlamilizpan",
+	"pf_createform_add": "Ticcētilīz",
+	"pf_createcategory_name": "Neneuhcayotl itoca:",
+	"pf_formstart_createoredit": "Titlayocoyaz nozo titlapatlaz",
+	"pf_formedit_createtitle": "Ticyocoyaz $1: $2",
+	"pf_formedit_edittitle": "Ticpatlāz $1: $2",
+	"pf_formedit_addanother": "Titlacēntilīz occē",
+	"pf_formedit_none": "Ahtlein"
 }

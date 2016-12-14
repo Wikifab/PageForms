@@ -1,19 +1,19 @@
 == About ==
 
-Semantic Forms is an extension to MediaWiki that allows for the
+Page Forms is an extension to MediaWiki that allows for the
 creation and usage of forms to add and edit semantic data. It can
 work in conjuction with two other extensions that both handle the
 storage of data: Semantic MediaWiki and Cargo.
 
-For much more information on Semantic Forms, see the extension
+For much more information on Page Forms, see the extension
 homepage at
-http://www.mediawiki.org/wiki/Extension:Semantic_Forms
+http://www.mediawiki.org/wiki/Extension:Page_Forms
 
-Notes on installing Semantic Forms can be found in the file INSTALL.
+Notes on installing Page Forms can be found in the file INSTALL.
 
 == Credits ==
 
-Semantic Forms was created, and mostly written by, Yaron Koren.
+Page Forms was created, and mostly written by, Yaron Koren.
 
 Significant parts of the code were contributed by Stephan Gambke.
 
@@ -50,8 +50,8 @@ or the Semantic MediaWiki mailing lists:
  https://lists.wikimedia.org/mailman/listinfo/mediawiki-l
  https://lists.sourceforge.net/lists/listinfo/semediawiki-user
 
-If possible, please add "[SF]" at the beginning of the subject line, to
-clarify the subject matter.
+If possible, please add "[Page Forms]" at the beginning of the subject
+line, to clarify the subject matter.
 
 Bug reports should be submitted at the Wikimedia Phabricator site:
 
@@ -59,7 +59,7 @@ Bug reports should be submitted at the Wikimedia Phabricator site:
 
 == Credits to other projects ==
 
-Semantic Forms includes the following JavaScript libraries:
+Page Forms includes the following JavaScript libraries:
 
 * FancyBox (http://fancybox.net) by Janis Skarnelis, distributed
 under both the MIT and GPL licenses.
@@ -70,6 +70,9 @@ distributed under both the MIT and GPL licenses.
 * jsGrid (http://js-grid.com) by Artem Tabalin, distributed under
 the MIT license.
 
+* RateYo! (http://rateyo.fundoocode.ninja/) by Prashanth Pamidi,
+distributed under the MIT license.
+
 * Select2 (https://select2.github.io) by Igor Vaynberg, distributed
 under both the Apache and GPL licenses.
 
@@ -77,5 +80,5 @@ It also includes the Balloon.css CSS library
 (https://kazzkiq.github.io/balloon.css/) by Claudio Holanda,
 distributed under the MIT license.
 
-Semantic Forms also makes extensive use of the jQuery and jQuery UI
+Page Forms also makes extensive use of the jQuery and jQuery UI
 JavaScript libraries, included within MediaWiki.
