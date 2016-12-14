@@ -303,7 +303,7 @@ class PFFormPrinter {
 	function multipleTemplateInstanceTableHTML( $form_is_disabled, $mainText ) {
 		global $sfgScriptPath;
 		if ( $form_is_disabled ) {
-			$addAboveButton = $removeButton = $rearranger = '';
+			$addAboveButton = $removeButton = '';
 		} else {
 /** Wikifab Config :
 			$addAboveButton = Html::element( 'img', array( 'src' => "$sfgScriptPath/skins/add-icon.png", 'class' => "addAboveButton" ) );
@@ -323,7 +323,6 @@ class PFFormPrinter {
 		<div class="col-md-1 col-sm-1 col-xs-12 step-nav">
 		<p>$addAboveButton</p>
 		<p>$removeButton</p>
-		<p>$rearranger </p>
 		</div>
 		</div>
 

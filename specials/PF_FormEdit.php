@@ -65,6 +65,9 @@ class PFFormEdit extends UnlistedSpecialPage {
 		$out = $this->getOutput();
 		$req = $this->getRequest();
 
+
+		Hooks::run( 'FormEdit::showEditForm:initial', [ &$this, &$out ] );
+
 		$module = new PFAutoeditAPI( new ApiMain(), 'pfautoedit' );
 		$module->setOption( 'form', $form_name );
 		$module->setOption( 'target', $targetName );
@@ -185,6 +188,8 @@ class PFFormEdit extends UnlistedSpecialPage {
 		PFUtils::addFormRLModules();
 
 		$out->addHTML( $text );
+
+
 
 		return null;
 	}
