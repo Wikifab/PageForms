@@ -133,11 +133,16 @@ class PFTextInput extends PFFormInput {
 			}
 		}
 
-		if ( $url !== false ) {
-			$previewImage = Html::element(
-				'img',
-				array( 'src' => $url )
-			);
+
+		$videoExtensions = ['mp4', 'webm'];
+		if ($url !== false) {
+			$urlArray = explode ( '.', $url );
+			$extension = end ( $urlArray );
+			if (in_array ( $extension, $videoExtensions )) {
+				$previewImage = Html::element ('video', array ('src' => $url, 'width' => '100%'));
+			} else {
+				$previewImage = Html::element ('img', array ('src' => $url));
+			}
 		}
 
 		return $previewImage;
