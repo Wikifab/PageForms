@@ -888,6 +888,8 @@ class PFAutoeditAPI extends ApiBase {
 			Hooks::run( 'PageForms::EditFormPreloadText', array( &$preloadContent, $targetTitle, $formTitle ) );
 		}
 
+		Hooks::run( 'PageForms::EditFormInitContent', array( &$preloadContent, $targetTitle, $formTitle ) );
+
 		// Flag to keep track of formHTML() runs.
 		$formHtmlHasRun = false;
 
