@@ -66,7 +66,7 @@ class PFFormEditAction extends Action {
 			$firstTimestamp = $title->getEarliestRevTime();
 			// if created less than 30seconds ago, link to form may not be presents
 			// strange to diff string like that, but it does the job
-			if (date('YmdHis') - $firstTimestamp < 30 ) {
+			if (wfTimestamp( TS_MW) - $firstTimestamp < 30 ) {
 				if (isset($wgPageFormsDefaultFormForNamespace[$title->getNamespace()])) {
 					$form_names = [ $wgPageFormsDefaultFormForNamespace[$title->getNamespace()] ];
 				}
