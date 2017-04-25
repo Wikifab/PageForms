@@ -41,6 +41,8 @@ class PFFormEditAction extends Action {
 	 * a form
 	 */
 	static function displayTab( $obj, &$content_actions ) {
+		global $wgPageFormsDefaultFormForNamespace;
+
 		if ( method_exists ( $obj, 'getTitle' ) ) {
 			$title = $obj->getTitle();
 		} else {
@@ -58,6 +60,18 @@ class PFFormEditAction extends Action {
 		}
 
 		$form_names = PFFormLinker::getDefaultFormsForPage( $title );
+
+		// /!\ if page is just been created, link to forms may not be recorded yet, so we double check
+		if ( count( $form_names) == 0 && $wgPageFormsDefaultFormForNamespace ) {
+			$firstTimestamp = $title->getEarliestRevTime();
+			// if created less than 30seconds ago, link to form may not be presents
+			// strange to diff string like that, but it does the job
+			if (date('YmdHis') - $firstTimestamp < 30 ) {
+				if (isset($wgPageFormsDefaultFormForNamespace[$title->getNamespace()])) {
+					$form_names = [ $wgPageFormsDefaultFormForNamespace[$title->getNamespace()] ];
+				}
+			}
+		}
 		if ( count( $form_names ) == 0 ) {
 			return true;
 		}
