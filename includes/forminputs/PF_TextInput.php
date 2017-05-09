@@ -126,8 +126,13 @@ class PFTextInput extends PFFormInput {
 			foreach ( $result['query']['pages'] as $page ) {
 				if ( array_key_exists( 'imageinfo', $page ) ) {
 					foreach ( $page['imageinfo'] as $imageInfo ) {
-						$url = $imageInfo['thumburl'];
-						break;
+						if(isset($imageInfo['thumburl'])){
+							$url = $imageInfo['thumburl'];
+							break;
+						}
+						if(isset($imageInfo['url'])){
+							$url = $imageInfo['url'];
+						}
 					}
 				}
 			}
