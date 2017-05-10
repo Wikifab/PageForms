@@ -12,10 +12,12 @@
 class PFWikiPageTemplateParam {
 	private $mName;
 	private $mValue;
+	private $mOptions;
 
-	function __construct( $name, $value ) {
+	function __construct( $name, $value, $options = [] ) {
 		$this->mName = $name;
 		$this->mValue = $value;
+		$this->mOptions = $options;
 	}
 
 	function getName() {
@@ -23,10 +25,24 @@ class PFWikiPageTemplateParam {
 	}
 
 	function getValue() {
-		return $this->mValue;
+		$value = $this->mValue;
+		if (isset($this->mOptions['translatable']) && $this->mOptions['translatable']) {
+			if( strpos($value, '<translate>') === false) {
+				$value = '<translate>' . $value .'</translate>';
+			}
+		}
+		return $value;
 	}
 
 	function setValue( $value ) {
 		$this->mValue = $value;
+	}
+
+	function getOptions() {
+		return $this->mOptions;
+	}
+
+	function setOptions( $options ) {
+		$this->mOptions = $options;
 	}
 }

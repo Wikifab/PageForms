@@ -834,6 +834,7 @@ END;
 				$bracketed_string = substr( $section, $brackets_loc + 3, $brackets_end_loc - ( $brackets_loc + 3 ) );
 				$tag_components = PFUtils::getFormTagComponents( $bracketed_string );
 				$tag_title = trim( $tag_components[0] );
+
 				// =====================================================
 				// for template processing
 				// =====================================================
@@ -1037,6 +1038,8 @@ END;
 							$cur_value_in_template = $cur_value;
 						}
 
+
+
 						// If we're creating the page name from a formula based on
 						// form values, see if the current input is part of that formula,
 						// and if so, substitute in the actual value.
@@ -1055,6 +1058,7 @@ END;
 						// separate calls, because of the different variable names in
 						// each case.
 						if ( $form_submitted ) {
+							$this->createFormFieldInternalHook($form_field, $cur_value_in_template, true  );
 							Hooks::run( 'PageForms::CreateFormField', array( &$form_field, &$cur_value_in_template, true ) );
 						} else {
 							if ( !empty( $cur_value ) &&
@@ -1073,6 +1077,7 @@ END;
 								}
 								$cur_value = $form_field->valueStringToLabels( $cur_value, $delimiter );
 							}
+							$this->createFormFieldInternalHook($form_field, $cur_value, false  );
 							Hooks::run( 'PageForms::CreateFormField', array( &$form_field, &$cur_value, false ) );
 						}
 						// if this is not part of a 'multiple' template, increment the
@@ -1120,12 +1125,12 @@ END;
 						if ( $tif->allInstancesPrinted() && $form_field->getDefaultValue() == null ) {
 							$cur_value = null;
 						}
-
 						$new_text = $this->formFieldHTML( $form_field, $cur_value );
 						$new_text .= $form_field->additionalHTMLForInput( $cur_value, $field_name, $tif->getTemplateName() );
 
 						if ( $new_text ) {
-							$wiki_page->addTemplateParam( $template_name, $tif->getInstanceNum(), $field_name, $cur_value_in_template );
+							$options = $form_field->getFieldArgs();
+							$wiki_page->addTemplateParam( $template_name, $tif->getInstanceNum(), $field_name, $cur_value_in_template, $options);
 							$section = substr_replace( $section, $new_text, $brackets_loc, $brackets_end_loc + 3 - $brackets_loc );
 						} else {
 							$start_position = $brackets_end_loc;
@@ -1623,4 +1628,22 @@ END;
 		}
 		return $text;
 	}
+
+	private function createFormFieldInternalHook(& $form_field, & $cur_value, $is_form_submitted  ) {
+
+
+		// thi is useless, it seems that translate tag is added after by WikifabPage class
+		if ($form_field->hasFieldArg( 'translatable' ) && $form_field->getFieldArg( 'translatable' )) {
+			if ( ! $is_form_submitted) {
+				if(preg_match('#^<translate>(.*)</translate>$#', $cur_value, $matches)) {
+					$cur_value = $matches[1];
+				} else if(substr($cur_value, 0, strlen('<translate>')) == '<translate>'
+						&& substr($cur_value, -1 * strlen('</translate>')) == '</translate>') {
+					// for unknown reason, the pregmatch regex does not work every time !! :(
+					$cur_value = substr($cur_value, strlen('<translate>'), -1* strlen('</translate>'));
+				}
+			}
+		}
+	}
+
 }

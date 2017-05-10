@@ -26,12 +26,12 @@ class PFWikiPage {
 		}
 	}
 
-	function addTemplateParam( $templateName, $instanceNum, $paramName, $value ) {
+	function addTemplateParam( $templateName, $instanceNum, $paramName, $value, $options = [] ) {
 		$curInstance = 0;
 		foreach ( $this->mComponents as $i => $component ) {
 			if ( get_class( $component ) == 'PFWikiPageTemplate' && $component->getName() == $templateName ) {
 				if ( $curInstance++ == $instanceNum ) {
-					$this->mComponents[$i]->addParam( $paramName, $value );
+					$this->mComponents[$i]->addParam( $paramName, $value, $options );
 					return;
 				}
 			}
@@ -107,7 +107,6 @@ class PFWikiPage {
 			if ( $embeddedTemplateName == '' && $paramValue == '' ) {
 				continue;
 			}
-
 			// Include the field name only for non-numeric field names.
 			if ( is_numeric( $paramName ) ) {
 				// Add at least one pipe, but possibly more -
@@ -139,7 +138,6 @@ class PFWikiPage {
 			$templateCall .= "\n";
 		}
 		$templateCall .= "}}";
-
 		return $templateCall;
 	}
 

@@ -18,8 +18,8 @@ class PFWikiPageTemplate {
 		$this->mAddUnhandledParams = $addUnhandledParams;
 	}
 
-	function addParam( $paramName, $value ) {
-		$this->mParams[] = new PFWikiPageTemplateParam( $paramName, $value );
+	function addParam( $paramName, $value, $options = [] ) {
+		$this->mParams[] = new PFWikiPageTemplateParam( $paramName, $value, $options );
 	}
 
 	function addUnhandledParam( $paramName, $value ) {

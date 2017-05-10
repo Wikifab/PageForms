@@ -327,7 +327,7 @@ class PFFormField {
 		}
 
 		// If we're using Cargo, there's no equivalent for "values from
-		// property" - instead, we just always get the values if a 
+		// property" - instead, we just always get the values if a
 		// field and table have been specified.
 		if ( is_null( $f->mPossibleValues ) && defined( 'CARGO_VERSION' ) && $cargo_table != null && $cargo_field != null ) {
 			// We only want the non-null values. Ideally this could
