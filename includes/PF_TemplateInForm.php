@@ -274,23 +274,16 @@ class PFTemplateInForm {
 		$search_pattern = '/{{' . $this->mPregMatchTemplateStr . '\s*[\|}]/i';
 		$content_str = str_replace( '_', ' ', $existing_page_content );
 		preg_match( $search_pattern, $content_str, $matches, PREG_OFFSET_CAPTURE );
-		$offsetCorrection = 2;
 
 		// case of templates called whith {{tntn}} template
 		if ( ! array_key_exists( 0, $matches ) && $wgPageFormsUseTranslatableTemplates ) {
-			$search_pattern = '/{{ {{tntn\|' . $this->mPregMatchTemplateStr . '\s*}}/i';
+			$search_pattern = '/{{ {{tntn\|' . $this->mPregMatchTemplateStr . '\s*}}\s*[\|}]/i';
 			preg_match( $search_pattern, $content_str, $matches, PREG_OFFSET_CAPTURE );
-			var_dump($search_pattern); echo '<br/>';
-			var_dump($matches); echo '<br/>';
-			$offsetCorrection = 12;
 		}
 		// is this check necessary?
 		if ( array_key_exists( 0, $matches ) && array_key_exists( 1, $matches[0] ) ) {
 			$start_char = $matches[0][1];
-			$fields_start_char = $start_char + strlen( $matches[0][0]);
-
-			echo "START CHAR  :<br/>\n";
-			var_dump(substr($existing_page_content, $fields_start_char, 20)); echo '<br/>';
+			$fields_start_char = $start_char + strlen( $matches[0][0]) -1;
 			// Skip ahead to the first real character.
 			while ( in_array( $existing_page_content[$fields_start_char], array( ' ', '\n' ) ) ) {
 				$fields_start_char++;
