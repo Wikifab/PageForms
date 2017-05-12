@@ -269,18 +269,33 @@ class PFTemplateInForm {
 	}
 
 	function setFieldValuesFromPage( $existing_page_content ) {
+		global $wgPageFormsUseTranslatableTemplates;
 		$matches = array();
 		$search_pattern = '/{{' . $this->mPregMatchTemplateStr . '\s*[\|}]/i';
 		$content_str = str_replace( '_', ' ', $existing_page_content );
 		preg_match( $search_pattern, $content_str, $matches, PREG_OFFSET_CAPTURE );
+		$offsetCorrection = 2;
+
+		// case of templates called whith {{tntn}} template
+		if ( ! array_key_exists( 0, $matches ) && $wgPageFormsUseTranslatableTemplates ) {
+			$search_pattern = '/{{ {{tntn\|' . $this->mPregMatchTemplateStr . '\s*}}/i';
+			preg_match( $search_pattern, $content_str, $matches, PREG_OFFSET_CAPTURE );
+			var_dump($search_pattern); echo '<br/>';
+			var_dump($matches); echo '<br/>';
+			$offsetCorrection = 12;
+		}
 		// is this check necessary?
 		if ( array_key_exists( 0, $matches ) && array_key_exists( 1, $matches[0] ) ) {
 			$start_char = $matches[0][1];
-			$fields_start_char = $start_char + 2 + strlen( $this->mSearchTemplateStr );
+			$fields_start_char = $start_char + strlen( $matches[0][0]);
+
+			echo "START CHAR  :<br/>\n";
+			var_dump(substr($existing_page_content, $fields_start_char, 20)); echo '<br/>';
 			// Skip ahead to the first real character.
 			while ( in_array( $existing_page_content[$fields_start_char], array( ' ', '\n' ) ) ) {
 				$fields_start_char++;
 			}
+			// Skip ahead to the first real character.
 			// If the next character is a pipe, skip that too.
 			if ( $existing_page_content[$fields_start_char] == '|' ) {
 				$fields_start_char++;
@@ -352,7 +367,9 @@ class PFTemplateInForm {
 			array( '/', '(', ')', '^' ),
 			array( '\/', '\(', '\)', '\^' ),
 			$this->mSearchTemplateStr );
-		$this->mPageCallsThisTemplate = preg_match( '/{{' . $this->mPregMatchTemplateStr . '\s*[\|}]/i', str_replace( '_', ' ', $existing_page_content ) );
+		$directCall = preg_match( '/{{' . $this->mPregMatchTemplateStr . '\s*[\|}]/i', str_replace( '_', ' ', $existing_page_content ), $matches );
+		$translatableModelCall = preg_match( '/{{ {{tntn\|' . $this->mPregMatchTemplateStr . '\s*[\|}]/i', str_replace( '_', ' ', $existing_page_content ) );
+		$this->mPageCallsThisTemplate = $directCall || $translatableModelCall;
 	}
 
 	function checkIfAllInstancesPrinted( $form_submitted, $source_is_page ) {

@@ -455,7 +455,8 @@
 			"DisabledDates": null,
 			"HighlightedDates": null,
 			"_merge_strategy": "array_plus"
-		}
+		},
+		"PageFormsUseTranslatableTemplates": false
 	},
 	"manifest_version": 1
 }

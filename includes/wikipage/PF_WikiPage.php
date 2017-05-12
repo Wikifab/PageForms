@@ -94,10 +94,15 @@ class PFWikiPage {
 	}
 
 	function createTemplateCall( $template ) {
+		global $wgPageFormsUseTranslatableTemplates;
 		$lastNumericParam = 0;
 		$template->addUnhandledParams();
 
-		$templateCall = '{{' . $template->getName();
+		if ($wgPageFormsUseTranslatableTemplates && $template->getName()) {
+			$templateCall = '{{ {{tntn|' . $template->getName() . '}}';
+		} else {
+			$templateCall = '{{' . $template->getName();
+		}
 		foreach( $template->getParams() as $templateParam ) {
 			$paramName = $templateParam->getName();
 			$embeddedTemplateName = $this->getEmbeddedTemplateForParam( $template->getName(), $paramName );
