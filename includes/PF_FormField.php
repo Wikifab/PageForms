@@ -29,6 +29,7 @@ class PFFormField {
 	private $mFieldArgs;
 	private $mDescriptionArgs;
 	private $mLabel;
+	private $mTranslateLabelPrefix;
 	// somewhat of a hack - these two fields are for a field in a specific
 	// representation of a form, not the form definition; ideally these
 	// should be contained in a third 'field' class, called something like
@@ -46,6 +47,7 @@ class PFFormField {
 		$f->mIsRestricted = false;
 		$f->mIsUploadable = false;
 		$f->mPossibleValues = null;
+		$f->mTranslateLabelPrefix = null;
 		$f->mFieldArgs = array();
 		$f->mDescriptionArgs = array();
 		return $f;
@@ -350,6 +352,11 @@ class PFFormField {
 				$f->setValuesWithMappingCargoField();
 			}
 		}
+
+		if ( array_key_exists( 'mapping using translate', $f->mFieldArgs )) {
+			$f->mTranslateLabelPrefix = $f->mFieldArgs['mapping using translate'];
+		};
+
 		if ( $template_in_form->allowsMultiple() ) {
 			$f->mFieldArgs['part_of_multiple'] = true;
 		}
@@ -833,6 +840,7 @@ class PFFormField {
 	 * field and the template field it corresponds to, if any.
 	 */
 	function getArgumentsForInputCall( $default_args = null ) {
+		global $wgParser;
 		// start with the arguments array already defined
 		$other_args = $this->mFieldArgs;
 		// a value defined for the form field should always supersede
@@ -842,6 +850,12 @@ class PFFormField {
 		} else {
 			$other_args['possible_values'] = $this->template_field->getPossibleValues();
 			$other_args['value_labels'] = $this->template_field->getValueLabels();
+			if ($this->mTranslateLabelPrefix) {
+				$other_args['value_labels'] = [];
+				foreach ($other_args['possible_values'] as $key) {
+					$other_args['value_labels'][$key] = $wgParser->recursiveTagParse( '{{int:' . $this->mTranslateLabelPrefix . $key . '}}');
+				}
+			}
 		}
 		$other_args['is_list'] = ( $this->mIsList || $this->template_field->isList() );
 
@@ -860,7 +874,6 @@ class PFFormField {
 			$other_args = array_merge( $default_args, $other_args );
 		}
 
-		global $wgParser;
 		foreach ( $other_args as $argname => $argvalue ) {
 			if ( is_string( $argvalue ) ) {
 				$other_args[$argname] =
