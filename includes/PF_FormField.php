@@ -195,7 +195,6 @@ class PFFormField {
 			}
 
 			$sub_components = array_map( 'trim', explode( '=', $component, 2 ) );
-
 			if ( count( $sub_components ) == 1 ) {
 				// add handling for single-value params, for custom input types
 				$f->mFieldArgs[$sub_components[0]] = true;

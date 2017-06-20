@@ -1632,7 +1632,6 @@ END;
 	private function createFormFieldInternalHook(& $form_field, & $cur_value, $is_form_submitted  ) {
 
 
-		// thi is useless, it seems that translate tag is added after by WikifabPage class
 		if ($form_field->hasFieldArg( 'translatable' ) && $form_field->getFieldArg( 'translatable' )) {
 			if ( ! $is_form_submitted) {
 				if(preg_match('#^<translate>(.*)</translate>$#', $cur_value, $matches)) {
