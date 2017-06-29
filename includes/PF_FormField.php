@@ -421,6 +421,17 @@ class PFFormField {
 		$field_name = $this->template_field->getFieldName();
 		$delimiter = $this->mFieldArgs['delimiter'];
 		$escaped_field_name = str_replace( "'", "\'", $field_name );
+
+		if ( $this->hasFieldArg( 'translatable' ) && $this->getFieldArg( 'translatable' )) {
+			// if this is a translatable field, and that an translate id tag is passed in an other field, we add it
+			$fieldName = $this->getTemplateField()->getFieldName();
+			$fieldNameTag = $fieldName . '_translate_number_tag';
+			if(isset($template_instance_query_values[$fieldName]) && isset($template_instance_query_values[$fieldNameTag])){
+				$template_instance_query_values[$fieldName] = $template_instance_query_values[$fieldNameTag] . $template_instance_query_values[$fieldName];
+			}
+		}
+
+
 		if ( isset( $template_instance_query_values ) &&
 			$template_instance_query_values != null &&
 			is_array( $template_instance_query_values ) ) {

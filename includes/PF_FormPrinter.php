@@ -1058,7 +1058,7 @@ END;
 						// separate calls, because of the different variable names in
 						// each case.
 						if ( $form_submitted ) {
-							$this->createFormFieldInternalHook($form_field, $cur_value_in_template, true  );
+							$this->createFormFieldInternalHook($template, $tif, $form_field, $cur_value_in_template, true  );
 							Hooks::run( 'PageForms::CreateFormField', array( &$form_field, &$cur_value_in_template, true ) );
 						} else {
 							if ( !empty( $cur_value ) &&
@@ -1077,7 +1077,7 @@ END;
 								}
 								$cur_value = $form_field->valueStringToLabels( $cur_value, $delimiter );
 							}
-							$this->createFormFieldInternalHook($form_field, $cur_value, false  );
+							$this->createFormFieldInternalHook($template, $tif, $form_field, $cur_value, false  );
 							Hooks::run( 'PageForms::CreateFormField', array( &$form_field, &$cur_value, false ) );
 						}
 						// if this is not part of a 'multiple' template, increment the
@@ -1556,8 +1556,6 @@ END;
 			$form_page_title = null;
 		}
 
-//		$wgParser = $oldParser;
-
 		return array( $form_text, $page_text, $form_page_title, $generated_page_name );
 	}
 
@@ -1626,20 +1624,61 @@ END;
 				$text = PFTextInput::getHTML( $cur_value, $form_field->getInputName(), $form_field->isMandatory(), $form_field->isDisabled(), $other_args );
 			}
 		}
+		$this->fieldToHtmlInternalHook($form_field, $cur_value, $text);
 		return $text;
 	}
 
-	private function createFormFieldInternalHook(& $form_field, & $cur_value, $is_form_submitted  ) {
+	/**
+	 * for translatable fields, this function add an hidden input containing the translate tags
+	 *
+	 * @param unknown $form_field
+	 * @param unknown $cur_value
+	 * @param unknown $text
+	 */
+	private function fieldToHtmlInternalHook( $form_field, $cur_value, & $text) {
+		if ( ! $form_field->hasFieldArg( 'translatable' ) || ! $form_field->getFieldArg( 'translatable' )) {
+			return;
+		}
 
+		if ( $form_field->hasFieldArg('translate_number_tag')) {
+			$inputName = $form_field->getInputName();
+			$pattern = '/\[([^\\]\\]]+)\]$/';
+			if (preg_match($pattern, $inputName, $matches)) {
+				$inputName = preg_replace($pattern, '[${1}_translate_number_tag]', $inputName);
+			} else {
+				$inputName .= '_translate_number_tag';
+			}
+			$translateTag = $form_field->getFieldArg( 'translate_number_tag' );
+			$text .= "<input  name='$inputName' value='$translateTag'/>";
+		}
+	}
 
-		if ($form_field->hasFieldArg( 'translatable' ) && $form_field->getFieldArg( 'translatable' )) {
-			if ( ! $is_form_submitted) {
-				if(preg_match('#^<translate>(.*)</translate>$#', $cur_value, $matches)) {
-					$cur_value = $matches[1];
-				} else if(substr($cur_value, 0, strlen('<translate>')) == '<translate>'
-						&& substr($cur_value, -1 * strlen('</translate>')) == '</translate>') {
-					// for unknown reason, the pregmatch regex does not work every time !! :(
-					$cur_value = substr($cur_value, strlen('<translate>'), -1* strlen('</translate>'));
+	private function createFormFieldInternalHook(& $template,& $tif, & $form_field, & $cur_value, $is_form_submitted  ) {
+
+		if ( ! $form_field->hasFieldArg( 'translatable' ) || ! $form_field->getFieldArg( 'translatable' )) {
+			return;
+		}
+
+		if ( ! $is_form_submitted) {
+			// if translatable, add translatable tags when saving, or remove them for displaying form
+			if(preg_match('#^<translate>(.*)</translate>$#', $cur_value, $matches)) {
+				$cur_value = $matches[1];
+			} else if(substr($cur_value, 0, strlen('<translate>')) == '<translate>'
+					&& substr($cur_value, -1 * strlen('</translate>')) == '</translate>') {
+				// for unknown reason, the pregmatch regex does not work every time !! :(
+				$cur_value = substr($cur_value, strlen('<translate>'), -1* strlen('</translate>'));
+			}
+
+			$isVEForm = $form_field->hasFieldArg( 'class' ) && strpos($form_field->getFieldArg( 'class'),'form-textarea') !== false;
+			if ( substr($cur_value, 0,6) == '<!--T:' && ! $isVEForm) {
+				// hide the tag <!-- T:X --> in an other input
+				// if field do not use Visual editor  ?
+
+				if ( preg_match("/<!-- *T:([a-zA-Z0-9]+) *-->/", $cur_value, $matches)) {
+					// remove the tag from this input
+					$cur_value = str_replace($matches[0], '', $cur_value);
+					// add field args, to add an hidden input in form with the tag
+					$form_field->setFieldArg('translate_number_tag', $matches[0]);
 				}
 			}
 		}
