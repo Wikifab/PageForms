@@ -427,7 +427,11 @@ class PFFormField {
 			$fieldName = $this->getTemplateField()->getFieldName();
 			$fieldNameTag = $fieldName . '_translate_number_tag';
 			if(isset($template_instance_query_values[$fieldName]) && isset($template_instance_query_values[$fieldNameTag])){
-				$template_instance_query_values[$fieldName] = $template_instance_query_values[$fieldNameTag] . $template_instance_query_values[$fieldName];
+				$tag = $template_instance_query_values[$fieldNameTag];
+				if (!preg_match('/( |\n)$/', $tag)){
+					$tag = $tag . "\n";
+				}
+				$template_instance_query_values[$fieldName] = $tag . $template_instance_query_values[$fieldName];
 			}
 		}
 
