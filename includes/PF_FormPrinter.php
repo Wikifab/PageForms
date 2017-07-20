@@ -1640,6 +1640,7 @@ END;
 			return;
 		}
 
+
 		if ( $form_field->hasFieldArg('translate_number_tag')) {
 			$inputName = $form_field->getInputName();
 			$pattern = '/\[([^\\]\\]]+)\]$/';
@@ -1649,7 +1650,7 @@ END;
 				$inputName .= '_translate_number_tag';
 			}
 			$translateTag = $form_field->getFieldArg( 'translate_number_tag' );
-			$text .= "<input  name='$inputName' value='$translateTag'/>";
+			$text .= "<input style='display:none'  name='$inputName' value='$translateTag'/>";
 		}
 	}
 
@@ -1670,7 +1671,7 @@ END;
 			}
 
 			$isVEForm = $form_field->hasFieldArg( 'class' ) && strpos($form_field->getFieldArg( 'class'),'form-textarea') !== false;
-			if ( substr($cur_value, 0,6) == '<!--T:' && ! $isVEForm) {
+			if ( substr($cur_value, 0,6) == '<!--T:' /*&& ! $isVEForm*/) {
 				// hide the tag <!-- T:X --> in an other input
 				// if field do not use Visual editor  ?
 
