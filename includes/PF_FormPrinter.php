@@ -1675,7 +1675,7 @@ END;
 				// hide the tag <!-- T:X --> in an other input
 				// if field do not use Visual editor  ?
 
-				if ( preg_match("/<!-- *T:([a-zA-Z0-9]+) *-->/", $cur_value, $matches)) {
+				if ( preg_match("/<!-- *T:([a-zA-Z0-9]+) *-->( |\n)/", $cur_value, $matches)) {
 					// remove the tag from this input
 					$cur_value = str_replace($matches[0], '', $cur_value);
 					// add field args, to add an hidden input in form with the tag
