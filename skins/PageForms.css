@@ -169,10 +169,6 @@ form input.formInput,
     border-radius: 0;
 }
 
-.select2-container .select2-choice > .select2-chosen {
-    color: #000;
-}
-
 div.infoMessage {
 	border: 1px solid #777777;
 	padding: 12px;
