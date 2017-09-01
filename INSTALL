@@ -29,6 +29,10 @@ The extension requires MediaWiki 1.21 or greater.
         include_once('extensions/PageForms/PageForms.php');
         wfLoadExtension( 'PageForms' );
 
+== Enable Visual Editor ==
+
+see INSTALL_VE.md for details
+
 == Contact ==
 
 If you have any issues or questions, please send them to

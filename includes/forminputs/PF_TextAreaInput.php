@@ -25,7 +25,7 @@ class PFTextAreaInput extends PFFormInput {
 			'Text' => array( 'field_type' => 'text', 'is_list' => 'true' )
 		);
 	}
-	
+
 	/**
 	 * Constructor for the PFTextAreaInput class.
 	 *
@@ -43,18 +43,18 @@ class PFTextAreaInput extends PFFormInput {
 	 *	input definition.
 	 */
 	public function __construct( $input_number, $cur_value, $input_name, $disabled, $other_args ) {
-		
+
 		global $wgOut;
-		
+
 		parent::__construct( $input_number, $cur_value, $input_name, $disabled, $other_args );
-		
+
 		if (
 			array_key_exists( 'editor', $this->mOtherArgs ) &&
 			$this->mOtherArgs['editor'] == 'wikieditor' &&
-			
+
 			method_exists( $wgOut, 'getResourceLoader' ) &&
 			in_array( 'jquery.wikiEditor', $wgOut->getResourceLoader()->getModuleNames() ) &&
-			
+
 			class_exists( 'WikiEditorHooks' )
 		) {
 			$this->mUseWikieditor = true;
@@ -62,7 +62,7 @@ class PFTextAreaInput extends PFFormInput {
 		}
 	}
 
-	
+
 	public static function getName() {
 		return 'textarea';
 	}
@@ -136,10 +136,10 @@ class PFTextAreaInput extends PFFormInput {
 
 	/**
 	 * Returns the names of the resource modules this input type uses.
-	 * 
-	 * Returns the names of the modules as an array or - if there is only one 
+	 *
+	 * Returns the names of the modules as an array or - if there is only one
 	 * module - as a string.
-	 * 
+	 *
 	 * @return null|string|array
 	 */
 	public function getResourceModuleNames() {
@@ -147,6 +147,7 @@ class PFTextAreaInput extends PFFormInput {
 	}
 
 	protected function getTextAreaAttributes() {
+		global $wgOut;
 
 		global $wgPageFormsTabIndex, $wgPageFormsFieldNum;
 
@@ -168,6 +169,14 @@ class PFTextAreaInput extends PFFormInput {
 			$className = 'wikieditor ';
 		} else {
 			$className = '';
+		}
+		if ( ExtensionRegistry::getInstance()->isLoaded( 'VisualEditor' ) ) {
+			global $wgOut;
+			// enable Visual Editor on textAreas,
+			// TODO : enable it only if visual editor is enabled on this textarea
+			$wgOut->addModules( [
+					'ext.pageforms.visualeditor.init'
+			] );
 		}
 
 		$className .= ( $this->mIsMandatory ) ? 'mandatoryField' : 'createboxInput';

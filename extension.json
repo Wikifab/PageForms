@@ -386,6 +386,38 @@
 			"messages": [
 				"pf_blank_error"
 			]
+		},
+		"ext.pageforms.visualeditor.init": {
+			"scripts": [
+				"libs/ve/veforpageform.js"
+			],
+			"dependencies": [
+			]
+		},
+		"ext.pageforms.visualeditor.visualEditor": {
+			"scripts": [
+				"libs/ve/lib/ve/ve.init.sa.Target.js",
+				"libs/ve/ui/ui.CommandRegistry.js",
+				"libs/ve/ui/ui.SwitchEditorAction.js",
+				"libs/ve/ui/ui.SwitchEditorTool.js",
+				"libs/ve/ext.pageforms.ve.target.js",
+				"libs/ve/ext.pageforms.ve.editor.js"
+			],
+			"styles": [
+				"libs/ve/veforpageform.css"
+			],
+			"dependencies": [
+				"ext.visualEditor.core",
+				"ext.visualEditor.core.desktop",
+				"ext.visualEditor.data",
+				"ext.visualEditor.icons",
+				"ext.visualEditor.mediawiki",
+				"ext.visualEditor.desktopTarget",
+				"ext.visualEditor.mwimage",
+				"ext.visualEditor.mwlink",
+				"ext.visualEditor.mwtransclusion",
+				"oojs-ui.styles.icons-editing-advanced"
+			]
 		}
 	},
 	"ResourceFileModulePaths": {
