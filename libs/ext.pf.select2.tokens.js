@@ -8,6 +8,7 @@
  *
  * @licence GNU GPL v2+
  * @author Jatin Mehta
+ * @author Yaron Koren
  */
 
 ( function( $, mw, pf ) {
@@ -33,6 +34,7 @@
 	};
 
 	var tokens_proto = new pf.select2.base();
+
 	/*
 	 * Applies select2 to the HTML element
 	 *
@@ -48,6 +50,9 @@
 		this.sortable(element);
 		element.on( "change", this.onChange );
 		element.val(cur_val);
+		if ( element.attr( "existingvaluesonly" ) !== "true" ) {
+			element.parent().on( "dblclick", "li.select2-search-choice", pfTokensTurnIntoInput );
+		}
 	};
 	/*
 	 * Returns options to be set by select2
@@ -133,6 +138,7 @@
 
 		return opts;
 	};
+
 	/*
 	 * Returns data to be used by select2 for tokens autocompletion
 	 *
@@ -210,9 +216,15 @@
 					var id = 0;
 					//Convert data into the format accepted by Select2
 					data.pfautocomplete.forEach( function(item) {
-						values.push({
-							id: id++, text: item.title
-						});
+						if (item.displaytitle !== undefined) {
+							values.push({
+								id: id++, text: item.displaytitle
+							});
+						} else {
+							values.push({
+								id: id++, text: item.title
+							});
+						}
 					});
 					return values;
 				}
@@ -221,6 +233,7 @@
 
 		return values;
 	};
+
 	/*
 	 * Returns ajax options to be used by select2 for
 	 * remote autocompletion of tokens
@@ -253,7 +266,11 @@
 				if (data.pfautocomplete !== undefined) {
 					data.pfautocomplete.forEach( function(item) {
 						item.id = id++;
-						item.text = item.title;
+						if (item.displaytitle !== undefined) {
+							item.text = item.displaytitle;
+						} else {
+							item.text = item.title;
+						}
 					});
 					return {results: data.pfautocomplete};
 				} else {
@@ -264,34 +281,16 @@
 
 		return ajaxOpts;
 	};
+
 	/*
 	 * Used to set the value of the HTMLInputElement
 	 * when there is a change in the select2 value
 	 *
 	 */
 	tokens_proto.onChange = function() {
-		var self = this;
-		var data = $(this).select2( "data" );
-		var tokens = new pf.select2.tokens();
-		var delim = tokens.getDelimiter( $(this) );
-		var namespace = $(this).attr( "data-namespace" );
-
-		if (data !== null) {
-			var tokens_value = "";
-			data.forEach( function( token ) {
- 				var val = token.text.trim();
- 				if ( namespace && data.id === data.text ) {
- 					if (val.indexOf( namespace + ':' ) !== 0 ) {
- 						val = namespace + ':' + val;
- 					}
- 				}
- 				tokens_value += val + delim + " ";
-			});
-			$(this).val( tokens_value );
-		} else {
-			$(this).val( '' );
-		}
+		pfTokensSaveFullValue( $(this).parent(), $(this) );
 	};
+
 	/*
 	 * Returns delimiter for the token field
 	 *
@@ -302,11 +301,12 @@
 		var field_values = element.attr('autocompletesettings').split( ',' );
 		var delimiter = ",";
 		if (field_values[1] === 'list' && field_values[2] !== undefined && field_values[2] !== "") {
-				delimiter = field_values[2];
+			delimiter = field_values[2];
 		}
 
 		return delimiter;
 	};
+
 	/*
 	 * Makes the choices rearrangable in tokens
 	 *
@@ -322,5 +322,65 @@
 	};
 
 	pf.select2.tokens.prototype = tokens_proto;
+
+	// The following functions, for making tokens editable, are loosely
+	// based on the example at:
+	// https://github.com/select2/select2/issues/116#issuecomment-37440758
+	// @TODO - some or all of these functions should ideally be part of
+	// the pf.select2.tokens "class", but I wasn't able to get that
+	// working.
+	function pfTokensSaveFullValue( tokensInput, inputControl ) {
+		var data = "";
+		var tokens = new pf.select2.tokens();
+		var publicInput = tokensInput.find( 'input.pfTokens' );
+		var delim = tokens.getDelimiter( publicInput );
+		var namespace = inputControl.attr( "data-namespace" );
+		tokensInput.find("li.select2-search-choice").each(function() {
+			var val = $(this).children("div").text().trim();
+ 			if ( namespace && data.id === data.text ) {
+ 				if (val.indexOf( namespace + ':' ) !== 0 ) {
+ 					val = namespace + ':' + val;
+ 				}
+ 			}
+			if (data !== "") {
+				data += delim + " ";
+			}
+			data += val;
+		});
+		publicInput.val(data);
+	}
+
+	function pfTokensSaveSelect( tokensInput, inputControl ) {
+		inputControl.parent().html(inputControl.val());
+		pfTokensSaveFullValue( tokensInput, inputControl );
+	}
+
+	function pfTokensTurnIntoInput( event ) {
+		var currentSelect = $(event.target);
+		var tokensInput = $(currentSelect).parent().parent().parent().parent();
+		var itemValue = currentSelect.html();
+		if ( itemValue.indexOf("<input type") === -1 ) {
+			currentSelect.html("<input type=\"text\" value=\"" + itemValue.replace( '"', '&quot;' ) + "\">");
+			var inputControl = currentSelect.children("input");
+			inputControl.focus()
+			// Normally, a click anywhere in the Select2 input will
+			// move the focus to the end of the tokens. Prevent
+			// that happening in this "sub-input".
+			.click(function(event) {
+				event.stopPropagation();
+			})
+			// Exit and save if the user clicks away, or hits
+			// "enter".
+			.blur(function() {
+				pfTokensSaveSelect( tokensInput, inputControl );
+			})
+			.keypress( function( event ) {
+				var keycode = (event.keyCode ? event.keyCode : event.which);
+				if ( keycode === 13 ) {
+					pfTokensSaveSelect( tokensInput, inputControl );
+				}
+			});
+		}
+	}
 
 }( jQuery, mediaWiki, pageforms ) );

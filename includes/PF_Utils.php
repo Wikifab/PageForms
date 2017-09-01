@@ -10,11 +10,25 @@
 class PFUtils {
 
 	/**
+	 * Helper function for backward compatibility.
+	 */
+	public static function makeLink( $linkRenderer, $title, $msg = null, $attrs = array(), $params = array() ) {
+		if ( !is_null( $linkRenderer ) ) {
+			// MW 1.28+
+			// Is there a makeLinkKnown() method? We'll just do it
+			// manually.
+			return $linkRenderer->makeLink( $title, $msg, $attrs, $params, array( 'known' ) );
+		} else {
+			return Linker::linkKnown( $title, $msg, $attrs, $params );
+		}
+	}
+
+	/**
 	 * Creates a link to a special page, using that page's top-level description as the link text.
 	 */
-	public static function linkForSpecialPage( $specialPageName ) {
+	public static function linkForSpecialPage( $linkRenderer, $specialPageName ) {
 		$specialPage = SpecialPageFactory::getPage( $specialPageName );
-		return Linker::link( $specialPage->getTitle(),
+		return self::makeLink( $linkRenderer, $specialPage->getTitle(),
 			htmlspecialchars( $specialPage->getDescription() ) );
 	}
 
@@ -171,7 +185,7 @@ END;
 	 * Accepts an optional Parser instance, or uses $wgOut if omitted.
 	 */
 	public static function addFormRLModules( $parser = null ) {
-		global $wgOut;
+		global $wgOut, $wgPageFormsSimpleUpload;
 
 		// Handling depends on whether or not this form is embedded
 		// in another page.
@@ -202,6 +216,10 @@ END;
 			'ext.pageforms.select2',
 			'ext.pageforms.rating'
 		);
+
+		if ( $wgPageFormsSimpleUpload ) {
+			$mainModules[] = 'ext.pageforms.simpleupload';
+		}
 
 		$output->addModules( $mainModules );
 

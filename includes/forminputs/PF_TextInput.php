@@ -154,6 +154,36 @@ class PFTextInput extends PFFormInput {
 	}
 
 	public static function uploadableHTML( $input_id, $delimiter = null, $default_filename = null, $cur_value = '', $other_args = array() ) {
+		global $wgPageFormsSimpleUpload, $wgPageFormsScriptPath;
+		if ( $wgPageFormsSimpleUpload ) {
+			$text = "\n" . '<img class="loading" style="display:none;" src="' . $wgPageFormsScriptPath . '/skins/loading.gif"/>' . "\n";
+			$text .= Html::input( '',
+				wfMessage( 'upload-dialog-button-upload' )->escaped(),
+				'button',
+				array(
+					'class' => 'simpleupload_btn',
+					'data-id' => $input_id
+				)
+			) . "\n";
+			$text .= Html::input( '',
+				wfMessage( 'htmlform-cloner-delete' )->escaped(),
+				'button',
+				array(
+					'class' => 'simpleupload_rmv_btn',
+					'style' => 'display: none;',
+					'data-id' => $input_id
+				)
+			) . "\n";
+			$text .= Html::input( '', '', 'file',
+				array(
+					'class' => 'simpleupload',
+					'style' => 'display: none;',
+					'data-id' => $input_id
+				)
+			) . "\n";
+
+			return $text;
+		}
 		$upload_window_page = SpecialPageFactory::getPage( 'UploadWindow' );
 		$query_string = "pfInputID=$input_id";
 		if ( $delimiter != null ) {
@@ -163,7 +193,7 @@ class PFTextInput extends PFFormInput {
 			$query_string .= "&wpDestFile=$default_filename";
 		}
 		$upload_window_url = $upload_window_page->getTitle()->getFullURL( $query_string );
-		$upload_label = wfMessage( 'upload' )->text();
+		$upload_label = wfMessage( 'upload' )->parse();
 		// We need to set the size by default.
 		$style = "width:650 height:500";
 
@@ -252,6 +282,12 @@ class PFTextInput extends PFFormInput {
 		}
 		if ( array_key_exists( 'placeholder', $other_args ) ) {
 			$inputAttrs['placeholder'] = $other_args['placeholder'];
+		}
+		if ( array_key_exists( 'feeds to map', $other_args ) ) {
+			global $wgPageFormsMapsWithFeeders;
+			$targetMapName = $other_args['feeds to map'];
+			$wgPageFormsMapsWithFeeders[$targetMapName] = true;
+			$inputAttrs['data-feeds-to-map'] = $targetMapName;
 		}
 		$text = Html::input( $input_name, $cur_value, 'text', $inputAttrs );
 

@@ -82,7 +82,7 @@
 	"pf_viewform": "अर्ज पहा",
 	"pf_editsource": "स्रोत संपादित करा",
 	"pf_formedit_edittitle": "संपादित करा $1: $2",
-	"pf_formedit_formwarning": "इशारा: हे पान <a href=\"$1\">पूर्वीच अस्तित्वात आहे</a>, पण ते पान या अर्जाचा वापर करीत नाही.",
+	"pf_formedit_formwarning": "इशारा: हे पान [[$1|पूर्वीच अस्तित्वात आहे]], पण ते पान या अर्जाचा वापर करीत नाही.",
 	"pf_formedit_remove": "काढा",
 	"pf_formedit_addanother": "दुसरे वाढवा",
 	"pf_formedit_none": "काहीही नाही",

@@ -264,17 +264,8 @@ class PFAutoeditAPI extends ApiBase {
 				}
 
 				$formNames = PFFormLinker::getDefaultFormsForPage( $targetTitle );
-
-				// if no default form can be found, try alternate forms
 				if ( count( $formNames ) === 0 ) {
-
-					$formNames = PFFormLinker::getFormsThatPagePointsTo( $targetTitle->getText(), $targetTitle->getNamespace(), PFFormLinker::ALTERNATE_FORM );
-
-					// if still no form can be found, give up
-					if ( count( $formNames ) === 0 ) {
-						throw new MWException( wfMessage( 'pf_autoedit_noformfound' )->parse() );
-					}
-
+					throw new MWException( wfMessage( 'pf_autoedit_noformfound' )->parse() );
 				}
 
 			}
@@ -911,6 +902,7 @@ class PFAutoeditAPI extends ApiBase {
 				$wgPageFormsFormPrinter->formHTML(
 					$formContent, $isFormSubmitted, $pageExists, $formArticleId, $preloadContent, $targetName, $targetNameFormula
 				);
+			$formHtmlHasRun = true;
 
 			// Parse the data to be preloaded from the form HTML of
 			// the existing page.
@@ -1000,11 +992,13 @@ class PFAutoeditAPI extends ApiBase {
 
 		$data = array( );
 		$doc = new DOMDocument();
+		$oldVal = libxml_disable_entity_loader( true );
 		@$doc->loadHTML(
 			'<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/></head><body>'
 			. $html
 			. '</body></html>'
 		);
+		libxml_disable_entity_loader( $oldVal );
 
 		// Process input tags.
 		$inputs = $doc->getElementsByTagName( 'input' );

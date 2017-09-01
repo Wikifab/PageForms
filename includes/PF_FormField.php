@@ -19,6 +19,7 @@ class PFFormField {
 	private $mIsHidden;
 	private $mIsRestricted;
 	private $mPossibleValues;
+	private $mUseDisplayTitle;
 	private $mIsList;
 	// The following fields are not set by the form-creation page
 	// (though they could be).
@@ -48,6 +49,7 @@ class PFFormField {
 		$f->mIsUploadable = false;
 		$f->mPossibleValues = null;
 		$f->mTranslateLabelPrefix = null;
+		$f->mUseDisplayTitle = false;
 		$f->mFieldArgs = array();
 		$f->mDescriptionArgs = array();
 		return $f;
@@ -127,6 +129,10 @@ class PFFormField {
 		} else {
 			return $this->template_field->getPossibleValues();
 		}
+	}
+
+	public function getUseDisplayTitle() {
+		return $this->mUseDisplayTitle;
 	}
 
 	public function getInputName() {
@@ -262,10 +268,16 @@ class PFFormField {
 						$category_name = ucfirst( $category_name );
 					}
 					$f->mPossibleValues = PFValuesUtils::getAllPagesForCategory( $category_name, 10 );
+					global $wgPageFormsUseDisplayTitle;
+					$f->mUseDisplayTitle = $wgPageFormsUseDisplayTitle;
 				} elseif ( $sub_components[0] == 'values from concept' ) {
 					$f->mPossibleValues = PFValuesUtils::getAllPagesForConcept( $sub_components[1] );
+					global $wgPageFormsUseDisplayTitle;
+					$f->mUseDisplayTitle = $wgPageFormsUseDisplayTitle;
 				} elseif ( $sub_components[0] == 'values from namespace' ) {
 					$f->mPossibleValues = PFValuesUtils::getAllPagesForNamespace( $sub_components[1] );
+					global $wgPageFormsUseDisplayTitle;
+					$f->mUseDisplayTitle = $wgPageFormsUseDisplayTitle;
 				} elseif ( $sub_components[0] == 'values dependent on' ) {
 					global $wgPageFormsDependentFields;
 					$wgPageFormsDependentFields[] = array( $sub_components[1], $fullFieldName );
@@ -349,6 +361,8 @@ class PFFormField {
 			} elseif ( array_key_exists( 'mapping cargo table', $f->mFieldArgs ) &&
 				array_key_exists( 'mapping cargo field', $f->mFieldArgs ) ) {
 				$f->setValuesWithMappingCargoField();
+			} elseif ( $f->mUseDisplayTitle ) {
+				$f->mPossibleValues = PFValuesUtils::disambiguateLabels( $f->mPossibleValues );
 			}
 		}
 
@@ -535,7 +549,10 @@ class PFFormField {
 		$templateName = $this->mFieldArgs['mapping template'];
 		$title = Title::makeTitleSafe( NS_TEMPLATE, $templateName );
 		$templateExists = $title->exists();
-		foreach ( $this->mPossibleValues as $value ) {
+		foreach ( $this->mPossibleValues as $index => $value ) {
+			if ( $this->mUseDisplayTitle ) {
+				$value = $index;
+			}
 			if ( $templateExists ) {
 				$label = trim( $wgParser->recursiveTagParse( '{{' . $templateName .
 					'|' . $value . '}}' ) );
@@ -548,7 +565,7 @@ class PFFormField {
 				$labels[$value] = $value;
 			}
 		}
-		$this->mPossibleValues = $this->disambiguateLabels( $labels );
+		$this->mPossibleValues = PFValuesUtils::disambiguateLabels( $labels );
 	}
 
 	/**
@@ -569,7 +586,10 @@ class PFFormField {
 
 		$propertyName = $this->mFieldArgs['mapping property'];
 		$labels = array();
-		foreach ( $this->mPossibleValues as $value ) {
+		foreach ( $this->mPossibleValues as $index => $value ) {
+			if ( $this->mUseDisplayTitle ) {
+				$value = $index;
+			}
 			$labels[$value] = $value;
 			$subject = Title::newFromText( $value );
 			if ( $subject != null ) {
@@ -579,7 +599,7 @@ class PFFormField {
 				}
 			}
 		}
-		$this->mPossibleValues = $this->disambiguateLabels( $labels );
+		$this->mPossibleValues = PFValuesUtils::disambiguateLabels( $labels );
 	}
 
 	/**
@@ -588,7 +608,10 @@ class PFFormField {
 	 */
 	function setValuesWithMappingCargoField() {
 		$labels = array();
-		foreach ( $this->mPossibleValues as $value ) {
+		foreach ( $this->mPossibleValues as $index => $value ) {
+			if ( $this->mUseDisplayTitle ) {
+				$value = $index;
+			}
 			$labels[$value] = $value;
 			$vals = PFValuesUtils::getValuesForCargoField(
 				$this->mFieldArgs['mapping cargo table'],
@@ -599,35 +622,7 @@ class PFFormField {
 				$labels[$value] = trim( $vals[0] );
 			}
 		}
-		$this->mPossibleValues = $this->disambiguateLabels( $labels );
-	}
-
-
-	function disambiguateLabels( $labels ) {
-		asort( $labels );
-		if ( count( $labels ) == count( array_unique( $labels ) ) ) {
-			return $labels;
-		}
-		$fixed_labels = array();
-		foreach ( $labels as $value => $label ) {
-			$fixed_labels[$value] = $labels[$value];
-		}
-		$counts = array_count_values( $fixed_labels );
-		foreach ( $counts as $current_label => $count ) {
-			if ( $count > 1 ) {
-				$matching_keys = array_keys( $labels, $current_label );
-				foreach ( $matching_keys as $key ) {
-					$fixed_labels[$key] .= ' (' . $key . ')';
-				}
-			}
-		}
-		if ( count( $fixed_labels ) == count( array_unique( $fixed_labels ) ) ) {
-			return $fixed_labels;
-		}
-		foreach ( $labels as $value => $label ) {
-			$labels[$value] .= ' (' . $value . ')';
-		}
-		return $labels;
+		$this->mPossibleValues = PFValuesUtils::disambiguateLabels( $labels );
 	}
 
 	/**
@@ -646,6 +641,10 @@ class PFFormField {
 	 * Map a template field value into labels.
 	 */
 	public function valueStringToLabels( $valueString, $delimiter ) {
+		if ( strlen( trim( $valueString ) ) === 0 ||
+			is_null( $this->mPossibleValues ) ) {
+			return $valueString;
+		}
 		if ( !is_null( $delimiter ) ) {
 			$values = array_map( 'trim', explode( $delimiter, $valueString ) );
 		} else {
@@ -682,7 +681,7 @@ class PFFormField {
 		// the value of this field, because disabled inputs for some
 		// reason don't submit their value.
 		if ( $this->mIsDisabled ) {
-			if ( $field_name == 'free text' || $field_name == '<freetext>' ) {
+			if ( $field_name == 'free text' || $field_name == '#freetext#' ) {
 				$text .= Html::hidden( 'pf_free_text', '!free_text!' );
 			} else {
 				if ( is_array( $cur_value ) ) {
@@ -697,7 +696,8 @@ class PFFormField {
 		if ( $this->hasFieldArg( 'mapping template' ) ||
 			$this->hasFieldArg( 'mapping property' ) ||
 			( $this->hasFieldArg( 'mapping cargo table' ) &&
-			$this->hasFieldArg( 'mapping cargo field' ) ) ) {
+			$this->hasFieldArg( 'mapping cargo field' ) ) ||
+			$this->mUseDisplayTitle ) {
 			if ( $this->hasFieldArg( 'part_of_multiple' ) ) {
 				$text .= Html::hidden( $template_name . '[num][map_field][' . $field_name . ']', 'true' );
 			} else {
@@ -837,6 +837,10 @@ class PFFormField {
 		if ( $fullCargoField !== null &&
 			! array_key_exists( 'full_cargo_field', $other_args ) ) {
 			$other_args['full_cargo_field'] = $fullCargoField;
+		}
+
+		if( $this->template_field->getFieldType() == 'Hierarchy' ) {
+			$other_args['structure'] = $this->template_field->getHierarchyStructure();
 		}
 
 		if ( ! array_key_exists( 'autocompletion source', $other_args ) ) {

@@ -16,7 +16,7 @@ class PFHooks {
 			return 1;
 		}
 
-		define( 'PF_VERSION', '4.0.2' );
+		define( 'PF_VERSION', '4.1.2' );
 
 		$GLOBALS['wgPageFormsIP'] = dirname( __DIR__ ) . '/../';
 
@@ -65,13 +65,19 @@ class PFHooks {
 	 * @return bool Always true
 	 */
 	public static function registerModules( ResourceLoader &$resourceLoader ) {
+		// These used to use a value of __DIR__ for 'localBasePath',
+		// but apparently in some installations that had a value of
+		// /PageForms/libs and in others just /PageForms, so we'll set
+		// the value here instead.
+		$pageFormsDir = __DIR__ . '/..';
+
 		if ( class_exists( 'WikiEditorHooks' ) ) {
 			$resourceLoader->register( array(
 				'ext.pageforms.wikieditor' => array(
-					'localBasePath' => __DIR__,
+					'localBasePath' => $pageFormsDir,
 					'remoteExtPath' => 'PageForms',
-					'scripts' => '/../libs/PF_wikieditor.js',
-					'styles' => '/../skins/PF_wikieditor.css',
+					'scripts' => '/libs/PF_wikieditor.js',
+					'styles' => '/skins/PF_wikieditor.css',
 					'dependencies' => array(
 						'ext.pageforms.main',
 						'jquery.wikiEditor'
@@ -83,9 +89,9 @@ class PFHooks {
 		if ( version_compare( $GLOBALS['wgVersion'], '1.26c', '>' ) && ExtensionRegistry::getInstance()->isLoaded( 'OpenLayers' ) ) {
 			$resourceLoader->register( array(
 				'ext.pageforms.maps' => array(
-					'localBasePath' => __DIR__,
+					'localBasePath' => $pageFormsDir,
 					'remoteExtPath' => 'PageForms',
-					'scripts' => '/../libs/PF_maps.offline.js',
+					'scripts' => '/libs/PF_maps.offline.js',
 					'dependencies' => array(
 						'ext.openlayers.main',
 					),
@@ -94,9 +100,9 @@ class PFHooks {
 		} else {
 			$resourceLoader->register( array(
 				'ext.pageforms.maps' => array(
-					'localBasePath' => __DIR__,
+					'localBasePath' => $pageFormsDir,
 					'remoteExtPath' => 'PageForms',
-					'scripts' => '/../libs/PF_maps.js',
+					'scripts' => '/libs/PF_maps.js',
 				),
 			) );
 		}
@@ -137,8 +143,8 @@ class PFHooks {
 		$parser->setFunctionHook( 'formlink', array( 'PFParserFunctions', 'renderFormLink' ) );
 		$parser->setFunctionHook( 'formredlink', array( 'PFParserFunctions', 'renderFormRedLink' ) );
 		$parser->setFunctionHook( 'queryformlink', array( 'PFParserFunctions', 'renderQueryFormLink' ) );
-		$parser->setFunctionHook( 'arraymap', array( 'PFParserFunctions', 'renderArrayMap' ), $parser::SFH_OBJECT_ARGS );
-		$parser->setFunctionHook( 'arraymaptemplate', array( 'PFParserFunctions', 'renderArrayMapTemplate' ), $parser::SFH_OBJECT_ARGS );
+		$parser->setFunctionHook( 'arraymap', array( 'PFParserFunctions', 'renderArrayMap' ), Parser::SFH_OBJECT_ARGS );
+		$parser->setFunctionHook( 'arraymaptemplate', array( 'PFParserFunctions', 'renderArrayMapTemplate' ), Parser::SFH_OBJECT_ARGS );
 
 		$parser->setFunctionHook( 'autoedit', array( 'PFParserFunctions', 'renderAutoEdit' ) );
 

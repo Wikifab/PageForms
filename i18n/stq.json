@@ -62,7 +62,7 @@
 	"pf_formedit_altformsonly": "Wääl een fon do foulgjende Formulare uut, uum disse Siede tou moakjen:",
 	"pf_editsource": "Beoarbaidje Wältext",
 	"pf_formedit_edittitle": "Beoarbaidje $1: $2",
-	"pf_formedit_formwarning": "Woarskauenge: Disse Siede <a href=\"$1\">bestoant al</a>, oawers ju benutset dit Formular nit.",
+	"pf_formedit_formwarning": "Woarskauenge: Disse Siede [[$1|bestoant al]], oawers ju benutset dit Formular nit.",
 	"pf_formedit_remove": "Wächhoalje",
 	"pf_formedit_addanother": "Wiedere bietouföigje",
 	"pf_blank_error": "Duur nit loos weese!",

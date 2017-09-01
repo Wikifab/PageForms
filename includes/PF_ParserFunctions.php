@@ -1,4 +1,7 @@
 <?php
+
+use MediaWiki\MediaWikiServices;
+
 /**
  * Parser functions for Page Forms.
  *
@@ -212,12 +215,24 @@ class PFParserFunctions {
 		return $parser->insertStripItem( self::createFormLink( $parser, $params, 'queryformlink' ), $parser->mStripState );
 	}
 
+	static function convertQueryString ( $queryString, $inQueryArr ) {
+		// Change HTML-encoded ampersands directly to URL-encoded
+		// ampersands, so that the string doesn't get split up on the '&'.
+		$queryString = str_replace( '&amp;', '%26', $queryString );
+		// "Decode" any other HTML tags.
+		$queryString = html_entity_decode( $queryString, ENT_QUOTES );
+
+		parse_str( $queryString, $arr );
+
+		return PFUtils::array_merge_recursive_distinct( $inQueryArr, $arr );
+	}
+
 	static function renderFormInput( &$parser ) {
 		$params = func_get_args();
 		array_shift( $params ); // don't need the parser
 
 		// Set defaults.
-		$inFormName = $inValue = $inButtonStr = $inQueryStr = '';
+		$inFormName = $inValue = $inButtonStr = '';
 		$inQueryArr = array();
 		$inAutocompletionSource = '';
 		$inSize = 25;
@@ -251,15 +266,7 @@ class PFParserFunctions {
 			} elseif ( $paramName == 'button text' ) {
 				$inButtonStr = $value;
 			} elseif ( $paramName == 'query string' ) {
-				// Change HTML-encoded ampersands directly to
-				// URL-encoded ampersands, so that the string
-				// doesn't get split up on the '&'.
-				$inQueryStr = str_replace( '&amp;', '%26', $value );
-				// "Decode" any other HTML tags.
-				$inQueryStr = html_entity_decode( $inQueryStr, ENT_QUOTES );
-
-				parse_str( $inQueryStr, $arr );
-				$inQueryArr = PFUtils::array_merge_recursive_distinct( $inQueryArr, $arr );
+				$inQueryArr = self::convertQueryString( $value, $inQueryArr );
 			} elseif ( $paramName == 'autocomplete on category' ) {
 				$inAutocompletionSource = $value;
 				$autocompletionType = 'category';
@@ -296,18 +303,10 @@ class PFParserFunctions {
 		if ( empty( $inAutocompletionSource ) ) {
 			$formInputAttrs['class'] = 'formInput';
 		} else {
+			$parser->getOutput()->addModules( 'ext.pageforms.main' );
+
 			self::$num_autocompletion_inputs++;
 			$input_num = self::$num_autocompletion_inputs;
-			// Place the necessary Javascript on the page, and
-			// disable the cache (so the Javascript will show up) -
-			// if there's more than one autocompleted #forminput
-			// on the page, we only need to do this the first time.
-			if ( $input_num == 1 ) {
-				$parser->disableCache();
-				$output = $parser->getOutput();
-				$output->addModules( 'ext.pageforms.main' );
-			}
-
 			$inputID = 'input_' . $input_num;
 			$formInputAttrs['id'] = $inputID;
 			$formInputAttrs['class'] = 'autocompleteInput createboxInput formInput';
@@ -323,6 +322,10 @@ class PFParserFunctions {
 			}
 		}
 
+		// The value has already been HTML-encoded as a parameter,
+		// and it will get encoded again by Html::input() - prevent
+		// double-encoding.
+		$inValue = html_entity_decode( $inValue );
 		$formContents = Html::input( 'page_name', $inValue, 'text', $formInputAttrs );
 
 		// If the form start URL looks like "index.php?title=Special:FormStart"
@@ -466,7 +469,10 @@ class PFParserFunctions {
 
 
 	static function renderAutoEdit( &$parser ) {
+		global $wgContentNamespaces;
+
 		$parser->getOutput()->addModules( 'ext.pageforms.autoedit' );
+		$parser->getOutput()->preventClickjacking( true );
 
 		// Set defaults.
 		$formcontent = '';
@@ -502,14 +508,7 @@ class PFParserFunctions {
 					$summary = $parser->recursiveTagParse( $value );
 					break;
 				case 'query string' :
-
-					// Change HTML-encoded ampersands directly to
-					// URL-encoded ampersands, so that the string
-					// doesn't get split up on the '&'.
-					$inQueryStr = str_replace( '&amp;', '%26', $value );
-
-					parse_str( $inQueryStr, $arr );
-					$inQueryArr = PFUtils::array_merge_recursive_distinct( $inQueryArr, $arr );
+					$inQueryArr = self::convertQueryString( $value, $inQueryArr );
 					break;
 
 				case 'ok text':
@@ -531,6 +530,21 @@ class PFParserFunctions {
 					$targetTitle = Title::newFromText( $value );
 
 					if ( $targetTitle !== null ) {
+						// It seems unnecessary to let
+						// #autoedit be called for non-
+						// content namespaces like
+						// "Template" or "Talk".
+						// $wgContentNamespaces mostly
+						// fits our needs, though it's
+						// slightly too restrictive.
+						$allowedNamespaces = array_merge(
+							$wgContentNamespaces,
+							array( NS_CATEGORY )
+						);
+						if ( !in_array( $targetTitle->getNamespace(), $allowedNamespaces ) ) {
+							return '<div class="error">Error: Invalid namespace "' .
+								$targetTitle->getNsText() . '"; only content namespaces are allowed for #autoedit.</div>';
+						}
 						$targetArticle = new Article( $targetTitle );
 						$targetArticle->clear();
 						$editTime = $targetArticle->getTimestamp();
@@ -561,13 +575,11 @@ class PFParserFunctions {
 		}
 
 		if ( $linkType == 'button' ) {
-			// Html::rawElement() before MW 1.21 or so drops the type attribute
-			// do not use Html::rawElement() for buttons!
 			$attrs = array( 'type' => 'submit', 'class' => $classString );
 			if ( $inTooltip != null ) {
 				$attrs['title'] = $inTooltip;
 			}
-			$linkElement = '<button ' . Html::expandAttributes( $attrs ) . '>' . $linkString . '</button>';
+			$linkElement = Html::rawElement( 'button', $attrs, $linkString );
 		} elseif ( $linkType == 'link' ) {
 			$attrs = array( 'class' => $classString, 'href' => "#" );
 			if ( $inTooltip != null ) {
@@ -603,9 +615,9 @@ class PFParserFunctions {
 	static function createFormLink( &$parser, $params, $parserFunctionName ) {
 		// Set defaults.
 		$inFormName = $inLinkStr = $inExistingPageLinkStr = $inLinkType =
-			$inTooltip = $inQueryStr = $inTargetName = '';
+			$inTooltip = $inTargetName = '';
 		if ( $parserFunctionName == 'queryformlink' ) {
-			$inLinkStr = wfMessage( 'runquery' )->text();
+			$inLinkStr = wfMessage( 'runquery' )->parse();
 		}
 		$inCreatePage = false;
 		$classStr = '';
@@ -640,13 +652,7 @@ class PFParserFunctions {
 			} elseif ( $param_name == 'link type' ) {
 				$inLinkType = $value;
 			} elseif ( $param_name == 'query string' ) {
-				// Change HTML-encoded ampersands directly to
-				// URL-encoded ampersands, so that the string
-				// doesn't get split up on the '&'.
-				$inQueryStr = str_replace( '&amp;', '%26', $value );
-
-				parse_str( $inQueryStr, $arr );
-				$inQueryArr = PFUtils::array_merge_recursive_distinct( $inQueryArr, $arr );
+				$inQueryArr = self::convertQueryString( $value, $inQueryArr );
 			} elseif ( $param_name == 'tooltip' ) {
 				$inTooltip = Sanitizer::decodeCharReferences( $value );
 			} elseif ( $param_name == 'target' ) {
@@ -675,17 +681,25 @@ class PFParserFunctions {
 		// If "red link only" was specified, and a target page was
 		// specified, and it exists, just link to the page.
 		if ( $inTargetName != '' ) {
-			$targetTitle = Title::newFromText( $inTargetName );
+			// Call urldecode() on it, in case the target was
+			// set via {{PAGENAMEE}}, and the page name contains
+			// an apostrophe or other unusual character.
+			$targetTitle = Title::newFromText( urldecode( $inTargetName ) );
 			$targetPageExists = ( $targetTitle != '' && $targetTitle->exists() );
 		} else {
 			$targetPageExists = false;
 		}
 
 		if ( $parserFunctionName == 'formredlink' && $targetPageExists ) {
-			if ( $inExistingPageLinkStr == '' ) {
-				return Linker::link( $targetTitle );
+			if ( function_exists( 'MediaWiki\MediaWikiServices::getLinkRenderer' ) ) {
+				$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
 			} else {
-				return Linker::link( $targetTitle, $inExistingPageLinkStr );
+				$linkRenderer = null;
+			}
+			if ( $inExistingPageLinkStr == '' ) {
+				return PFUtils::makeLink( $linkRenderer, $targetTitle );
+			} else {
+				return PFUtils::makeLink( $linkRenderer, $targetTitle, $inExistingPageLinkStr );
 			}
 		}
 
@@ -736,14 +750,19 @@ class PFParserFunctions {
 			}
 		}
 		if ( $inLinkType == 'button' || $inLinkType == 'post button' ) {
-			$formMethod = ( $inLinkType == 'button' ) ? 'get' : 'post';
-			$str = Html::rawElement( 'form', array( 'action' => $link_url, 'method' => $formMethod, 'class' => $classStr, 'target' => $targetWindow ),
-
-				// Html::rawElement() before MW 1.21 or so drops the type attribute
-				// do not use Html::rawElement() for buttons!
-				'<button ' . Html::expandAttributes( array( 'type' => 'submit', 'value' => $inLinkStr, 'title' => $inTooltip ) ) . '>' . $inLinkStr . '</button>' .
-				$hidden_inputs
+			$buttonAttrs = array(
+				'type' => 'submit',
+				'value' => $inLinkStr,
+				'title' => $inTooltip
 			);
+			$buttonHTML = Html::rawElement( 'button', $buttonAttrs, $inLinkStr );
+			$formAttrs = array(
+				'action' => $link_url,
+				'method' => ( $inLinkType == 'button' ) ? 'get' : 'post',
+				'class' => $classStr,
+				'target' => $targetWindow
+			);
+			$str = Html::rawElement( 'form', $formAttrs, $buttonHTML . $hidden_inputs );
 		} else {
 			// If a target page has been specified but it doesn't
 			// exist, make it a red link.

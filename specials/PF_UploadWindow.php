@@ -21,7 +21,7 @@ class PFUploadWindow extends UnlistedSpecialPage {
 	 */
 	public function __construct( $request = null ) {
 		parent::__construct( 'UploadWindow', 'upload' );
-		$this->loadRequest( is_null( $request ) ? $this->getRequest() : $request );
+		$this->loadRequest( $request instanceof WebRequest ? $request : $this->getRequest() );
 	}
 
 	/** Misc variables **/
@@ -151,7 +151,9 @@ class PFUploadWindow extends UnlistedSpecialPage {
 			$this->processUpload();
 		} else {
 			# Backwards compatibility hook
-			if( !Hooks::run( 'UploadForm:initial', array( &$this ) ) ) {
+			// Avoid PHP 7.1 warning from passing $this by reference
+			$page = $this;
+			if( !Hooks::run( 'UploadForm:initial', array( &$page ) ) ) {
 				wfDebug( "Hook 'UploadForm:initial' broke output of the upload form" );
 				return;
 			}
@@ -206,7 +208,7 @@ class PFUploadWindow extends UnlistedSpecialPage {
 
 		# Add upload error message
 		$form->addPreText( $message );
-		
+
 		# Add footer to form
 		if ( !wfMessage( 'uploadfooter' )->isDisabled() ) {
 			$uploadFooter = wfMessage( 'uploadfooter' )->plain();
@@ -255,7 +257,7 @@ class PFUploadWindow extends UnlistedSpecialPage {
 		$sessionKey = $this->mUpload->stashFile()->getFileKey();
 		$message = '<h2>' . wfMessage( 'uploadwarning' )->escaped() . "</h2>\n" .
 			'<div class="error">' . $message . "</div>\n";
-		
+
 		$form = $this->getUploadForm( $message, $sessionKey );
 		$form->setSubmitText( wfMessage( 'upload-tryagain' )->text() );
 		$this->showUploadForm( $form );
@@ -327,7 +329,9 @@ class PFUploadWindow extends UnlistedSpecialPage {
 		if ( !$status->isOK() )
 			return $this->showUploadForm( $this->getUploadForm( $this->getOutput()->parse( $status->getWikiText() ) ) );
 
-		if( !Hooks::run( 'UploadForm:BeforeProcessing', array( &$this ) ) ) {
+		// Avoid PHP 7.1 warning from passing $this by reference
+		$page = $this;
+		if( !Hooks::run( 'UploadForm:BeforeProcessing', array( &$page ) ) ) {
 			wfDebug( "Hook 'UploadForm:BeforeProcessing' broke processing the file.\n" );
 			// This code path is deprecated. If you want to break upload processing
 			// do so by hooking into the appropriate hooks in UploadBase::verifyUpload
@@ -383,12 +387,12 @@ class PFUploadWindow extends UnlistedSpecialPage {
 		// any more... and it messes up the encoding for all other
 		// browsers. @TODO - fix handling in IE!
 		//$basename = utf8_decode( $basename );
-		
+
 		$output = <<<END
 		<script type="text/javascript">
 		var input = parent.window.jQuery( parent.document.getElementById("{$this->mInputID}") );
 END;
-		
+
 		if ( $this->mDelimiter == null ) {
 			$output .= <<<END
 		input.val( '$basename' );
@@ -402,7 +406,7 @@ END;
 		// both a delimiter and a file name; and add on a delimiter
 		// at the end in any case
 		var cur_value = parent.document.getElementById("{$this->mInputID}").value;
-		
+
 		if (cur_value === '') {
 			input.val( '$basename' + '{$this->mDelimiter} ' );
 			input.change();
@@ -428,7 +432,9 @@ END;
 		print $output;
 		$img = null; // @todo: added to avoid passing a ref to null - should this be defined somewhere?
 
-		Hooks::run( 'SpecialUploadComplete', array( &$this ) );
+		// Avoid PHP 7.1 warning from passing $this by reference
+		$page = $this;
+		Hooks::run( 'SpecialUploadComplete', array( &$page ) );
 	}
 
 	/**
@@ -603,7 +609,13 @@ END;
 		} elseif ( $exists['warning'] == 'was-deleted' ) {
 			# If the file existed before and was deleted, warn the user of this
 			$ltitle = SpecialPage::getTitleFor( 'Log' );
-			$llink = Linker::linkKnown(
+			if ( method_exists( $this, 'getLinkRenderer' ) ) {
+				$linkRenderer = $this->getLinkRenderer();
+			} else {
+				$linkRenderer = null;
+			}
+			$llink = PFUtils::makeLink(
+				$linkRenderer,
 				$ltitle,
 				wfMessage( 'deletionlog' )->escaped(),
 				array(),

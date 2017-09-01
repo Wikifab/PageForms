@@ -1,7 +1,7 @@
 {
 	"@Note": "When updating this file please also update PageForms.php with the same changes.",
 	"name": "Page Forms",
-	"version": "4.0.2",
+	"version": "4.1.2",
 	"author": [
 		"Yaron Koren",
 		"Stephan Gambke",
@@ -29,7 +29,7 @@
 	"ExtensionFunctions": [
 		"PFHooks::initialize"
 	],
-	"require": {
+	"requires": {
 		"MediaWiki": ">= 1.27.0"
 	},
 	"GroupPermissions": {
@@ -178,6 +178,7 @@
 				"pf_bad_email_error",
 				"pf_bad_number_error",
 				"pf_bad_date_error",
+				"pf_modified_input_error",
 				"pf_pipe_error"
 			]
 		},
@@ -295,6 +296,15 @@
 				"libs/PF_rating.js"
 			],
 			"styles": "skins/jquery.rateyo.css"
+		},
+		"ext.pageforms.simpleupload": {
+			"scripts": [
+				"libs/PF_simpleupload.js"
+			],
+			"messages": [
+				"pf_forminputs_change_file",
+				"upload-dialog-button-upload"
+			]
 		},
 		"ext.pageforms.select2": {
 			"scripts": [
@@ -420,6 +430,8 @@
 		]
 	},
 	"config": {
+		"PageFormsUseDisplayTitle": false,
+		"PageFormsSimpleUpload": false,
 		"PageFormsMaxAutocompleteValues": 1000,
 		"PageFormsMaxLocalAutocompleteValues": 100,
 		"PageFormsAutocompleteOnAllChars": false,
@@ -431,8 +443,8 @@
 		"PageForms24HourTime": false,
 		"PageFormsCacheFormDefinitions": false,
 		"PageFormsFormCacheType": null,
+		"PageFormsDisableOutsideServices": false,
 		"PageFormsLinkAllRedLinksToForms": false,
-		"PageFormsRedLinksCheckOnlyLocalProps": false,
 		"PageFormsShowTabsForAllHelperForms": true,
 		"PageFormsRunQueryFormAtTop": false,
 		"PageFormsGoogleMapsKey": null,
@@ -444,6 +456,7 @@
 		"PageFormsCargoFields": [],
 		"PageFormsDependentFields": [],
 		"PageFormsCheckboxesSelectAllMinimum": 10,
+		"PageFormsMapsWithFeeders": [],
 		"PageFormsDatePickerSettings": {
 			"@note": "See PF_DefaultInputSettings.php for allowed values",
 			"FirstDate": null,

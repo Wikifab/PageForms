@@ -69,7 +69,7 @@ if ( defined( 'PF_VERSION' ) ) {
 	return 1;
 }
 
-define( 'PF_VERSION', '4.0.2' );
+define( 'PF_VERSION', '4.1.2' );
 
 $GLOBALS['wgExtensionCredits']['specialpage'][] = array(
 	'path' => __FILE__,
@@ -110,6 +110,7 @@ if ( defined( 'SMW_VERSION' ) ) {
 	};
 } else {
 	$GLOBALS['wgPageFormsFormPrinter'] = new StubObject( 'wgPageFormsFormPrinter', 'PFFormPrinter' );
+
 }
 
 $GLOBALS['wgHooks']['LinkEnd'][] = 'PFFormLinker::setBrokenLink';
@@ -276,6 +277,7 @@ $GLOBALS['wgResourceModules'] += array(
 			'pf_bad_email_error',
 			'pf_bad_number_error',
 			'pf_bad_date_error',
+			'pf_modified_input_error',
 			'pf_pipe_error',
 		),
 	),
@@ -371,6 +373,15 @@ $GLOBALS['wgResourceModules'] += array(
 			'libs/PF_rating.js'
 		),
 		'styles' => 'skins/jquery.rateyo.css',
+	),
+	'ext.pageforms.simpleupload' => $wgPageFormsResourceTemplate + array(
+		'scripts' => array(
+			'libs/PF_simpleupload.js'
+		),
+        'messages' => array(
+			'pf_forminputs_change_file',
+			'upload-dialog-button-upload'
+		),
 	),
 	'ext.pageforms.select2' => $wgPageFormsResourceTemplate + array(
 		'scripts' => array(
@@ -548,13 +559,6 @@ $GLOBALS['wgPageFormsFormCacheType'] = null;
 $GLOBALS['wgPageFormsLinkAllRedLinksToForms'] = false;
 
 # ##
-# When modifying red links to potentially point to a form to edit that page,
-# check only the properties pointing to that missing page from the page the
-# user is currently on, instead of from all pages in the wiki.
-# ##
-$GLOBALS['wgPageFormsRedLinksCheckOnlyLocalProps'] = false;
-
-# ##
 # Show the "create with form" tab for uncreated templates and categories.
 # ##
 $GLOBALS['wgPageFormsShowTabPForAllHelperForms'] = true;
@@ -570,6 +574,16 @@ $GLOBALS['wgPageFormsGoogleMapsKey'] = null;
 
 // Include default settings for form inputs
 require_once 'includes/PF_DatePickerSettings.php';
+
+# ##
+# Display displaytitle page property instead of page title for Page type fields
+# ##
+$GLOBALS['wgPageFormsUseDisplayTitle'] = false;
+
+// Other variables
+$GLOBALS['wgPageFormsSimpleUpload'] = false;
+$GLOBALS['wgPageFormsDisableOutsideServices'] = false;
+$GLOBALS['wgPageFormsMapsWithFeeders'] = array();
 
 # ##
 # Global variables for Javascript
