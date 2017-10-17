@@ -1212,6 +1212,9 @@ END;
 					} elseif ( $input_name == 'run query' ) {
 						$new_text = PFFormUtils::runQueryButtonHTML( $form_is_disabled, $input_label, $attr );
 					}
+
+					Hooks::run( 'PageForms::StandardInputButton', array( &$new_text, $input_name ) );
+
 					$section = substr_replace( $section, $new_text, $brackets_loc, $brackets_end_loc + 3 - $brackets_loc );
 				// =====================================================
 				// for section processing
