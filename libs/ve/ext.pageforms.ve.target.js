@@ -213,7 +213,7 @@
 
 		// focus VE instance if textarea had focus
 		var $focusedElement = $( ':focus' );
-		if ( !$focusedElement.length || this.$node.is( $focusedElement ) ) {
+		if ( $focusedElement.length && this.$node.is( $focusedElement ) ) {
 			this.getSurface().getView().focus();
 		}
 		
