@@ -170,6 +170,14 @@ form input.formInput,
 	border-color: #52bad5;
 }
 
+.ve-area-wrapper .oo-ui-toolbar-narrow .oo-ui-toolbar-bar:after {
+    border-bottom: 0px;
+}
+
+.ve-area-wrapper .oo-ui-toolbar-bar .oo-ui-tool-name-vefpgSwitchEditor .oo-ui-tool-link{
+	padding:9.5px;
+} 
+
 .select2-container .select2-choice .select2-arrow {
     border-radius: 0;
 }
