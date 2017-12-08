@@ -159,10 +159,15 @@ form input.formInput,
 }
 .select2-container-multi .select2-choices {
     padding: 2px 0;
+    border-color: #ccc;
 }
 
 .select2-container-multi .select2-choices .select2-search-choice {
     padding: 4px 5px 4px 18px;
+}
+
+.table-edit-form .select2-container-multi.select2-container-active {
+	border-color: #52bad5;
 }
 
 .select2-container .select2-choice .select2-arrow {
