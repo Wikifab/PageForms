@@ -159,11 +159,24 @@ form input.formInput,
 }
 .select2-container-multi .select2-choices {
     padding: 2px 0;
+    border-color: #ccc;
 }
 
 .select2-container-multi .select2-choices .select2-search-choice {
     padding: 4px 5px 4px 18px;
 }
+
+.table-edit-form .select2-container-multi.select2-container-active {
+	border-color: #52bad5;
+}
+
+.ve-area-wrapper .oo-ui-toolbar-narrow .oo-ui-toolbar-bar:after {
+    border-bottom: 0px;
+}
+
+.ve-area-wrapper .oo-ui-toolbar-bar .oo-ui-tool-name-vefpgSwitchEditor .oo-ui-tool-link{
+	padding:9.5px;
+} 
 
 .select2-container .select2-choice .select2-arrow {
     border-radius: 0;
