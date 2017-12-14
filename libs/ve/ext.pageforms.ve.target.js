@@ -78,7 +78,7 @@
 			type: 'list',
 			icon: 'add',
 			label: '',
-			include: [ 'insertTable', 'specialCharacter' ]
+			include: [ 'insertTable', 'specialCharacter', 'warningblock','preformatted','infoblock', 'ideablock']
 		},
 		// Special character toolbar
 		//{ include: [ 'specialCharacter' ] }
