@@ -195,8 +195,8 @@
 
 	$('#wpSave').click(function(){
 		if (validateAll()){
-			$('#wpSave').hide();
-			$('.loaderWait').show();
+			$(this).hide();
+			$('#loaderSave').show();
 		}
 		else {
 			//Scroll automatically to the first error messages with 200px margin

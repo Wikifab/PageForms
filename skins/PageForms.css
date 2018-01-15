@@ -279,7 +279,7 @@ input.pfComboBoxActual {
 	border: 1px solid #a6a6a6;
 }
 
-.loaderWait {
+#loaderSave {
 	display:none;
 	margin-left:5px;
 	background-color: #52bad5;
