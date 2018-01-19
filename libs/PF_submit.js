@@ -192,7 +192,6 @@
 		.on( 'mousedown', '.rearrangerImage',setChanged );
 
 	}
-
 	$('#wpSave').click(function(){
 		if (validateAll()){
 			$(this).hide();
@@ -202,6 +201,7 @@
 			//Scroll automatically to the first error messages with 200px margin
 			$('div.errorMessage').first().scrollView();
 		}
+
 		
 
 	});
