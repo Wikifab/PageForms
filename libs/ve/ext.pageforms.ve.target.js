@@ -19,8 +19,17 @@
 		config.toolbarConfig.actions = true;
 		//disable floatable behaviour
 		config.toolbarConfig.floatable = false;
-		
-		
+
+		this.toolbarAutoHide = true;
+		this.toolbarPosition = 'bottom';
+
+		if (node.hasClass('toolbarOnTop')) {
+			console.log('toolbarOnTop');
+			this.toolbarPosition = 'top';
+			this.toolbarAutoHide = false;
+			config.toolbarConfig.floatable = true;
+		}
+
 		mw.pageForms.ve.Target.parent.call( this, config );
 
 		// HACK: stop VE's education popups from appearing (T116643)
@@ -161,6 +170,9 @@
 	 * hide toolbar if area not focused (VE area or textarea )
 	 */
 	mw.pageForms.ve.Target.prototype.updateToolbarVisibility = function () {
+		if (! this.toolbarAutoHide) {
+			return;
+		}
 		if ( $(this.$node).closest('.inputSpan').find(":focus").length > 0){
 			this.getToolbar().$element.show(500);
 		} else {
@@ -313,7 +325,13 @@
 	 * redifine attach Toolbar function to place on the bottom
 	 */
 	mw.pageForms.ve.Target.prototype.attachToolbar = function ( surface ) {
-		$(this.$node).after( this.getToolbar().$element );
+
+		if (this.toolbarPosition == 'top') {
+			var toolbar = this.getToolbar();
+			toolbar.$element.insertBefore( toolbar.getSurface().$element );
+		} else {
+			$(this.$node).after( this.getToolbar().$element );
+		}
 		this.getToolbar().initialize();
 		this.getActions().initialize();
 	};
