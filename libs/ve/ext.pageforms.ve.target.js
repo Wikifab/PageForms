@@ -130,28 +130,6 @@
 			mw.pageForms.ve.Target.static.actionGroups = [];
 		}
 	};
-
-	// Methods
-/*
-	mw.pageForms.ve.Target.prototype.loadHtml = function ( html ) {
-		var doc = this.parseDocument( html );
-		this.documentReady( doc );
-	};
-
-	// These tools aren't available so don't bother generating them
-	mw.pageForms.ve.Target.prototype.generateCitationFeatures = function () {};
-
-	mw.pageForms.ve.Target.prototype.attachToolbar = function () {
-		this.$element.after( this.getToolbar().$element );
-	};
-
-	mw.pageForms.ve.Target.prototype.setDisabled = function ( disabled ) {
-		var i, len;
-		for ( i = 0, len = this.surfaces.length; i < len; i++ ) {
-			this.surfaces[ i ].setDisabled( disabled );
-		}
-	};
-*/
 	
 	/**
 	 * add listener to show or hide toolbar if the area get focus or loose it
