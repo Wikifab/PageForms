@@ -401,6 +401,7 @@
 				"libs/ve/ui/ui.SwitchEditorAction.js",
 				"libs/ve/ui/ui.SwitchEditorTool.js",
 				"libs/ve/ext.pageforms.ve.target.js",
+				"libs/ve/ext.pageforms.ve.targetwide.js",
 				"libs/ve/ext.pageforms.ve.editor.js"
 			],
 			"styles": [
