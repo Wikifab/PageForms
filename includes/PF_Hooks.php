@@ -156,7 +156,7 @@ class PFHooks {
 		global $wgPageFormsFieldProperties, $wgPageFormsCargoFields, $wgPageFormsDependentFields;
 		global $wgPageFormsGridValues, $wgPageFormsGridParams;
 		global $wgPageFormsShowOnSelect, $wgPageFormsScriptPath;
-		global $edgValues, $wgPageFormsEDSettings;
+		global $edgValues, $wgPageFormsEDSettings, $wgAllowPipesInForms;
 		//global $wgPageFormsInitJSFunctions, $wgPageFormsValidationJSFunctions;
 
 		$vars['wgPageFormsAutocompleteValues'] = $wgPageFormsAutocompleteValues;
@@ -170,6 +170,7 @@ class PFHooks {
 		$vars['wgPageFormsScriptPath'] = $wgPageFormsScriptPath;
 		$vars['edgValues'] = $edgValues;
 		$vars['wgPageFormsEDSettings'] = $wgPageFormsEDSettings;
+		$vars['wgAllowPipesInForms'] = $wgAllowPipesInForms;
 		//$vars['wgPageFormsInitJSFunctions'] = $wgPageFormsInitJSFunctions;
 		//$vars['wgPageFormsValidationJSFunctions'] = $wgPageFormsValidationJSFunctions;
 
