@@ -445,7 +445,10 @@ class PFFormField {
 				if (!preg_match('/( |\n)$/', $tag)){
 					$tag = $tag . "\n";
 				}
-				$template_instance_query_values[$fieldName] = $tag . $template_instance_query_values[$fieldName];
+				if(trim($template_instance_query_values[$fieldName])) {
+					// we don't add the tag if field content has been removed :
+					$template_instance_query_values[$fieldName] = $tag . $template_instance_query_values[$fieldName];
+				}
 			}
 		}
 
