@@ -138,7 +138,11 @@ form input.formInput,
 }
 .select2-container-multi .select2-choices {
     padding: 2px 0;
-    border-color: #ccc;
+    border-color: #ddd;
+}
+
+.select2-container-multi .select2-choices:hover {
+    border-color: #bbb;
 }
 
 .select2-container-multi .select2-choices .select2-search-choice {
@@ -151,6 +155,14 @@ form input.formInput,
 
 .ve-area-wrapper .oo-ui-toolbar-narrow .oo-ui-toolbar-bar:after {
     border-bottom: 0px;
+}
+
+.ve-area-wrapper .oo-ui-toolbar-position-top > .oo-ui-toolbar-bar {
+    box-shadow: none;
+}
+
+.ve-area-wrapper .oo-ui-toolbar-bar {
+	border-radius: 0 0px 3px 3px;
 }
 
 .ve-area-wrapper .oo-ui-toolbar-bar .oo-ui-tool-name-vefpgSwitchEditor .oo-ui-tool-link{
