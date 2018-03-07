@@ -36,3 +36,8 @@ To enable VE on a PageForm field, you need to add the class 'form-textarea' on t
 
 for instance : 
   {{{field|Description|input type=textarea|class=form-textarea}}}
+
+to set the toolbar on top of the visual editor area, add class 'toolbarOnTop' on fields :
+  {{{field|Description|input type=textarea|class=form-textare toolbarOnTop}}}
+
+But note that when the toolbar is on top, the position is fixed on top on scroll down, it is not well integrated when there is other visuals editors areas on page.

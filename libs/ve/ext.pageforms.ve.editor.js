@@ -64,6 +64,16 @@
 	 */
 	mw.pageForms.ve.Editor.prototype.initCallbacks = [];
 	
+	mw.pageForms.ve.Editor.prototype.createTarget = function () {
+		
+		if ($(this.$node).hasClass('toolbarOnTop')) {
+			this.target = new mw.pageForms.ve.Targetwide(this.$node, $(this.$node).val());
+		} else {
+			this.target = new mw.pageForms.ve.Target(this.$node, $(this.$node).val());
+		}
+		return this.target;
+	}
+	
 	/**
 	 * Callback function, executed after all VE dependencies have been loaded.
 	 *
@@ -77,73 +87,11 @@
 		// to create an empty document, but does not mention other falsy values.
 		content = content || '';
 		
-
 		
 		//this.target = ve.init.mw.targetFactory.create( 'pageForms' );
-		this.target = new mw.pageForms.ve.Target(this.$node, $(this.$node).val());
+		this.target = this.createTarget();
 
 		
-		/*
-		 * all this id done in target :
-		// Fix missing base URL
-		htmlDoc = ve.createDocumentFromHtml( content ); // HTMLDocument
-		//ve.init.mw.ArticleTarget.static.fixBase( htmlDoc );
-
-		// Based on ve.init.mw.ArticleTarget.prototype.setupSurface
-		this.dmDoc = ve.dm.converter.getModelFromDom( htmlDoc, {
-			lang: mw.config.get( 'wgVisualEditor' ).pageLanguageCode,
-			dir: mw.config.get( 'wgVisualEditor' ).pageLanguageDir
-		} );
-
-		// attach VE to DOM
-		surface = this.target.addSurface( this.dmDoc, { placeholder: this.$node.attr( 'placeholder' ) } );
-		this.target.setSurface( surface );
-		this.target.$element.insertAfter( this.$node );
-
-		// show or hide toolbar when loose focus
-		//this.target.setPulloutToolbar();
-		
-
-		this.$node
-			.hide()
-			.removeClass( 'oo-ui-texture-pending' )
-			.prop( 'disabled', false );
-
-		// Add appropriately mw-content-ltr or mw-content-rtl class
-		$documentNode = surface.getView().getDocument().getDocumentNode().$element;
-		$documentNode.addClass(
-			'mw-content-' + mw.config.get( 'wgVisualEditor' ).pageLanguageDir
-		);
-		*/
-
-		/**
-		 * to be done in target
-		 *
-		// Pass surface focus state to parent
-		surface.getView()
-			.on( 'focus', $.proxy( function () {
-				this.target.$element.addClass( 'flow-ui-focused' );
-			}, this ) )
-			.on( 'blur', $.proxy( function () {
-				this.target.$element.removeClass( 'flow-ui-focused' );
-			}, this ) );*/
-
-		/*
-		// focus VE instance if textarea had focus
-		if ( !$focusedElement.length || this.$node.is( $focusedElement ) ) {
-			surface.getView().focus();
-		}
-
-		$veNode = surface.$element.find( '.ve-ce-documentNode' );
-
-		// HACK: simulate a keyup event on the original node, so the validation code will
-		// pick up changes in the new node
-		$veNode.keyup( $.proxy( function () {
-			this.$node.keyup();
-		}, this ) );
-
-		surface.getModel().connect( this, { documentUpdate: [ 'emit', 'change' ] } );
-*/
 		$.each( this.initCallbacks, $.proxy( function ( k, callback ) {
 			callback.apply( this );
 		}, this ) );
