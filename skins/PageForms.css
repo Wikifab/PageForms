@@ -99,7 +99,7 @@ form input.formInput,
 #pfForm input.minutesInput,
 #pfForm input.secondsInput {
     border-radius: 3px;
-    padding: 4px 8px;
+    padding: 7px 8px;
 }
 
 /* The dropdowns need slightly different settings. */
