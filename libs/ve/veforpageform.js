@@ -70,7 +70,7 @@
 		    	// if update needed, stop event propagation, and delay before relaunch
 		    	event.preventDefault();
 		    	setTimeout( function () { 
-		    		clickWhenApiCallDone('#'+buttonId);
+					clickWhenApiCallDone('#'+buttonId, 5);
 			    }, 100);
 		    } else {
 			    // if success, we can reset the clickCount to 0 to re enable other calls
@@ -79,7 +79,7 @@
 		});
 	}
 	
-	function clickWhenApiCallDone(button, maxCount = 5) {
+	function clickWhenApiCallDone(button, maxCount) {
 		if (jQuery.active > 0 && maxCount > 0) {
 			setTimeout( function () { 
 				clickWhenApiCallDone(button, maxCount -1);
