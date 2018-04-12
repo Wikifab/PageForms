@@ -148,7 +148,7 @@
 			.attr( 'disabled', 'disabled' )
 			.addClass( 'pf-save_and_continue-wait' )
 			.removeClass( 'pf-save_and_continue-changed' );
-
+				
 			var form = $( '#pfForm' );
 
 			var data = {
@@ -158,7 +158,6 @@
 			};
 
 			data.query +=  '&wpSave=' + encodeURIComponent( $( event.currentTarget ).attr( 'value' ) );
-
 			$.ajax( {
 
 				type: 'POST', // request type ( GET or POST )
@@ -193,5 +192,26 @@
 		.on( 'mousedown', '.rearrangerImage',setChanged );
 
 	}
+	$('#wpSave').click(function(){
+		if (validateAll()){
+			$(this).hide();
+			$('#loaderSave').show();
+		}
+		else {
+			//Scroll automatically to the first error messages with 200px margin
+			$('div.errorMessage').first().scrollView();
+		}
+
+		
+
+	});
+	// to scroll to errors on fields of form
+	$.fn.scrollView = function () {
+		  return this.each(function () {
+		    $('html, body').animate({
+		      scrollTop: $(this).offset().top - 200
+		    }, 500);
+		  });
+		}
 
 }( jQuery, mediaWiki ) );
