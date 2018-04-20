@@ -272,6 +272,8 @@ input.pfComboBoxActual {
 
 #loaderSave {
 	display: none;
+	width: 94px;
+	text-align: center;
     margin-left: 9px;
     background-color: #2c9ab7;
     color: #fff;
