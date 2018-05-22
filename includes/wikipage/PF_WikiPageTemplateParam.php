@@ -24,9 +24,13 @@ class PFWikiPageTemplateParam {
 		return $this->mName;
 	}
 
+	function isTranslateEnabled() {
+		return class_exists('SpecialTranslate');
+	}
+
 	function getValue() {
 		$value = $this->mValue;
-		if (isset($this->mOptions['translatable']) && $this->mOptions['translatable']) {
+		if ( $this->isTranslateEnabled() && isset($this->mOptions['translatable']) && $this->mOptions['translatable']) {
 			if( strpos($value, '<translate>') === false) {
 				$value = '<translate>' . $value .'</translate>';
 			}

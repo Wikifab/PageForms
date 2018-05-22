@@ -428,6 +428,11 @@ class PFFormField {
 		return $f;
 	}
 
+
+	function isTranslateEnabled() {
+		return class_exists('SpecialTranslate');
+	}
+
 	function getCurrentValue( $template_instance_query_values, $form_submitted, $source_is_page, $all_instances_printed ) {
 		// Get the value from the request, if
 		// it's there, and if it's not an array.
@@ -436,7 +441,7 @@ class PFFormField {
 		$delimiter = $this->mFieldArgs['delimiter'];
 		$escaped_field_name = str_replace( "'", "\'", $field_name );
 
-		if ( $this->hasFieldArg( 'translatable' ) && $this->getFieldArg( 'translatable' )) {
+		if ( $this->isTranslateEnabled() && $this->hasFieldArg( 'translatable' ) && $this->getFieldArg( 'translatable' )) {
 			// if this is a translatable field, and that an translate id tag is passed in an other field, we add it
 			$fieldName = $this->getTemplateField()->getFieldName();
 			$fieldNameTag = $fieldName . '_translate_number_tag';

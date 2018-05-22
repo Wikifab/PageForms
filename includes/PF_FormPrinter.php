@@ -1644,6 +1644,10 @@ END;
 		return $text;
 	}
 
+	function isTranslateEnabled() {
+		return class_exists('SpecialTranslate');
+	}
+
 	/**
 	 * for translatable fields, this function add an hidden input containing the translate tags
 	 *
@@ -1652,7 +1656,7 @@ END;
 	 * @param unknown $text
 	 */
 	private function fieldToHtmlInternalHook( $form_field, $cur_value, & $text) {
-		if ( ! $form_field->hasFieldArg( 'translatable' ) || ! $form_field->getFieldArg( 'translatable' )) {
+		if ( ! $this->isTranslateEnabled() || ! $form_field->hasFieldArg( 'translatable' ) || ! $form_field->getFieldArg( 'translatable' )) {
 			return;
 		}
 
@@ -1672,7 +1676,7 @@ END;
 
 	private function createFormFieldInternalHook(& $template,& $tif, & $form_field, & $cur_value, $is_form_submitted  ) {
 
-		if ( ! $form_field->hasFieldArg( 'translatable' ) || ! $form_field->getFieldArg( 'translatable' )) {
+		if ( ! $this->isTranslateEnabled() || ! $form_field->hasFieldArg( 'translatable' ) || ! $form_field->getFieldArg( 'translatable' )) {
 			return;
 		}
 
