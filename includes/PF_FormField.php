@@ -433,6 +433,28 @@ class PFFormField {
 		return class_exists('SpecialTranslate');
 	}
 
+	function cleanupTranslateTags(&$value) {
+		$i=0;
+
+		// is there is 2 tag ("<!--T:X-->") with no content between, we must remove the first one
+		while (preg_match('/(<!--T:[0-9]+-->\s*)(<!--T:[0-9]+-->)/', $value, $matches)){
+			$value = str_replace($matches[1], '', $value);
+			if($i++ > 200) {
+				//security : is it usefull ?
+				break;
+			}
+		}
+		$i=0;
+		// is there is a tag ("<!--T:X-->") at the end, without nothing after, we must remove it
+		while (preg_match('#(<!--T:[0-9]+-->\s*)(</translate>)#', $value, $matches)){
+			$value = str_replace($matches[1], '', $value);
+			if($i++ > 200) {
+				//security : is it usefull ?
+				break;
+			}
+		}
+	}
+
 	function getCurrentValue( $template_instance_query_values, $form_submitted, $source_is_page, $all_instances_printed ) {
 		// Get the value from the request, if
 		// it's there, and if it's not an array.
@@ -454,6 +476,10 @@ class PFFormField {
 					// we don't add the tag if field content has been removed :
 					$template_instance_query_values[$fieldName] = $tag . $template_instance_query_values[$fieldName];
 				}
+			}
+			// if user has deleted some content, and there is some translate tag ("<!--T:X-->") with no content, we must remove the tag
+			if(isset($template_instance_query_values[$fieldName])) {
+				$this->cleanupTranslateTags($template_instance_query_values[$fieldName]);
 			}
 		}
 
