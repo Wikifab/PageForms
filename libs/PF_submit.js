@@ -192,8 +192,9 @@
 		.on( 'mousedown', '.rearrangerImage',setChanged );
 
 	}
+	
 	$('#wpSave').click(function(){
-		form = $( '#pfForm' );
+		form = document.getElementById('pfForm');
 		if (validateAll() && form.checkValidity()){
 			$(this).hide();
 			$('#loaderSave').show();
