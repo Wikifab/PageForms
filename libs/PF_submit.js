@@ -193,7 +193,8 @@
 
 	}
 	$('#wpSave').click(function(){
-		if (validateAll()){
+		form = $( '#pfForm' );
+		if (validateAll() && form.checkValidity()){
 			$(this).hide();
 			$('#loaderSave').show();
 		}
