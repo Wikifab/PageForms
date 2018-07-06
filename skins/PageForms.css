@@ -275,7 +275,7 @@ input.pfComboBoxActual {
 	width: 94px;
 	text-align: center;
     margin-left: 9px;
-    background-color: var(--main-hover-color);
+    //background-color: var(--main-hover-color);
     color: #fff;
     padding: 7px 14px;
     border: none;
