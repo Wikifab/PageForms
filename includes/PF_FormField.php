@@ -453,6 +453,14 @@ class PFFormField {
 				break;
 			}
 		}
+		// if there is  a tag ("<!--T:X-->") no separated from a template "{{ ...", aad a new line between
+		while (preg_match('/(<!--T:[0-9]+-->)({{[^}]+}}\s*)/', $value, $matches)){
+			$value = str_replace($matches[1], $matches[1] . "\n", $value);
+			if($i++ > 200) {
+				//security : is it usefull ?
+				break;
+			}
+		}
 	}
 
 	function getCurrentValue( $template_instance_query_values, $form_submitted, $source_is_page, $all_instances_printed ) {
