@@ -10,7 +10,9 @@
 			"555",
 			"Imperadeiro98",
 			"Vitorvicentevalente",
-			"Jaideraf"
+			"Jaideraf",
+			"MokaAkashiyaPT",
+			"Athena in Wonderland"
 		]
 	},
 	"pageforms-desc": "Formulários para criar e editar páginas da wiki",
@@ -104,7 +106,7 @@
 	"pf_forminputs_listboxsize": "A altura desta caixa de listagem, em linhas",
 	"pf_forminputs_includetimezone": "Incluir uma entrada para o fuso horário",
 	"pf_forminputs_topcategory": "A categoria mãe de um conjunto de categorias",
-	"pf_forminputs_structure": "Uma lista de valores criada manualmente, na forma de lista não ordenada de valores, em texto com notação wiki",
+	"pf_forminputs_structure": "Uma lista de valores criada manualmente, na forma de lista não ordenada de valores, em texto wiki",
 	"pf_forminputs_hideroot": "Esconder a categoria mãe",
 	"pf_forminputs_depth": "O número de níveis de categorias a apresentar inicialmente",
 	"pf_forminputs_height": "A altura desta entrada, em píxeis",
@@ -220,8 +222,10 @@
 	"pf_bad_email_error": "tem de ter um endereço de correio eletrónico com formato válido",
 	"pf_bad_number_error": "tem de ser um número válido",
 	"pf_bad_date_error": "tem de ser uma data válida",
+	"pf_modified_input_error": "Esta alteração devia ser aprovada ou rejeitada",
 	"pf_pipe_error": "\"|\" não é permitido, exceto entre {{...}} ou [[...]]",
 	"uploadwindow": "Janela de carregamento",
+	"pf-simpleupload": "Carregar",
 	"pf_deletionlog": "Registo de eliminações",
 	"pf-preview-header": "Antevisão de formulário",
 	"pf-preview-note": "Este é o aspeto do formulário quando estiver em uso:",
@@ -278,6 +282,6 @@
 	"pf-nocompletionurls": "Não foi especificado nenhum URL externo para a função de preenchimento automático nesta wiki.",
 	"pf-invalidexturl": "Valor de URL externo inválido.",
 	"pf-blankexturl": "Valor de URL externo em branco.",
-	"pf-externalpageempty": "A página externa não possui conteúdo.",
+	"pf-externalpageempty": "A página externa não tem conteúdo.",
 	"pf-externalpagebadjson": "Não foi possível analisar o JSON da página externa."
 }

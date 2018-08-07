@@ -60,7 +60,7 @@ class PFCreateTemplate extends SpecialPage {
 			if ( !method_exists( $property, 'getKey' ) ) {
 				continue;
 			}
-			$all_properties[] = str_replace( '_' , ' ', $property->getKey() );
+			$all_properties[] = str_replace( '_', ' ', $property->getKey() );
 		}
 
 		// Sort properties list alphabetically, and get unique values
@@ -75,7 +75,9 @@ class PFCreateTemplate extends SpecialPage {
 		$selectBody = "<option value=\"\"></option>\n";
 		foreach ( $all_properties as $prop_name ) {
 			$optionAttrs = array( 'value' => $prop_name );
-			if ( $selected_property == $prop_name ) { $optionAttrs['selected'] = 'selected'; }
+			if ( $selected_property == $prop_name ) {
+				$optionAttrs['selected'] = 'selected';
+			}
 			$selectBody .= Html::element( 'option', $optionAttrs, $prop_name ) . "\n";
 		}
 		return Html::rawElement( 'select', array( 'id' => "semantic_property_$id", 'name' => "semantic_property_$id", 'class' => 'pfComboBox' ), $selectBody ) . "\n";
@@ -130,8 +132,7 @@ class PFCreateTemplate extends SpecialPage {
 				array( 'size' => '80' ) ) . "</label>\n";
 
 			$text .= "\t<label class=\"hierarchy_structure_input\" style=\"display: none;\">" . wfMessage( 'pf_createproperty_allowedvalsforhierarchy' )->escaped();
-			$text .= Html::textarea( 'hierarchy_structure_' . $id, null,
-				array( 'rows' => '10', 'cols' => '80', 'placeholder' => wfMessage( 'pf_createtemplate_hierarchystructureplaceholder' )->escaped() ) ) . "</label>\n";
+			$text .= '<textarea class="hierarchy_structure" rows="10" cols="20" name="hierarchy_structure_' . $id .'"></textarea></label>';
 			$text .= "\t</p>\n";
 		}
 		$text .= "\t</td><td>\n";
@@ -155,7 +156,9 @@ END;
 	}
 
 	static function printTemplateStyleInput( $htmlFieldName, $curSelection = null ) {
-		if ( !$curSelection ) $curSelection = 'standard';
+		if ( !$curSelection ) {
+			$curSelection = 'standard';
+		}
 		$text = "\t<p>" . wfMessage( 'pf_createtemplate_outputformat' )->escaped() . "\n";
 		$text .= self::printTemplateStyleButton( 'standard', 'pf_createtemplate_standardformat', $htmlFieldName, $curSelection );
 		$text .= self::printTemplateStyleButton( 'infobox', 'pf_createtemplate_infoboxformat', $htmlFieldName, $curSelection );
@@ -200,7 +203,7 @@ END;
 				if ( count( $var_elements ) != 2 ) {
 					continue;
 				}
-				list ( $field_field, $id ) = $var_elements;
+				list( $field_field, $id ) = $var_elements;
 				if ( $field_field == 'name' && $id != 'starter' ) {
 					$field = PFTemplateField::create(
 						$val,

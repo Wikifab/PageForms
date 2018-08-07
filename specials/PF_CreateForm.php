@@ -98,7 +98,7 @@ class PFCreateForm extends SpecialPage {
 			# ignore variables that are not of the right form
 			if ( strpos( $var, "_" ) != false ) {
 				# get the template declarations and work from there
-				list ( $action, $id ) = explode( "_", $var, 2 );
+				list( $action, $id ) = explode( "_", $var, 2 );
 				if ( $action == "template" ) {
 					// If the button was pressed to remove
 					// this template, just don't add it to
@@ -179,11 +179,11 @@ class PFCreateForm extends SpecialPage {
 
 		// Now cycle through the templates and fields, modifying each
 		// one per the query variables.
-		$templates = 0; $sections = 0;
+		$templates = 0;
+		$sections = 0;
 		foreach ( $form_items as $fi ) {
 			if ( $fi['type'] == 'template' ) {
 				foreach ( $fi['item']->getFields() as $j => $field ) {
-
 					$old_i = PFFormUtils::getChangedIndex( $templates, $new_template_loc, $deleted_template_loc );
 					foreach ( $req->getValues() as $key => $value ) {
 						if ( ( $pos = strpos( $key, '_' . $old_i . '_' . $j ) ) != false ) {
@@ -287,7 +287,7 @@ class PFCreateForm extends SpecialPage {
 			$text .= Html::hidden( 'title', $this->getTitle()->getPrefixedText() );
 			$text .= "\n\t<p><label>" . wfMessage( 'pf_createform_nameinput' )->escaped() .
 				' ' . wfMessage( 'pf_createform_nameinputdesc' )->escaped() .
-				Html::input( 'form_name', $form_name, 'text', array( 'size'=> 25 ) );
+				Html::input( 'form_name', $form_name, 'text', array( 'size' => 25 ) );
 			if ( ! empty( $form_name_error_str ) ) {
 				$text .= "\t" . Html::element( 'span', array( 'class' => 'error' ), $form_name_error_str );
 			}
@@ -399,7 +399,6 @@ END;
 	}
 
 	function sectionCreationHTML( $section, $section_count ) {
-		global $wgRequest;
 		$paramValues = array();
 		$section_name = $section->getSectionName();
 		$section_level = $section->getSectionLevel();
@@ -409,7 +408,7 @@ END;
 		$text .= '<div class="sectionForm">';
 		$text .= Html::element( 'h2', array(), $section_str );
 
-		foreach ( $wgRequest->getValues() as $key => $value ) {
+		foreach ( $this->getRequest()->getValues() as $key => $value ) {
 			if ( ( $pos = strpos( $key, '_section_'.$section_count ) ) != false ) {
 				$paramName = substr( $key, 0, $pos );
 				$paramName = str_replace( '_', ' ', $paramName );
@@ -546,9 +545,8 @@ END;
 			$cur_input_type = $possible_input_types[0];
 		}
 
-		global $wgRequest;
 		$paramValues = array();
-		foreach ( $wgRequest->getValues() as $key => $value ) {
+		foreach ( $this->getRequest()->getValues() as $key => $value ) {
 			if ( ( $pos = strpos( $key, '_' . $field_form_text ) ) != false ) {
 				$paramName = substr( $key, 0, $pos );
 				// Spaces got replaced by underlines in the
@@ -604,6 +602,13 @@ END;
 	 * Prints an input for a form-field parameter.
 	 * Code borrowed from Semantic MediaWiki's
 	 * SMWAskPage::addOptionInput().
+	 * @param string $type
+	 * @param string $paramName
+	 * @param string $cur_value
+	 * @param array $param
+	 * @param array $paramValues
+	 * @param string $fieldFormText
+	 * @return string
 	 */
 	public static function inputTypeParamInput( $type, $paramName, $cur_value, array $param, array $paramValues, $fieldFormText ) {
 		if ( $type == 'int' ) {
@@ -648,7 +653,9 @@ END;
 			return $text;
 		} elseif ( $type == 'boolean' ) {
 			$checkboxAttrs = array();
-			if ( $cur_value) { $checkboxAttrs['checked'] = true; }
+			if ( $cur_value ) {
+				$checkboxAttrs['checked'] = true;
+			}
 			return Html::input( $paramName . '_' . $fieldFormText, null, 'checkbox', $checkboxAttrs );
 		}
 	}
@@ -657,7 +664,8 @@ END;
 	 * Display a form section showing the options for a given format,
 	 * based on the getParameters() value for that format's query printer.
 	 *
-	 * @param string $format
+	 * @param string $inputType
+	 * @param string $fieldFormText
 	 * @param array $paramValues
 	 *
 	 * @return string
@@ -670,7 +678,7 @@ END;
 
 		// Handle default types, which start with a '.' to differentiate
 		// them.
-		if ( substr( $inputType, 0, 1) == '.' ) {
+		if ( substr( $inputType, 0, 1 ) == '.' ) {
 			$inputType = substr( $inputType, 1 );
 		}
 
@@ -714,6 +722,8 @@ END;
 	/**
 	 * Display other parameters for a page section
 	 *
+	 * @param int $section_count
+	 * @param array $paramValues
 	 * @return string
 	 */
 	function showSectionParameters( $section_count, $paramValues ) {

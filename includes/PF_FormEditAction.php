@@ -26,6 +26,7 @@ class PFFormEditAction extends Action {
 	 * output.  Do not use globals $wgOut, $wgRequest, etc, in implementations; use
 	 * $this->getOutput(), etc.
 	 * @throws ErrorPageError
+	 * @return false
 	 */
 	public function show() {
 		return self::displayForm( $this, $this->page );
@@ -33,7 +34,7 @@ class PFFormEditAction extends Action {
 
 	/**
 	 * Execute the action in a silent fashion: do not display anything or release any errors.
-	 * @return Bool whether execution was successful
+	 * @return bool whether execution was successful
 	 */
 	public function execute() {
 		return true;
@@ -42,11 +43,14 @@ class PFFormEditAction extends Action {
 	/**
 	 * Adds an "action" (i.e., a tab) to edit the current article with
 	 * a form
+	 * @param Title $obj
+	 * @param array &$links
+	 * @return true
 	 */
-	static function displayTab( $obj, &$content_actions ) {
+	static function displayTab( $obj, &$links ) {
 		global $wgPageFormsDefaultFormForNamespace;
 
-		if ( method_exists ( $obj, 'getTitle' ) ) {
+		if ( method_exists( $obj, 'getTitle' ) ) {
 			$title = $obj->getTitle();
 		} else {
 			$title = $obj->mTitle;
@@ -79,8 +83,9 @@ class PFFormEditAction extends Action {
 			return true;
 		}
 
-		global $wgRequest;
 		global $wgPageFormsRenameEditTabs, $wgPageFormsRenameMainEditTab;
+
+		$content_actions = &$links['views'];
 
 		$user_can_edit = $title->userCan( 'edit' );
 		// Create the form edit tab, and apply whatever changes are
@@ -107,7 +112,7 @@ class PFFormEditAction extends Action {
 			}
 		}
 
-		$class_name = ( $wgRequest->getVal( 'action' ) == 'formedit' ) ? 'selected' : '';
+		$class_name = ( $obj->getRequest()->getVal( 'action' ) == 'formedit' ) ? 'selected' : '';
 		$form_edit_tab = array(
 			'class' => $class_name,
 			'text' => wfMessage( $form_edit_tab_msg )->text(),
@@ -143,24 +148,13 @@ class PFFormEditAction extends Action {
 			$content_actions[$tab_keys[$i]] = $tab_values[$i];
 		}
 
-		global $wgUser;
-		if ( ! $wgUser->isAllowed( 'viewedittab' ) ) {
+		if ( ! $obj->getUser()->isAllowed( 'viewedittab' ) ) {
 			// The tab can have either of these two actions.
 			unset( $content_actions['edit'] );
 			unset( $content_actions['viewsource'] );
 		}
 
 		return true; // always return true, in order not to stop MW's hook processing!
-	}
-
-	/**
-	 * Like displayTab(), but called with a different hook - this one is
-	 * called for the 'Vector' skin, and some others.
-	 */
-	static function displayTab2( $obj, &$links ) {
-		// the old '$content_actions' array is thankfully just a
-		// sub-array of this one
-		return self::displayTab( $obj, $links['views'] );
 	}
 
 	static function displayFormChooser( $output, $title ) {
@@ -185,7 +179,7 @@ class PFFormEditAction extends Action {
 			}
 		}
 		$otherForms = array();
-		foreach( $formNames as $i => $formName ) {
+		foreach ( $formNames as $i => $formName ) {
 			if ( !in_array( $formName, $popularForms ) ) {
 				$otherForms[] = $formName;
 			}
@@ -202,7 +196,7 @@ class PFFormEditAction extends Action {
 				) );
 			}
 			$text = self::printLinksToFormArray( $popularForms, $targetName, $fe );
-			$output->addHTML( Html::rawElement( 'div', array( 'class' => 'infoMessage mainForms'  ), $text ) );
+			$output->addHTML( Html::rawElement( 'div', array( 'class' => 'infoMessage mainForms' ), $text ) );
 		}
 
 		if ( count( $otherForms ) > 0 ) {
@@ -237,6 +231,7 @@ class PFFormEditAction extends Action {
 	 * creating a page in a namespace that has a form, this interface probably won't
 	 * get called anyway; and #default_form calls for individual pages are
 	 * (hopefully) pretty rare.
+	 * @return int[]
 	 */
 	static function getNumPagesPerForm() {
 		$dbr = wfGetDB( DB_SLAVE );
@@ -271,16 +266,16 @@ class PFFormEditAction extends Action {
 
 	static function printLinksToFormArray( $formNames, $targetName, $fe ) {
 		$text = '';
-		foreach( $formNames as $i => $formName ) {
+		foreach ( $formNames as $i => $formName ) {
 			if ( $i > 0 ) {
 				$text .= " &middot; ";
 			}
 
 			// Special handling for forms whose name contains a slash.
 			if ( strpos( $formName, '/' ) !== false ) {
-				$url = $fe->getTitle()->getLocalURL( array( 'form' => $formName, 'target' => $targetName ) );
+				$url = $fe->getPageTitle()->getLocalURL( array( 'form' => $formName, 'target' => $targetName ) );
 			} else {
-				$url = $fe->getTitle( "$formName/$targetName" )->getLocalURL();
+				$url = $fe->getPageTitle( "$formName/$targetName" )->getLocalURL();
 			}
 			$text .= Html::element( 'a', array( 'href' => $url ), $formName );
 		}
@@ -290,6 +285,9 @@ class PFFormEditAction extends Action {
 	/**
 	 * The function called if we're in index.php (as opposed to one of the
 	 * special pages)
+	 * @param Action $action
+	 * @param Article $article
+	 * @return true
 	 */
 	static function displayForm( $action, $article ) {
 		$output = $action->getOutput();

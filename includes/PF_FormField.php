@@ -494,8 +494,8 @@ class PFFormField {
 
 		if ( isset( $template_instance_query_values ) &&
 			$template_instance_query_values != null &&
-			is_array( $template_instance_query_values ) ) {
-
+			is_array( $template_instance_query_values )
+		) {
 			// If the field name contains an apostrophe, the array
 			// sometimes has the apostrophe escaped, and sometimes
 			// not. For now, just check for both versions.
@@ -669,6 +669,8 @@ class PFFormField {
 
 	/**
 	 * Map a label back to a value.
+	 * @param string $label
+	 * @return string
 	 */
 	function labelToValue( $label ) {
 		$value = array_search( $label, $this->mPossibleValues );
@@ -681,6 +683,9 @@ class PFFormField {
 
 	/**
 	 * Map a template field value into labels.
+	 * @param string $valueString
+	 * @param string $delimiter
+	 * @return string|string[]
 	 */
 	public function valueStringToLabels( $valueString, $delimiter ) {
 		if ( strlen( trim( $valueString ) ) === 0 ||
@@ -821,7 +826,9 @@ class PFFormField {
 			$text .= "! $fieldLabel: $descPlaceholder\n";
 		}
 
-		if ( ! $part_of_multiple ) { $text .= "| "; }
+		if ( ! $part_of_multiple ) {
+			$text .= "| ";
+		}
 		$text .= "{{{field|" . $this->template_field->getFieldName();
 		if ( $this->mIsHidden ) {
 			$text .= "|hidden";
@@ -881,7 +888,7 @@ class PFFormField {
 			$other_args['full_cargo_field'] = $fullCargoField;
 		}
 
-		if( $this->template_field->getFieldType() == 'Hierarchy' ) {
+		if ( $this->template_field->getFieldType() == 'Hierarchy' ) {
 			$other_args['structure'] = $this->template_field->getHierarchyStructure();
 		}
 
@@ -898,6 +905,8 @@ class PFFormField {
 	 * create HTML inputs, most arguments are contained in the "$other_args"
 	 * array - create this array, using the attributes of this form
 	 * field and the template field it corresponds to, if any.
+	 * @param array|null $default_args
+	 * @return array
 	 */
 	function getArgumentsForInputCall( $default_args = null ) {
 		global $wgParser;
@@ -918,6 +927,12 @@ class PFFormField {
 			}
 		}
 		$other_args['is_list'] = ( $this->mIsList || $this->template_field->isList() );
+		if ( $this->template_field->isMandatory() ) {
+			$other_args['mandatory'] = true;
+		}
+		if ( $this->template_field->isUnique() ) {
+			$other_args['unique'] = true;
+		}
 
 		// Now add some extension-specific arguments to the input call.
 		if ( defined( 'CARGO_VERSION' ) ) {

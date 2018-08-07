@@ -25,14 +25,11 @@ class PFPageSection {
 	}
 
 	static function newFromFormTag( $tag_components ) {
-		global $wgUser;
-
 		$ps = new PFPageSection();
 		$ps->mSectionName = trim( $tag_components[1] );
 
 		// cycle through the other components
 		for ( $i = 2; $i < count( $tag_components ); $i++ ) {
-
 			$component = trim( $tag_components[$i] );
 
 			if ( $component === 'mandatory' ) {
@@ -40,6 +37,7 @@ class PFPageSection {
 			} elseif ( $component === 'hidden' ) {
 				$ps->mIsHidden = true;
 			} elseif ( $component === 'restricted' ) {
+				global $wgUser;
 				$ps->mIsRestricted = !( $wgUser && $wgUser->isAllowed( 'editrestrictedfields' ) );
 			} elseif ( $component === 'autogrow' ) {
 				$ps->mSectionArgs['autogrow'] = true;
@@ -58,6 +56,7 @@ class PFPageSection {
 				case 'cols':
 				case 'class':
 				case 'editor':
+				case 'placeholder':
 					$ps->mSectionArgs[$sub_components[0]] = $sub_components[1];
 					break;
 				default:
@@ -67,7 +66,6 @@ class PFPageSection {
 		}
 		return $ps;
 	}
-
 
 	public function getSectionName() {
 		return $this->mSectionName;
@@ -121,10 +119,10 @@ class PFPageSection {
 		$section_name = $this->mSectionName;
 		$section_level = $this->mSectionLevel;
 		// Set default section level to 2
-		if ( $section_level == '' ){
+		if ( $section_level == '' ) {
 			$section_level = 2;
 		}
-		//display the section headers in wikitext
+		// display the section headers in wikitext
 		$header_string = "";
 		$header_string .= str_repeat( "=", $section_level );
 		$text = $header_string . $section_name . $header_string . "\n";

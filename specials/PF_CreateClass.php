@@ -42,7 +42,7 @@ class PFCreateClass extends SpecialPage {
 			$form_name = trim( $req->getVal( "form_name" ) );
 			$category_name = trim( $req->getVal( "category_name" ) );
 		}
-		if ( $template_name === '' || ( !$template_multiple && ( $form_name === '' || $category_name === '' ) ) ||
+		if ( $template_name === '' || ( !$template_multiple && $form_name === '' ) ||
 			( $use_cargo && ( $cargo_table === '' ) ) ) {
 			$out->addWikiMsg( 'pf_createclass_missingvalues' );
 			return;
@@ -93,13 +93,13 @@ class PFCreateClass extends SpecialPage {
 				$params = array();
 				$params['user_id'] = $user->getId();
 				$params['page_text'] = $full_text;
-				$params['edit_summary'] = wfMessage( 'pf_createproperty_editsummary', $property_type)->inContentLanguage()->text();
+				$params['edit_summary'] = wfMessage( 'pf_createproperty_editsummary', $property_type )->inContentLanguage()->text();
 				$jobs[] = new PFCreatePageJob( $property_title, $params );
 			}
 		}
 
 		// Also create the "connecting property", if there is one.
-		$connectingProperty = trim( $req->getVal('connecting_property') );
+		$connectingProperty = trim( $req->getVal( 'connecting_property' ) );
 		if ( defined( 'SMW_VERSION' ) && $connectingProperty != '' ) {
 			global $smwgContLang;
 			$datatypeLabels = $smwgContLang->getDatatypeLabels();
@@ -109,7 +109,7 @@ class PFCreateClass extends SpecialPage {
 			$params = array();
 			$params['user_id'] = $user->getId();
 			$params['page_text'] = $full_text;
-			$params['edit_summary'] = wfMessage( 'pf_createproperty_editsummary', $property_type)->inContentLanguage()->text();
+			$params['edit_summary'] = wfMessage( 'pf_createproperty_editsummary', $property_type )->inContentLanguage()->text();
 			$jobs[] = new PFCreatePageJob( $property_title, $params );
 		}
 
@@ -235,7 +235,7 @@ class PFCreateClass extends SpecialPage {
 		$creation_links[] = PFUtils::linkForSpecialPage( $linkRenderer, 'CreateForm' );
 		$creation_links[] = PFUtils::linkForSpecialPage( $linkRenderer, 'CreateCategory' );
 
-		$text = '<form action="" method="post">' . "\n";
+		$text = '<form id="createClassForm" action="" method="post">' . "\n";
 		$text .= "\t" . Html::rawElement( 'p', null,
 				wfMessage( 'pf_createclass_docu' )
 					->rawParams( $wgLang->listToText( $creation_links ) )
@@ -270,7 +270,7 @@ class PFCreateClass extends SpecialPage {
 		global $smwgDefaultStore;
 		if ( defined( 'SIO_VERSION' ) || $smwgDefaultStore == "SMWSQLStore3" ) {
 			$templateInfo .= Html::rawElement( 'div',
-				array (
+				array(
 					'id' => 'connecting_property_div',
 					'style' => 'display: none;',
 				),
@@ -384,9 +384,8 @@ END;
 			<input type="text" size="25" name="allowed_values_$n" />
 END;
 			if ( defined( 'CARGO_VERSION' ) ) {
-				$hierarchyStructurePlaceholder = wfMessage( 'pf_createtemplate_hierarchystructureplaceholder' )->escaped();
 				$text .= <<<END
-				<textarea rows="10" cols="20" name="hierarchy_structure_$n" placeholder="$hierarchyStructurePlaceholder" style="display: none;"></textarea>
+				<textarea class="hierarchy_structure" rows="10" cols="20" name="hierarchy_structure_$n" style="display: none;"></textarea>
 END;
 			}
 			$text .= <<<END

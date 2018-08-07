@@ -10,7 +10,7 @@
  * @author Harold Solbrig
  * @author Eugene Mednikov
  */
-/*global wgPageFormsShowOnSelect, wgPageFormsFieldProperties, wgPageFormsCargoFields, wgPageFormsDependentFields, validateAll, alert, pf*/
+/*global wgPageFormsShowOnSelect, wgPageFormsFieldProperties, wgPageFormsCargoFields, wgPageFormsDependentFields, validateAll, alert, mwTinyMCEInit, pf*/
 
 // Activate autocomplete functionality for the specified field
 ( function ( $, mw ) {
@@ -1453,14 +1453,16 @@ $.fn.initializeJSElements = function( partOfMultiple ) {
 
 	this.find('.autoGrow').autoGrow();
 	this.find('.pfFancyBox').fancybox({
-		'width'         : '75%',
-		'height'        : '75%',
-		'autoScale'     : false,
-		'transitionIn'  : 'none',
-		'transitionOut' : 'none',
-		'type'          : 'iframe',
-		'overlayColor'  : '#222',
-		'overlayOpacity' : '0.8'
+		toolbar : false,
+		smallBtn : true,
+		iframe : {
+			preload : false,
+			css : {
+				width : '75%',
+				height : '75%'
+			}
+		},
+		animationEffect : false
 	});
 
 	// @TODO - this should ideally be called only for inputs that have
@@ -1489,6 +1491,11 @@ $.fn.initializeJSElements = function( partOfMultiple ) {
 
 	this.find(".pfRating").each( function() {
 		$(this).applyRatingInput();
+	});
+
+	// @TODO - this should be in the TinyMCE extension, and use a hook.
+	this.find(".tinymce").not(".multipleTemplateStarter .tinymce").each( function() {
+		mwTinyMCEInit( '#' + $(this).attr('id') );
 	});
 
 };

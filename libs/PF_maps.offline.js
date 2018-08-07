@@ -3,7 +3,7 @@
  * @author Paladox
  */
 
-/*jshint -W038 */
+/* global L */
 
 function setupMapFormInput( inputDiv, mapService ) {
 
@@ -15,9 +15,8 @@ function setupMapFormInput( inputDiv, mapService ) {
 		return Math.round( num * 100000 ) / 100000;
 	}
 
-	var map,
-		marker,
-		markers;
+	var map, marker, markers, mapCanvas, mapOptions;
+	var numClicks = 0, timer = null;
 
 	var coordsInput = inputDiv.find('.pfCoordsInput');
 
@@ -42,6 +41,29 @@ function setupMapFormInput( inputDiv, mapService ) {
 
 	}
 
+	function leafletSetMarker( location ) {
+		if ( marker === null) {
+			marker = L.marker( location ).addTo( map );
+		} else {
+			marker.setLatLng( location, { draggable: true } );
+		}
+		marker.dragging.enable();
+
+		function setInput() {
+			var stringVal = pfRoundOffDecimal( marker.getLatLng().lat ) + ', ' +
+				pfRoundOffDecimal( marker.getLatLng().lng );
+			coordsInput.val( stringVal )
+				.attr( 'data-original-value', stringVal )
+				.removeClass( 'modifiedInput' )
+				.parent().find('.pfCoordsInputHelpers').remove();
+		}
+
+		marker.off('dragend').on('dragend', function( event ) {
+			setInput();
+		});
+		setInput();
+	}
+
 	function openLayersSetMarker( location ) {
 		// OpenLayers does not have a real marker move
 		// option - instead, just delete the old marker
@@ -64,25 +86,52 @@ function setupMapFormInput( inputDiv, mapService ) {
 	}
 
 	if ( mapService === "Google Maps" ) {
-		var mapCanvas = inputDiv.find('.pfMapCanvas')[ 0 ];
-		var mapOptions = {
+		mapCanvas = inputDiv.find('.pfMapCanvas')[ 0 ];
+		mapOptions = {
 			zoom: 1,
 			center: new google.maps.LatLng( 0, 0 )
 		};
 		map = new google.maps.Map( mapCanvas, mapOptions );
 		var geocoder = new google.maps.Geocoder();
-		var update_timeout;
 
 		// Let a click set the marker, while keeping the default
 		// behavior (zoom and center) for double clicks.
 		// Code copied from http://stackoverflow.com/a/8417447
 		google.maps.event.addListener( map, 'click', function( event ) {
-			update_timeout = setTimeout( function(){
+			timer = setTimeout( function(){
 				googleMapsSetMarker( event.latLng );
 			}, 200 );
 		});
 		google.maps.event.addListener( map, 'dblclick', function( event ) {
-			clearTimeout( update_timeout );
+			clearTimeout( timer );
+		});
+	} else if (mapService === "Leaflet") {
+		mapCanvas = inputDiv.find('.pfMapCanvas').get(0);
+		mapOptions = {
+			zoom: 1,
+			center: [0, 0]
+		};
+		var layerOptions = {
+			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+		};
+
+		map = L.map(mapCanvas, mapOptions);
+		new L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', layerOptions).addTo(map);
+
+		map.on( 'click', function( event ) {
+			// Place/move the marker only on a single click, not a
+			// double click (double clicks do a zoom).
+			// Code based on https://stackoverflow.com/a/7845282
+			numClicks++;
+			if (numClicks === 1) {
+				timer = setTimeout( function() {
+					leafletSetMarker( event.latlng );
+					numClicks = 0;
+				});
+			} else {
+				clearTimeout(timer);
+				numClicks = 0;
+			}
 		});
 	} else { // if ( mapService == "OpenLayers" ) {
 		var mapCanvasID = inputDiv.find( '.pfMapCanvas' ).attr( 'id' );
@@ -93,9 +142,18 @@ function setupMapFormInput( inputDiv, mapService ) {
 		map.addLayer( markers );
 
 		map.events.register( "click", map, function( e ) {
-			var opx = map.getLayerPxFromViewPortPx(e.xy) ;
-			var loc = map.getLonLatFromPixel( opx );
-			openLayersSetMarker( loc );
+			numClicks++;
+			if (numClicks === 1) {
+				timer = setTimeout( function() {
+					var opx = map.getLayerPxFromViewPortPx(e.xy) ;
+					var loc = map.getLonLatFromPixel( opx );
+					openLayersSetMarker( loc );
+					numClicks = 0;
+				});
+			} else {
+				clearTimeout(timer);
+				numClicks = 0;
+			}
 		} );
 	}
 
@@ -127,7 +185,11 @@ function setupMapFormInput( inputDiv, mapService ) {
 			var gmPoint = new google.maps.LatLng( lat, lon );
 			googleMapsSetMarker( gmPoint );
 			map.setCenter( gmPoint );
-		} else { // if ( mapService == "OpenLayers" ) {
+		} else if ( mapService === "Leaflet" ){
+			var lPoint = L.latLng( lat, lon );
+			leafletSetMarker( lPoint );
+			map.setView( lPoint, 14 );
+		} else { // if ( mapService === "OpenLayers" ) {
 			var olPoint = toOpenLayersLonLat( map, lat, lon );
 			openLayersSetMarker( olPoint );
 			map.setCenter( olPoint, 14 );
@@ -183,10 +245,10 @@ function setupMapFormInput( inputDiv, mapService ) {
 					alert("Geocode was not successful for the following reason: " + status);
 				}
 			});
-		} // else { if ( mapService == "OpenLayers" ) {
+		//} else { // Leaflet, OpenLayers
 			// Do nothing, for now - address lookup/geocode is
-			// not yet enabled for OpenLayers.
-		// }
+			// not yet enabled for Leaflet or OpenLayers.
+		}
 	}
 
 	inputDiv.find('.pfAddressInput').keypress( function( e ) {
@@ -213,6 +275,9 @@ function setupMapFormInput( inputDiv, mapService ) {
 jQuery(document).ready( function() {
 	jQuery(".pfGoogleMapsInput").each( function() {
 		setupMapFormInput( jQuery(this), "Google Maps" );
+	});
+	jQuery(".pfLeafletInput").each( function() {
+		setupMapFormInput( jQuery(this), "Leaflet" );
 	});
 	jQuery(".pfOpenLayersInput").each( function() {
 		setupMapFormInput( jQuery(this), "OpenLayers" );

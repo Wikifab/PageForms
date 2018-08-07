@@ -1,7 +1,5 @@
 <?php
 /**
- * File holding the PFTreeInput class
- *
  * @file
  * @ingroup PF
  *
@@ -10,8 +8,6 @@
  */
 
 /**
- * The PFTreeInput class.
- *
  * @ingroup PFFormInput
  */
 class PFTreeInput extends PFFormInput {
@@ -259,6 +255,7 @@ class PFTreeInput extends PFFormInput {
 
 	/**
 	 * Returns the HTML code to be included in the output page for this input.
+	 * @return string
 	 */
 	public function getHtmlText() {
 		return self::getHTML(
@@ -272,7 +269,7 @@ class PFTreeInput extends PFFormInput {
 
 	/**
 	 * Creates a Title object from a user-provided (and thus unsafe) string
-	 * @param $title string
+	 * @param string $title
 	 * @return null|Title
 	 */
 	static function makeTitle( $title ) {

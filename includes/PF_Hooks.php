@@ -16,7 +16,7 @@ class PFHooks {
 			return 1;
 		}
 
-		define( 'PF_VERSION', '4.1.2' );
+		define( 'PF_VERSION', '4.3' );
 
 		$GLOBALS['wgPageFormsIP'] = dirname( __DIR__ ) . '/../';
 
@@ -71,21 +71,6 @@ class PFHooks {
 		// the value here instead.
 		$pageFormsDir = __DIR__ . '/..';
 
-		if ( class_exists( 'WikiEditorHooks' ) ) {
-			$resourceLoader->register( array(
-				'ext.pageforms.wikieditor' => array(
-					'localBasePath' => $pageFormsDir,
-					'remoteExtPath' => 'PageForms',
-					'scripts' => '/libs/PF_wikieditor.js',
-					'styles' => '/skins/PF_wikieditor.css',
-					'dependencies' => array(
-						'ext.pageforms.main',
-						'jquery.wikiEditor'
-					),
-				),
-			) );
-		}
-
 		if ( version_compare( $GLOBALS['wgVersion'], '1.26c', '>' ) && ExtensionRegistry::getInstance()->isLoaded( 'OpenLayers' ) ) {
 			$resourceLoader->register( array(
 				'ext.pageforms.maps' => array(
@@ -116,7 +101,7 @@ class PFHooks {
 	 *
 	 * @since 2.4.1
 	 *
-	 * @param array $list
+	 * @param array &$list
 	 *
 	 * @return true
 	 */
@@ -158,6 +143,7 @@ class PFHooks {
 		global $wgPageFormsShowOnSelect, $wgPageFormsScriptPath;
 		global $edgValues, $wgPageFormsEDSettings, $wgAllowPipesInForms;
 		//global $wgPageFormsInitJSFunctions, $wgPageFormsValidationJSFunctions;
+		global $wgAmericanDates;
 
 		$vars['wgPageFormsAutocompleteValues'] = $wgPageFormsAutocompleteValues;
 		$vars['wgPageFormsAutocompleteOnAllChars'] = $wgPageFormsAutocompleteOnAllChars;
@@ -171,9 +157,9 @@ class PFHooks {
 		$vars['edgValues'] = $edgValues;
 		$vars['wgPageFormsEDSettings'] = $wgPageFormsEDSettings;
 		$vars['wgAllowPipesInForms'] = $wgAllowPipesInForms;
+		$vars['wgAmericanDates'] = $wgAmericanDates;
 		//$vars['wgPageFormsInitJSFunctions'] = $wgPageFormsInitJSFunctions;
 		//$vars['wgPageFormsValidationJSFunctions'] = $wgPageFormsValidationJSFunctions;
-
 		return true;
 	}
 
@@ -204,8 +190,8 @@ class PFHooks {
 			// If SMW is not installed, don't bother with a "links
 			// to the documentation" row - it would only have one
 			// link.
-			//$smw_docu_row = new ALRow( 'smw_docu' );
-			//$data_structure_section->addRow( $smw_docu_row );
+			// $smw_docu_row = new ALRow( 'smw_docu' );
+			// $data_structure_section->addRow( $smw_docu_row );
 			$admin_links_tree->addSection( $data_structure_section, wfMessage( 'adminlinks_browsesearch' )->text() );
 		} else {
 			$smw_row = $data_structure_section->getRow( 'smw' );
@@ -230,6 +216,25 @@ class PFHooks {
 		return true;
 	}
 
+	/**
+	 * Disable TinyMCE if this is a form definition page, or a form-editable page.
+	 *
+	 * @param Title $title The page Title object
+	 * @return Whether or not to disable TinyMCE
+	 */
+	public static function disableTinyMCE( $title ) {
+		if ( $title->getNamespace() == PF_NS_FORM ) {
+			return false;
+		}
+
+		$defaultForms = PFFormLinker::getDefaultFormsForPage( $title );
+		if ( count( $defaultForms ) > 0 ) {
+			return false;
+		}
+
+		return true;
+	}
+
 	public static function showFormPreview( EditPage $editpage, WebRequest $request ) {
 		global $wgOut, $wgParser, $wgPageFormsFormPrinter;
 
@@ -248,11 +253,11 @@ class PFHooks {
 			'<div class="previewnote" style="font-weight: bold">' . $wgOut->parse( wfMessage( 'pf-preview-note' )->text() ) . "</div>\n<hr />\n";
 
 		$form_definition = StringUtils::delimiterReplace( '<noinclude>', '</noinclude>', '', $editpage->textbox1 );
-		list ( $form_text, $data_text, $form_page_title, $generated_page_name ) =
+		list( $form_text, $data_text, $form_page_title, $generated_page_name ) =
 			$wgPageFormsFormPrinter->formHTML( $form_definition, null, false, null, null, "Page Forms form preview dummy title", null );
 
 		$parserOutput = $wgParser->getOutput();
-		if( method_exists( $wgOut, 'addParserOutputMetadata' ) ){
+		if ( method_exists( $wgOut, 'addParserOutputMetadata' ) ) {
 			$wgOut->addParserOutputMetadata( $parserOutput );
 		} else {
 			$wgOut->addParserOutputNoText( $parserOutput );
@@ -269,7 +274,8 @@ class PFHooks {
 	 * Hook to add PHPUnit test cases.
 	 * From https://www.mediawiki.org/wiki/Manual:PHP_unit_testing/Writing_unit_tests_for_extensions
 	 *
-	 * @return boolean
+	 * @param string[] &$files
+	 * @return bool
 	 */
 	public static function onUnitTestsList( &$files ) {
 		$testDir = dirname( __DIR__ ) . '/tests/phpunit/includes';

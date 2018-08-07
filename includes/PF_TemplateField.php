@@ -29,6 +29,9 @@ class PFTemplateField {
 	private $mDelimiter;
 	private $mDisplay;
 	private $mNamespace;
+	private $mIsMandatory = false;
+	private $mIsUnique = false;
+	private $mRegex = null;
 
 	static function create( $name, $label, $semanticProperty = null, $isList = null, $delimiter = null, $display = null ) {
 		$f = new PFTemplateField();
@@ -91,6 +94,7 @@ class PFTemplateField {
 	/**
 	 * Called if a matching property is found for a template field when
 	 * a template is parsed during the creation of a form.
+	 * @param string $semantic_property
 	 */
 	function setSemanticProperty( $semantic_property ) {
 		$this->mSemanticProperty = str_replace( '\\', '', $semantic_property );
@@ -102,6 +106,9 @@ class PFTemplateField {
 	/**
 	 * Equivalent to setSemanticProperty(), but called when using Cargo
 	 * instead of SMW.
+	 * @param string $tableName
+	 * @param string $fieldName
+	 * @param string|null $fieldDescription
 	 */
 	function setCargoFieldData( $tableName, $fieldName, $fieldDescription = null ) {
 		$this->mCargoTable = $tableName;
@@ -128,7 +135,7 @@ class PFTemplateField {
 		// We have some "pseudo-types", used for setting the correct
 		// form input.
 		if ( $fieldDescription->mAllowedValues != null ) {
-			if( $fieldDescription->mIsHierarchy == true ) {
+			if ( $fieldDescription->mIsHierarchy == true ) {
 				$this->mFieldType = 'Hierarchy';
 				$this->mHierarchyStructure = $fieldDescription->mHierarchyStructure;
 			} else {
@@ -147,6 +154,12 @@ class PFTemplateField {
 			$this->mDelimiter = $fieldDescription->mDelimiter;
 		}
 		$this->mPossibleValues = $fieldDescription->mAllowedValues;
+		if ( property_exists( $fieldDescription, 'mIsMandatory' ) ) {
+			// Cargo 1.7+
+			$this->mIsMandatory = $fieldDescription->mIsMandatory;
+			$this->mIsUnique = $fieldDescription->mIsUnique;
+			$this->mRegex = $fieldDescription->mRegex;
+		}
 	}
 
 	function getFieldName() {
@@ -202,6 +215,18 @@ class PFTemplateField {
 
 	function getNamespace() {
 		return $this->mNamespace;
+	}
+
+	function isMandatory() {
+		return $this->mIsMandatory;
+	}
+
+	function isUnique() {
+		return $this->mIsUnique;
+	}
+
+	function getRegex() {
+		return $this->mRegex;
 	}
 
 	function setTemplateField( $templateField ) {

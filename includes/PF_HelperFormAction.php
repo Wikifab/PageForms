@@ -2,7 +2,7 @@
 /**
  * Handles the formcreate action - used for helper forms for creating
  * properties, forms, etc..
- * 
+ *
  * @author Yaron Koren
  * @file
  * @ingroup PF
@@ -17,12 +17,13 @@ class PFHelperFormAction extends Action {
 	public function getName() {
 		return 'formcreate';
 	}
-	
+
 	/**
 	 * The main action entry point.  Do all output for display and send it to the context
 	 * output.  Do not use globals $wgOut, $wgRequest, etc, in implementations; use
 	 * $this->getOutput(), etc.
 	 * @throws ErrorPageError
+	 * @return false
 	 */
 	public function show() {
 		return self::displayForm( $this, $this->page );
@@ -39,9 +40,12 @@ class PFHelperFormAction extends Action {
 	/**
 	 * Adds an "action" (i.e., a tab) to edit the current article with
 	 * a form
+	 * @param Title $obj
+	 * @param array &$links
+	 * @return bool
 	 */
-	static function displayTab( $obj, &$content_actions ) {
-		if ( method_exists ( $obj, 'getTitle' ) ) {
+	static function displayTab( $obj, &$links ) {
+		if ( method_exists( $obj, 'getTitle' ) ) {
 			$title = $obj->getTitle();
 		} else {
 			$title = $obj->mTitle;
@@ -70,14 +74,14 @@ class PFHelperFormAction extends Action {
 			}
 		}
 
-		global $wgRequest, $wgUser;
+		$content_actions = &$links['views'];
 
-		if ( $wgUser->isAllowed( 'edit' ) && $title->userCan( 'edit' ) ) {
+		if ( $obj->getUser()->isAllowed( 'edit' ) && $title->userCan( 'edit' ) ) {
 			$form_create_tab_text = 'pf_formcreate';
 		} else {
 			$form_create_tab_text = 'pf_viewform';
 		}
-		$class_name = ( $wgRequest->getVal( 'action' ) == 'formcreate' ) ? 'selected' : '';
+		$class_name = ( $obj->getRequest()->getVal( 'action' ) == 'formcreate' ) ? 'selected' : '';
 		$form_create_tab = array(
 			'class' => $class_name,
 			'text' => wfMessage( $form_create_tab_text )->text(),
@@ -113,8 +117,7 @@ class PFHelperFormAction extends Action {
 			$content_actions[$tab_keys[$i]] = $tab_values[$i];
 		}
 
-		global $wgUser;
-		if ( ! $wgUser->isAllowed( 'viewedittab' ) ) {
+		if ( ! $obj->getUser()->isAllowed( 'viewedittab' ) ) {
 			// The tab can have either of these two actions.
 			unset( $content_actions['edit'] );
 			unset( $content_actions['viewsource'] );
@@ -124,18 +127,11 @@ class PFHelperFormAction extends Action {
 	}
 
 	/**
-	 * Like displayTab(), but called with a different hook - this one is
-	 * called for the 'Vector' skin, and others.
-	 */
-	static function displayTab2( $obj, &$links ) {
-		// the old '$content_actions' array is thankfully just a
-		// sub-array of this one
-		return self::displayTab( $obj, $links['views'] );
-	}
-
-	/**
 	 * The function called if we're in index.php (as opposed to one of the
 	 * special pages).
+	 * @param string $action
+	 * @param Article $article
+	 * @return false
 	 */
 	static function displayForm( $action, $article ) {
 		$title = $article->getTitle();

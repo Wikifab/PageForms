@@ -20,19 +20,21 @@ class PFRunQuery extends IncludableSpecialPage {
 	}
 
 	function execute( $query ) {
-		global $wgRequest;
-
 		if ( !$this->including() ) {
 			$this->setHeaders();
 		}
-		$form_name = $this->including() ? $query : $wgRequest->getVal( 'form', $query );
+		$form_name = $this->including() ? $query : $this->getRequest()->getVal( 'form', $query );
+		$form_name = str_replace( '_', ' ', $form_name );
 
 		$this->printPage( $form_name, $this->including() );
 	}
 
 	function printPage( $form_name, $embedded = false ) {
-		global $wgOut, $wgRequest, $wgPageFormsFormPrinter, $wgParser, $wgPageFormsRunQueryFormAtTop;
-		global $wgUser;
+		global $wgPageFormsFormPrinter, $wgParser, $wgPageFormsRunQueryFormAtTop;
+
+		$out = $this->getOutput();
+		$req = $this->getRequest();
+		$user = $this->getUser();
 
 		// Get contents of form-definition page.
 		$form_title = Title::makeTitleSafe( PF_NS_FORM, $form_name );
@@ -44,27 +46,39 @@ class PFRunQuery extends IncludableSpecialPage {
 				$text = Html::rawElement( 'p', array( 'class' => 'error' ),
 					wfMessage( 'pf_formstart_badform', PFUtils::linkText( PF_NS_FORM, $form_name ) )->parse() ) . "\n";
 			}
-			$wgOut->addHTML( $text );
+			$out->addHTML( $text );
 			return;
 		}
 
 		// Initialize variables.
 		$form_definition = PFUtils::getPageText( $form_title );
 		if ( $embedded ) {
-			$run_query = false;
-			$content = null;
-			$raw = false;
+			$req = $this->getUser()->getRequest();
+			// @HACK - set $wgRequest so that FormPrinter::formHTML()
+			// can have the right data. Much better would be to
+			// pass this in as a parameter to formHTML().
+			global $wgRequest;
+			$wgRequest = $req;
 		} else {
-			$run_query = $wgRequest->getCheck( 'wpRunQuery' );
-			$content = $wgRequest->getVal( 'wpTextbox1' );
-			$raw = $wgRequest->getBool( 'raw', false );
-		}
-		$form_submitted = ( $run_query );
-		if ( $raw ) {
-			$wgOut->setArticleBodyOnly( true );
+			$req = $this->getRequest();
 		}
 
-		list ( $form_text, $data_text, $form_page_title ) =
+		// We check that the form name is the same, in case
+		// Special:RunQuery is embedded on the page and there's more
+		// than one of them.
+		// Query/ies on the page can also be run automatically if
+		// "_run" is added to the query string (this was added in
+		// PF 4.3.1; in PF 4.3, there was no such option, and before
+		// 4.3, "wpRunQuery=true" was used).
+		$form_submitted = $req->getCheck( '_run' ) || $req->getVal( 'pfRunQueryFormName' ) == $form_name;
+		$content = $req->getVal( 'wpTextbox1' );
+		$raw = $req->getBool( 'raw', false );
+
+		if ( $raw ) {
+			$out->setArticleBodyOnly( true );
+		}
+
+		list( $form_text, $data_text, $form_page_title ) =
 			$wgPageFormsFormPrinter->formHTML( $form_definition, $form_submitted, false, $form_title->getArticleID(), $content, null, null, true, $embedded );
 		$text = "";
 
@@ -72,7 +86,6 @@ class PFRunQuery extends IncludableSpecialPage {
 		$resultsText = '';
 
 		if ( $form_submitted ) {
-
 			// @TODO - fix RunQuery's parsing so that this check
 			// isn't needed.
 			if ( $wgParser->getOutput() == null ) {
@@ -81,11 +94,11 @@ class PFRunQuery extends IncludableSpecialPage {
 				$headItems = $wgParser->getOutput()->getHeadItems();
 			}
 			foreach ( $headItems as $key => $item ) {
-				$wgOut->addHeadItem( $key, "\t\t" . $item . "\n" );
+				$out->addHeadItem( $key, "\t\t" . $item . "\n" );
 			}
 
-			$wgParser->mOptions = ParserOptions::newFromUser( $wgUser );
-			$resultsText = $wgParser->parse( $data_text, $this->getTitle(), $wgParser->mOptions )->getText();
+			$wgParser->mOptions = ParserOptions::newFromUser( $user );
+			$resultsText = $wgParser->parse( $data_text, $this->getPageTitle(), $wgParser->mOptions, true, false )->getText();
 		}
 
 		// Get the full text of the form.
@@ -101,19 +114,40 @@ class PFRunQuery extends IncludableSpecialPage {
 				$additionalQueryHeader = "\n" . Html::element( 'h2', null, wfMessage( 'pf_runquery_additionalquery' )->text() ) . "\n";
 				$dividerText = "\n<hr style=\"margin: 15px 0;\" />\n";
 			}
-			$action = htmlspecialchars( $this->getTitle( $form_name )->getLocalURL() );
+
+			if ( $embedded ) {
+				$embeddingPageName = $req->getVal( 'title' );
+				if ( $embeddingPageName == '' ) {
+					// Seems to happen on page save.
+					$realTitle = $this->getPageTitle();
+				} else {
+					$realTitle = Title::newFromText( $embeddingPageName );
+				}
+			} else {
+				$realTitle = $this->getPageTitle( $form_name );
+			}
+
+			// Preserve all query string values in the results page.
+			$queryStringValues = array();
+			foreach ( $req->getValues() as $key => $value ) {
+				if ( $key != 'title' ) {
+					$queryStringValues[$key] = $value;
+				}
+			}
+			$action = htmlspecialchars( $realTitle->getLocalURL( $queryStringValues ) );
+
 			$fullFormText .= <<<END
 	<form id="pfForm" name="createbox" action="$action" method="post" class="createbox">
 
 END;
-			$fullFormText .= Html::hidden( 'query', 'true' );
+			$fullFormText .= Html::hidden( 'pfRunQueryFormName', $form_name );
 			$fullFormText .= $form_text;
 		}
 
 		// Either don't display a query form at all, or display the
 		// query form at the top, and the results at the bottom, or the
 		// other way around, depending on the settings.
-		if ( $wgRequest->getVal( 'additionalquery' ) == 'false' ) {
+		if ( $req->getVal( 'additionalquery' ) == 'false' ) {
 			$text .= $resultsText;
 		} elseif ( $wgPageFormsRunQueryFormAtTop ) {
 			$text .= Html::openElement( 'div', array( 'class' => 'pf-runquery-formcontent' ) );
@@ -137,16 +171,16 @@ END;
 		$text = preg_replace( '/^ +/m', '', $text );
 
 		// Now write everything to the screen.
-		$wgOut->addHTML( $text );
+		$out->addHTML( $text );
 		PFUtils::addFormRLModules( $embedded ? $wgParser : null );
 		if ( !$embedded ) {
 			$po = $wgParser->getOutput();
 			if ( $po ) {
 				// addParserOutputMetadata was introduced in 1.24 when addParserOutputNoText was deprecated
-				if( method_exists( $wgOut, 'addParserOutputMetadata' ) ){
-					$wgOut->addParserOutputMetadata( $po );
+				if ( method_exists( $out, 'addParserOutputMetadata' ) ) {
+					$out->addParserOutputMetadata( $po );
 				} else {
-					$wgOut->addParserOutputNoText( $po );
+					$out->addParserOutputNoText( $po );
 				}
 			}
 		}
@@ -156,10 +190,10 @@ END;
 		// now the order doesn't matter.
 		if ( !$embedded ) {
 			if ( $form_page_title != null ) {
-				$wgOut->setPageTitle( $form_page_title );
+				$out->setPageTitle( $form_page_title );
 			} else {
 				$s = wfMessage( 'pf_runquery_title', $form_title->getText() )->text();
-				$wgOut->setPageTitle( $s );
+				$out->setPageTitle( $s );
 			}
 		}
 	}

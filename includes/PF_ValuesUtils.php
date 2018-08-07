@@ -11,6 +11,11 @@ class PFValuesUtils {
 
 	/**
 	 * Helper function to handle getPropertyValues().
+	 * @param Store $store
+	 * @param Title $subject
+	 * @param string $propID
+	 * @param array $requestOptions
+	 * @return array
 	 */
 	public static function getSMWPropertyValues( $store, $subject, $propID, $requestOptions = null ) {
 		// If SMW is not installed, exit out.
@@ -31,7 +36,7 @@ class PFValuesUtils {
 			} elseif ( $value instanceof SMWDIWikiPage ) {
 				$realValue = str_replace( '_', ' ', $value->getDBKey() );
 				if ( $value->getNamespace() != 0 ) {
-					$realValue = MWNamespace::getCanonicalName($value->getNamespace()) . ":$realValue";
+					$realValue = MWNamespace::getCanonicalName( $value->getNamespace() ) . ":$realValue";
 				}
 				$values[] = $realValue;
 			} else {
@@ -45,22 +50,20 @@ class PFValuesUtils {
 
 	/**
 	 * Helper function - gets names of categories for a page;
-	 * based on Title::getParentCategories(), but simpler
-	 * - this function doubles as a function to get all categories on
-	 * the site, if no article is specified
+	 * based on Title::getParentCategories(), but simpler.
+	 *
+	 * @param Title $title
+	 * @return array
 	 */
-	public static function getCategoriesForPage( $title = null ) {
+	public static function getCategoriesForPage( $title ) {
 		$categories = array();
 		$db = wfGetDB( DB_SLAVE );
-		$conditions = null;
-		if ( !is_null( $title ) ) {
-			$titlekey = $title->getArticleID();
-			if ( $titlekey == 0 ) {
-				// Something's wrong - exit
-				return $categories;
-			}
-			$conditions['cl_from'] = $titlekey;
+		$titlekey = $title->getArticleID();
+		if ( $titlekey == 0 ) {
+			// Something's wrong - exit
+			return $categories;
 		}
+		$conditions['cl_from'] = $titlekey;
 		$res = $db->select(
 			'categorylinks',
 			'DISTINCT cl_to',
@@ -77,10 +80,35 @@ class PFValuesUtils {
 	}
 
 	/**
+	 * Helper function - returns names of all the categories.
+	 * @return array
+	 */
+	public static function getAllCategories() {
+		$categories = array();
+		$db = wfGetDB( DB_SLAVE );
+		$res = $db->select(
+			'category',
+			'cat_title',
+			 null,
+			__METHOD__
+		);
+		if ( $db->numRows( $res ) > 0 ) {
+			while ( $row = $db->fetchRow( $res ) ) {
+				$categories[] = $row['cat_title'];
+			}
+		}
+		$db->freeResult( $res );
+		return $categories;
+	}
+
+	/**
 	 * This function, unlike the others, doesn't take in a substring
 	 * because it uses the SMW data store, which can't perform
 	 * case-insensitive queries; for queries with a substring, the
 	 * function PFAutocompleteAPI::getAllValuesForProperty() exists.
+	 *
+	 * @param string $property_name
+	 * @return array
 	 */
 	public static function getAllValuesForProperty( $property_name ) {
 		global $wgPageFormsMaxAutocompleteValues;
@@ -97,14 +125,21 @@ class PFValuesUtils {
 	}
 
 	/**
-	 * Used with the Cargo extension
+	 * Used with the Cargo extension.
+	 * @param string $tableName
+	 * @param string $fieldName
+	 * @return array
 	 */
 	public static function getAllValuesForCargoField( $tableName, $fieldName ) {
 		return self::getValuesForCargoField( $tableName, $fieldName );
 	}
 
 	/**
-	 * Used with the Cargo extension
+	 * Used with the Cargo extension.
+	 * @param string $tableName
+	 * @param string $fieldName
+	 * @param string|null $whereStr
+	 * @return array
 	 */
 	public static function getValuesForCargoField( $tableName, $fieldName, $whereStr = null ) {
 		global $wgPageFormsMaxLocalAutocompleteValues;
@@ -114,10 +149,10 @@ class PFValuesUtils {
 		// to switch to remote autocompletion.
 		// (We increment by 10, to be on the safe side, since some values
 		// can be null, etc.)
-		$limitStr = max( 100, $wgPageFormsMaxLocalAutocompleteValues + 10);
+		$limitStr = max( 100, $wgPageFormsMaxLocalAutocompleteValues + 10 );
 
 		try {
-			$sqlQuery = CargoSQLQuery::newFromValues( $tableName, $fieldName, $whereStr, $joinOnStr = null, $fieldName, $havingStr = null, $fieldName, $limitStr );
+			$sqlQuery = CargoSQLQuery::newFromValues( $tableName, $fieldName, $whereStr, $joinOnStr = null, $fieldName, $havingStr = null, $fieldName, $limitStr, $offsetStr = 0 );
 		} catch ( Exception $e ) {
 			return array();
 		}
@@ -141,7 +176,12 @@ class PFValuesUtils {
 	/**
 	 * Get all the pages that belong to a category and all its
 	 * subcategories, down a certain number of levels - heavily based on
-	 * SMW's SMWInlineQuery::includeSubcategories()
+	 * SMW's SMWInlineQuery::includeSubcategories().
+	 *
+	 * @param string $top_category
+	 * @param int $num_levels
+	 * @param string|null $substring
+	 * @return string
 	 */
 	public static function getAllPagesForCategory( $top_category, $num_levels, $substring = null ) {
 		if ( 0 == $num_levels ) {
@@ -226,14 +266,14 @@ class PFValuesUtils {
 							}
 							$cur_value = PFUtils::titleString( $cur_title );
 							if ( ! in_array( $cur_value, $pages ) ) {
-								if ( array_key_exists( 'pp_displaytitle_value' , $row ) &&
+								if ( array_key_exists( 'pp_displaytitle_value', $row ) &&
 									!is_null( $row[ 'pp_displaytitle_value' ] ) &&
 									trim( str_replace( '&#160;', '', strip_tags( $row[ 'pp_displaytitle_value' ] ) ) ) !== '' ) {
 									$pages[ $cur_value ] = htmlspecialchars_decode( $row[ 'pp_displaytitle_value'] );
 								} else {
 									$pages[ $cur_value ] = $cur_value;
 								}
-								if ( array_key_exists( 'pp_defaultsort_value' , $row ) &&
+								if ( array_key_exists( 'pp_defaultsort_value', $row ) &&
 									!is_null( $row[ 'pp_defaultsort_value' ] ) ) {
 									$sortkeys[ $cur_value ] = $row[ 'pp_defaultsort_value'];
 								} else {
@@ -441,14 +481,14 @@ class PFValuesUtils {
 		$sortkeys = array();
 		while ( $row = $db->fetchRow( $res ) ) {
 			$title = str_replace( '_', ' ', $row[0] );
-			if ( array_key_exists( 'pp_displaytitle_value' , $row ) &&
+			if ( array_key_exists( 'pp_displaytitle_value', $row ) &&
 				!is_null( $row[ 'pp_displaytitle_value' ] ) &&
 				trim( str_replace( '&#160;', '', strip_tags( $row[ 'pp_displaytitle_value' ] ) ) ) !== '' ) {
 				$pages[ $title ] = htmlspecialchars_decode( $row[ 'pp_displaytitle_value'] );
 			} else {
 				$pages[ $title ] = $title;
 			}
-			if ( array_key_exists( 'pp_defaultsort_value' , $row ) &&
+			if ( array_key_exists( 'pp_defaultsort_value', $row ) &&
 				!is_null( $row[ 'pp_defaultsort_value' ] ) ) {
 				$sortkeys[ $title ] = $row[ 'pp_defaultsort_value'];
 			} else {
@@ -464,14 +504,18 @@ class PFValuesUtils {
 	/**
 	 * Creates an array of values that match the specified source name and
 	 * type, for use by both Javascript autocompletion and comboboxes.
+	 *
+	 * @param string|null $source_name
+	 * @param string $source_type
+	 * @return string|null
 	 */
 	public static function getAutocompleteValues( $source_name, $source_type ) {
 		if ( $source_name == null ) {
 			return null;
 		}
 
-		// The query depends on whether this is a property, category,
-		// concept or namespace.
+		// The query depends on whether this is a Cargo field, SMW
+		// property, category, SMW concept or namespace.
 		if ( $source_type == 'cargo field' ) {
 			list( $table_name, $field_name ) = explode( '|', $source_name, 2 );
 			$names_array = self::getAllValuesForCargoField( $table_name, $field_name );
@@ -491,13 +535,17 @@ class PFValuesUtils {
 
 	/**
 	 * Helper function to get an array of values out of what may be either
-	 * an array or a delimited string
+	 * an array or a delimited string.
+	 *
+	 * @param string[]|string $value
+	 * @param string $delimiter
+	 * @return string[]
 	 */
 	public static function getValuesArray( $value, $delimiter ) {
 		if ( is_array( $value ) ) {
 			return $value;
 		} else {
-			// remove extra spaces
+			// Remove extra spaces.
 			return array_map( 'trim', explode( $delimiter, $value ) );
 		}
 	}
@@ -533,9 +581,10 @@ class PFValuesUtils {
 	/**
 	 * Returns a SQL condition for autocompletion substring value in a column.
 	 *
-	 * @param string $value_column Value column name
+	 * @param string $column Value column name
 	 * @param string $substring Substring to look for
-	 * @return SQL condition for use in WHERE clause
+	 * @param bool $replaceSpaces
+	 * @return string SQL condition for use in WHERE clause
 	 */
 	public static function getSQLConditionForAutocompleteInColumn( $column, $substring, $replaceSpaces = true ) {
 		global $wgDBtype, $wgPageFormsAutocompleteOnAllChars;
@@ -566,9 +615,10 @@ class PFValuesUtils {
 	}
 
 	/**
-	 * returns an array of pages that are result of the semantic query
-	 * @param $rawQueryString string - the query string like [[Category:Trees]][[age::>1000]]
-	 * @return array of SMWDIWikiPage objects representing the result
+	 * Returns an array of pages that are result of a semantic query.
+	 *
+	 * @param string $rawQuery the query string like [[Category:Trees]][[age::>1000]]
+	 * @return SMWDIWikiPage[] SMWDIWikiPage objects representing the result
 	 */
 	public static function getAllPagesForQuery( $rawQuery ) {
 		$rawQueryArray = array( $rawQuery );

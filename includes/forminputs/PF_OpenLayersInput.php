@@ -1,14 +1,10 @@
 <?php
 /**
- * File holding the PFOpenLayersInput class
- *
  * @file
  * @ingroup PF
  */
 
 /**
- * The PFOpenLayersInput class.
- *
  * @ingroup PFFormInput
  */
 class PFOpenLayersInput extends PFFormInput {
@@ -81,9 +77,9 @@ class PFOpenLayersInput extends PFFormInput {
 		// For now, let's just not do this, since the Google Maps
 		// input is much more widely used anyway.
 		// @TODO - add this in.
-		//$wgPageFormsTabIndex++;
-		//$addressLookupInput = Html::element( 'input', array( 'type' => 'text', 'tabindex' => $wgPageFormsTabIndex, 'class' => 'pfAddressInput', 'size' => 40, 'placeholder' => wfMessage( 'pf-maps-enteraddress' )->parse() ), null );
-		//$addressLookupButton = Html::element( 'input', array( 'type' => 'button', 'class' => 'pfLookUpAddress', 'value' => wfMessage( 'pf-maps-lookupcoordinates' )->parse() ), null );
+		// $wgPageFormsTabIndex++;
+		// $addressLookupInput = Html::element( 'input', array( 'type' => 'text', 'tabindex' => $wgPageFormsTabIndex, 'class' => 'pfAddressInput', 'size' => 40, 'placeholder' => wfMessage( 'pf-maps-enteraddress' )->parse() ), null );
+		// $addressLookupButton = Html::element( 'input', array( 'type' => 'button', 'class' => 'pfLookUpAddress', 'value' => wfMessage( 'pf-maps-lookupcoordinates' )->parse() ), null );
 		$height = self::getHeight( $other_args );
 		$width = self::getWidth( $other_args );
 		$mapCanvas = Html::element( 'div', array( 'class' => 'pfMapCanvas', 'id' => 'pfMapCanvas' . $wgPageFormsFieldNum, 'style' => "height: $height; width: $width;" ), null );
@@ -126,6 +122,7 @@ END;
 
 	/**
 	 * Returns the HTML code to be included in the output page for this input.
+	 * @return string
 	 */
 	public function getHtmlText() {
 		return self::getHTML(
@@ -142,6 +139,9 @@ END;
 	 *
 	 * Copied from CargoStore::coordinatePartToNumber() in the Cargo
 	 * extension.
+	 * @param string $coordinateStr
+	 * @return int
+	 * @throws MWException
 	 */
 	public static function coordinatePartToNumber( $coordinateStr ) {
 		$degreesSymbols = array( "\x{00B0}", "d" );
@@ -197,11 +197,13 @@ END;
 	 *
 	 * Copied from CargoStore::parseCoordinateString() in the Cargo
 	 * extension.
+	 * @param string $coordinatesString
+	 * @return string|null
 	 */
 	public static function parseCoordinatesString( $coordinatesString ) {
 		$coordinatesString = trim( $coordinatesString );
-		if ( $coordinatesString == null ) {
-			return;
+		if ( $coordinatesString === '' ) {
+			return null;
 		}
 
 		// This is safe to do, right?

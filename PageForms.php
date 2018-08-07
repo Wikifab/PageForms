@@ -69,7 +69,7 @@ if ( defined( 'PF_VERSION' ) ) {
 	return 1;
 }
 
-define( 'PF_VERSION', '4.1.2' );
+define( 'PF_VERSION', '4.3' );
 
 $GLOBALS['wgExtensionCredits']['specialpage'][] = array(
 	'path' => __FILE__,
@@ -78,7 +78,7 @@ $GLOBALS['wgExtensionCredits']['specialpage'][] = array(
 	'author' => array( 'Yaron Koren', 'Stephan Gambke', '...' ),
 	'url' => 'https://www.mediawiki.org/wiki/Extension:Page_Forms',
 	'descriptionmsg' => 'pageforms-desc',
-	'license-name' => 'GPL-2.0+'
+	'license-name' => 'GPL-2.0-or-later'
 );
 
 # ##
@@ -86,7 +86,7 @@ $GLOBALS['wgExtensionCredits']['specialpage'][] = array(
 # seen from the web. Change it if required ($wgScriptPath is the
 # path to the base directory of your wiki). No final slash.
 # #
-$GLOBALS['wgExtensionFunctions'][] = function() {
+$GLOBALS['wgExtensionFunctions'][] = function () {
 	$GLOBALS['wgPageFormsPartialPath'] = '/extensions/PageForms';
 	$GLOBALS['wgPageFormsScriptPath'] = $GLOBALS['wgScriptPath'] . $GLOBALS['wgPageFormsPartialPath'];
 };
@@ -97,13 +97,13 @@ $GLOBALS['wgExtensionFunctions'][] = function() {
 # seen on your local filesystem. Used against some PHP file path
 # issues.
 # #
-$GLOBALS['wgPageFormsIP'] = dirname( __FILE__ );
+$GLOBALS['wgPageFormsIP'] = __DIR__;
 # #
 
 // Sometimes this call needs to be delayed, and sometimes it shouldn't be
 // delayed. Is it just the precense of SMW that dictates which one's the case??
 if ( defined( 'SMW_VERSION' ) ) {
-	$GLOBALS['wgExtensionFunctions'][] = function() {
+	$GLOBALS['wgExtensionFunctions'][] = function () {
 		// This global variable is needed so that other extensions can
 		// hook into it to add their own input types.
 		$GLOBALS['wgPageFormsFormPrinter'] = new StubObject( 'wgPageFormsFormPrinter', 'PFFormPrinter' );
@@ -114,16 +114,14 @@ if ( defined( 'SMW_VERSION' ) ) {
 }
 
 $GLOBALS['wgHooks']['LinkEnd'][] = 'PFFormLinker::setBrokenLink';
-// 'SkinTemplateNavigation' replaced 'SkinTemplateTabs' in the Vector skin
-$GLOBALS['wgHooks']['SkinTemplateTabs'][] = 'PFFormEditAction::displayTab';
-$GLOBALS['wgHooks']['SkinTemplateNavigation'][] = 'PFFormEditAction::displayTab2';
-$GLOBALS['wgHooks']['SkinTemplateTabs'][] = 'PFHelperFormAction::displayTab';
-$GLOBALS['wgHooks']['SkinTemplateNavigation'][] = 'PFHelperFormAction::displayTab2';
+$GLOBALS['wgHooks']['SkinTemplateNavigation'][] = 'PFFormEditAction::displayTab';
+$GLOBALS['wgHooks']['SkinTemplateNavigation'][] = 'PFHelperFormAction::displayTab';
 $GLOBALS['wgHooks']['ArticlePurge'][] = 'PFFormUtils::purgeCache';
 $GLOBALS['wgHooks']['ParserFirstCallInit'][] = 'PFHooks::registerFunctions';
 $GLOBALS['wgHooks']['MakeGlobalVariablesScript'][] = 'PFHooks::setGlobalJSVariables';
 $GLOBALS['wgHooks']['PageSchemasRegisterHandlers'][] = 'PFPageSchemas::registerClass';
 $GLOBALS['wgHooks']['EditPage::importFormData'][] = 'PFHooks::showFormPreview';
+$GLOBALS['wgHooks']['TinyMCEDisable'][] = 'PFHooks::disableTinyMCE';
 $GLOBALS['wgHooks']['CanonicalNamespaces'][] = 'PFHooks::registerNamespaces';
 $GLOBALS['wgHooks']['UnitTestsList'][] = 'PFHooks::onUnitTestsList';
 $GLOBALS['wgHooks']['ResourceLoaderRegisterModules'][] = 'PFHooks::registerModules';
@@ -132,7 +130,7 @@ if ( defined( 'SMW_VERSION' ) ) {
 	// Admin Links hook needs to be called in a delayed way so that it
 	// will always be called after SMW's Admin Links addition; as of
 	// SMW 1.9, SMW delays calling all its hook functions.
-	$GLOBALS['wgExtensionFunctions'][] = function() {
+	$GLOBALS['wgExtensionFunctions'][] = function () {
 		$GLOBALS['wgHooks']['AdminLinks'][] = 'PFHooks::addToAdminLinks';
 	};
 } else {
@@ -220,6 +218,7 @@ $GLOBALS['wgAutoloadClasses']['PFTree'] = __DIR__ . '/includes/forminputs/PF_Tre
 $GLOBALS['wgAutoloadClasses']['PFTokensInput'] = __DIR__ . '/includes/forminputs/PF_TokensInput.php';
 $GLOBALS['wgAutoloadClasses']['PFGoogleMapsInput'] = __DIR__ . '/includes/forminputs/PF_GoogleMapsInput.php';
 $GLOBALS['wgAutoloadClasses']['PFOpenLayersInput'] = __DIR__ . '/includes/forminputs/PF_OpenLayersInput.php';
+$GLOBALS['wgAutoloadClasses']['PFLeafletInput'] = __DIR__ . '/includes/forminputs/PF_LeafletInput.php';
 $GLOBALS['wgAutoloadClasses']['PFRegExpInput'] = __DIR__ . '/includes/forminputs/PF_RegExpInput.php';
 $GLOBALS['wgAutoloadClasses']['PFRatingInput'] = __DIR__ . '/includes/forminputs/PF_RatingInput.php';
 
@@ -233,7 +232,6 @@ $GLOBALS['wgJobClasses']['createPage'] = 'PFCreatePageJob';
 $GLOBALS['wgAutoloadClasses']['PFCreatePageJob'] = __DIR__ . '/includes/PF_CreatePageJob.php';
 
 $GLOBALS['wgMessagesDirs']['PageForms'] = __DIR__ . '/i18n';
-$GLOBALS['wgExtensionMessagesFiles']['PageForms'] = __DIR__ . '/languages/PF_Messages.php';
 $GLOBALS['wgExtensionMessagesFiles']['PageFormsAlias'] = __DIR__ . '/languages/PF_Aliases.php';
 $GLOBALS['wgExtensionMessagesFiles']['PageFormsMagic'] = __DIR__ . '/languages/PF_Magic.php';
 $GLOBALS['wgExtensionMessagesFiles']['PageFormsNS'] = __DIR__ . '/languages/PF_Namespaces.php';
@@ -259,13 +257,12 @@ $GLOBALS['wgResourceModules'] += array(
 		'dependencies' => array(
 			'jquery.ui.core',
 			'jquery.ui.autocomplete',
-			'jquery.ui.button',
 			'jquery.ui.sortable',
-			'jquery.ui.widget',
 			'ext.pageforms.fancybox',
 			'ext.pageforms.autogrow',
 			'mediawiki.util',
 			'ext.pageforms.select2',
+			'ext.pageforms.wikieditor'
 		),
 		'messages' => array(
 			'pf_formerrors_header',
@@ -342,14 +339,12 @@ $GLOBALS['wgResourceModules'] += array(
 			'jquery.ui.datepicker',
 			'ext.pageforms.main'
 		),
-		'position' => 'bottom', // MW 1.26
 	),
 	'ext.pageforms.timepicker' => $wgPageFormsResourceTemplate + array(
 		'scripts' => array(
 			'libs/PF_timepicker.js',
 		),
 		'styles' => 'skins/PF_Timepicker.css',
-		'position' => 'bottom', // MW 1.26
 	),
 	'ext.pageforms.datetimepicker' => $wgPageFormsResourceTemplate + array(
 		'scripts' => array(
@@ -359,7 +354,6 @@ $GLOBALS['wgResourceModules'] += array(
 			'ext.pageforms.datepicker',
 			'ext.pageforms.timepicker'
 		),
-		'position' => 'bottom', // MW 1.26
 	),
 	'ext.pageforms.regexp' => $wgPageFormsResourceTemplate + array(
 		'scripts' => 'libs/PF_regexp.js',
@@ -378,9 +372,9 @@ $GLOBALS['wgResourceModules'] += array(
 		'scripts' => array(
 			'libs/PF_simpleupload.js'
 		),
-        'messages' => array(
+		'messages' => array(
 			'pf_forminputs_change_file',
-			'upload-dialog-button-upload'
+			'pf-simpleupload'
 		),
 	),
 	'ext.pageforms.select2' => $wgPageFormsResourceTemplate + array(
@@ -428,6 +422,10 @@ $GLOBALS['wgResourceModules'] += array(
 			'skins/balloon.css',
 		),
 	),
+	'ext.pageforms.wikieditor' => $wgPageFormsResourceTemplate + array(
+		'scripts' => '/libs/PF_wikieditor.js',
+		'styles' => '/skins/PF_wikieditor.css',
+	),
 	'ext.pageforms' => $wgPageFormsResourceTemplate + array(
 		'scripts' => array(
 			'libs/ext.pf.js',
@@ -449,11 +447,15 @@ $GLOBALS['wgResourceModules'] += array(
 		),
 		'messages' => array(
 			'pf_blank_error',
+			'pf_createtemplate_hierarchystructureplaceholder',
 		),
 	),
 	'ext.pageforms.PF_CreateClass' => $wgPageFormsResourceTemplate + array(
 		'scripts' => array(
 			'libs/PF_CreateClass.js',
+		),
+		'messages' => array(
+			'pf_createtemplate_hierarchystructureplaceholder',
 		),
 	),
 	'ext.pageforms.PF_CreateForm' => $wgPageFormsResourceTemplate + array(
@@ -578,7 +580,7 @@ require_once 'includes/PF_DatePickerSettings.php';
 # ##
 # Display displaytitle page property instead of page title for Page type fields
 # ##
-$GLOBALS['wgPageFormsUseDisplayTitle'] = false;
+$GLOBALS['wgPageFormsUseDisplayTitle'] = true;
 
 // Other variables
 $GLOBALS['wgPageFormsSimpleUpload'] = false;

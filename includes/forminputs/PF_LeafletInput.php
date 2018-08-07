@@ -1,5 +1,6 @@
 <?php
 /**
+ * @author Peter Grassberger
  * @file
  * @ingroup PF
  */
@@ -7,9 +8,9 @@
 /**
  * @ingroup PFFormInput
  */
-class PFGoogleMapsInput extends PFOpenLayersInput {
+class PFLeafletInput extends PFOpenLayersInput {
 	public static function getName() {
-		return 'googlemaps';
+		return 'leaflet';
 	}
 
 	public static function getDefaultCargoTypes() {
@@ -21,18 +22,27 @@ class PFGoogleMapsInput extends PFOpenLayersInput {
 	}
 
 	public static function getHTML( $cur_value, $input_name, $is_mandatory, $is_disabled, $other_args ) {
-		global $wgPageFormsGoogleMapsKey, $wgPageFormsTabIndex;
-		global $wgOut, $wgPageFormsMapsWithFeeders;
+		global $wgPageFormsTabIndex;
+		global $wgOut;
 
 		$scripts = array(
-			"https://maps.googleapis.com/maps/api/js?v=3.exp&key=$wgPageFormsGoogleMapsKey"
+			"https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
+		);
+		$styles = array(
+			"https://unpkg.com/leaflet@1.1.0/dist/leaflet.css"
 		);
 		$scriptsHTML = '';
+		$stylesHTML = '';
 		foreach ( $scripts as $script ) {
 			$scriptsHTML .= Html::linkedScript( $script );
 		}
+		foreach ( $styles as $style ) {
+			$stylesHTML .= Html::linkedStyle( $style );
+		}
 		$wgOut->addHeadItem( $scriptsHTML, $scriptsHTML );
+		$wgOut->addHeadItem( $stylesHTML, $stylesHTML );
 		$wgOut->addModules( 'ext.pageforms.maps' );
+
 		$coordsInputAttrs = array(
 			'type' => 'text',
 			'tabindex' => $wgPageFormsTabIndex,
@@ -41,38 +51,20 @@ class PFGoogleMapsInput extends PFOpenLayersInput {
 			'value' => PFOpenLayersInput::parseCoordinatesString( $cur_value ),
 			'size' => 40
 		);
-		if ( array_key_exists( 'starting bounds', $other_args ) ) {
-			$boundCoords = $other_args['starting bounds'];
-			$boundCoords = explode( ";", $boundCoords );
-			$boundCoords[0] = PFOpenLayersInput::parseCoordinatesString( $boundCoords[0] );
-			$boundCoords[1] = PFOpenLayersInput::parseCoordinatesString( $boundCoords[1] );
-			$coordsInputAttrs['data-bound-coords'] = "$boundCoords[0];$boundCoords[1]";
-		}
 		$coordsInput = Html::element( 'input', $coordsInputAttrs );
-		$wgPageFormsTabIndex++;
-		// The address input box is not necessary if we are using other form inputs for the address.
-		if ( array_key_exists( $input_name, $wgPageFormsMapsWithFeeders ) ) {
-			$addressLookupInput = '';
-		} else {
-			$addressLookupInput = Html::element( 'input', array( 'type' => 'text', 'tabindex' => $wgPageFormsTabIndex, 'class' => 'pfAddressInput', 'size' => 40, 'placeholder' => wfMessage( 'pf-maps-enteraddress' )->parse() ), null );
-		}
-		$addressLookupButton = Html::element( 'input', array( 'type' => 'button', 'class' => 'pfLookUpAddress', 'value' => wfMessage( 'pf-maps-lookupcoordinates' )->parse() ), null );
+		// $wgPageFormsTabIndex++;
 		$height = self::getHeight( $other_args );
 		$width = self::getWidth( $other_args );
 		$mapCanvas = Html::element( 'div', array( 'class' => 'pfMapCanvas', 'style' => "height: $height; width: $width;" ), 'Map goes here...' );
 
 		$fullInputHTML = <<<END
 <div style="padding-bottom: 10px;">
-$addressLookupInput
-$addressLookupButton
-</div>
-<div style="padding-bottom: 10px;">
 $coordsInput
 </div>
 $mapCanvas
 
 END;
-		$text = Html::rawElement( 'div', array( 'class' => 'pfGoogleMapsInput' ), $fullInputHTML );
+		$text = Html::rawElement( 'div', array( 'class' => 'pfLeafletInput' ), $fullInputHTML );
 
 		return $text;
 	}
