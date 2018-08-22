@@ -85,3 +85,13 @@ ve.init.sa.Target.prototype.setupToolbar = function ( surface ) {
 
 	this.getToolbar().$element.addClass( 've-init-sa-target-toolbar' );
 };
+
+ve.init.sa.Target.prototype.parseWikitextFragment = function ( wikitext, pst ) {
+	return new mw.Api().post( {
+		action: 'visualeditor',
+		paction: 'parsefragment',
+		page: this.pageName,
+		wikitext: wikitext,
+		pst: pst
+	} );
+};
