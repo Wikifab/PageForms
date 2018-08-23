@@ -165,8 +165,14 @@ form input.formInput,
 	border-radius: 0 0px 3px 3px;
 }
 
+.ve-ui-toolbar {
+	z-index:0;
+}
+
 .ve-area-wrapper .oo-ui-toolbar-bar .oo-ui-tool-name-vefpgSwitchEditor .oo-ui-tool-link{
-	padding:9.5px;
+	padding: 9.5px;
+	width: 40px;
+    height: 40px;
 } 
 
 .select2-container .select2-choice .select2-arrow {
