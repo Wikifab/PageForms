@@ -163,6 +163,7 @@ form input.formInput,
 
 .ve-area-wrapper .oo-ui-toolbar-bar {
 	border-radius: 0 0px 3px 3px;
+	z-index: auto;
 }
 
 .ve-area-wrapper .oo-ui-toolbar-bar .oo-ui-tool-name-vefpgSwitchEditor .oo-ui-tool-link{
