@@ -277,8 +277,6 @@ input.pfComboBoxActual {
 	display: none;
 	width: 94px;
 	text-align: center;
-    margin-left: 5px;
-    //background-color: var(--main-hover-color);
     color: #fff;
     padding: 7px 14px;
     border: none;
@@ -286,8 +284,13 @@ input.pfComboBoxActual {
     -moz-border-radius: 3px;
     border-radius: 3px;
     font-size: 0.7em;
-    float: right;
+    float: left;
     cursor: inherit;
+}
+
+.saving-menu #loaderSave {
+	float: right;
+	margin-left: 5px;
 }
 
 #loaderSave .fa {
