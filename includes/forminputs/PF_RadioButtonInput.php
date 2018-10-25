@@ -59,8 +59,7 @@ class PFRadioButtonInput extends PFEnumInput {
 		$itemClass = 'radioButtonItem';
 		if ( array_key_exists( 'class', $other_args ) ) {
 			$itemClass .= ' ' . $other_args['class'];
-		}
-		$itemAttrs = array( 'class' => $itemClass );
+		}		
 
 		foreach ( $possible_values as $possible_value ) {
 			$wgPageFormsTabIndex++;
@@ -71,6 +70,9 @@ class PFRadioButtonInput extends PFEnumInput {
 				'id' => $input_id,
 				'tabindex' => $wgPageFormsTabIndex,
 			);
+
+			$itemAttrs = array( 'class' => $itemClass, 'for' => $input_id);
+
 			if ( array_key_exists( 'origName', $other_args ) ) {
 				$radiobutton_attrs['origname'] = $other_args['origName'];
 			}
