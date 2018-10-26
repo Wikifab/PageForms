@@ -331,13 +331,14 @@ class PFFormPrinter {
 
 		$text = <<<END
 
-		<div class="row">
-		<div class="col-md-11 col-sm-11 col-xs-12">
+		<div class="DokitPfTemplate">
+ 		<div class="DokitPfTemplateContent">
 		$mainText
 		</div>
-		<div class="col-md-1 col-sm-1 col-xs-12 step-nav">
-		<p>$addAboveButton</p>
-		<p>$removeButton</p>
+		<div class="DokitPfTemplateTools">
+		<div>$addAboveButton</div>
+		<div>$removeButton</div>
+		<div class="instanceRearranger"></div>
 		</div>
 		</div>
 
