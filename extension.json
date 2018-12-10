@@ -1,7 +1,7 @@
 {
 	"@Note": "When updating this file please also update PageForms.php with the same changes.",
 	"name": "Page Forms",
-	"version": "4.3",
+	"version": "4.4.1",
 	"author": [
 		"Yaron Koren",
 		"Stephan Gambke",
@@ -40,13 +40,15 @@
 			"editrestrictedfields": true
 		},
 		"user": {
-			"createclass": true
+			"createclass": true,
+			"multipageedit": true
 		}
 	},
 	"AvailableRights": [
 		"viewedittab",
 		"editrestrictedfields",
-		"createclass"
+		"createclass",
+		"multipageedit"
 	],
 	"Actions": {
 		"formedit": "PFFormEditAction",
@@ -56,6 +58,7 @@
 		"Forms": "PFForms",
 		"CreateForm": "PFCreateForm",
 		"Templates": "PFTemplates",
+		"MultiPageEdit": "PFMultiPageEdit",
 		"CreateTemplate": "PFCreateTemplate",
 		"CreateClass": "PFCreateClass",
 		"CreateCategory": "PFCreateCategory",
@@ -85,6 +88,7 @@
 		"PFForms": "specials/PF_Forms.php",
 		"PFCreateForm": "specials/PF_CreateForm.php",
 		"PFTemplates": "specials/PF_Templates.php",
+		"PFMultiPageEdit": "specials/PF_MultiPageEdit.php",
 		"PFCreateTemplate": "specials/PF_CreateTemplate.php",
 		"PFCreateClass": "specials/PF_CreateClass.php",
 		"PFCreateCategory": "specials/PF_CreateCategory.php",
@@ -96,6 +100,7 @@
 		"PFUploadWindow": "specials/PF_UploadWindow.php",
 		"PFTemplateField": "includes/PF_TemplateField.php",
 		"TemplatesPage": "specials/PF_Templates.php",
+		"SpreadsheetTemplatesPage": "specials/PF_MultiPageEdit.php",
 		"FormsPage": "specials/PF_Forms.php",
 		"PFForm": "includes/PF_Form.php",
 		"PFTemplate": "includes/PF_Template.php",
@@ -162,9 +167,9 @@
 				"jquery.ui.core",
 				"jquery.ui.autocomplete",
 				"jquery.ui.sortable",
-				"ext.pageforms.fancybox",
 				"ext.pageforms.autogrow",
 				"mediawiki.util",
+				"mediawiki.api",
 				"ext.pageforms.select2",
 				"ext.pageforms.wikieditor"
 			],
@@ -187,9 +192,16 @@
 				"libs/jquery.browser.js"
 			]
 		},
-		"ext.pageforms.fancybox": {
-			"scripts": "libs/jquery.fancybox.js",
-			"styles": "skins/jquery.fancybox.css",
+		"ext.pageforms.fancybox.jquery1": {
+			"scripts": "libs/FancyBox/jquery.fancybox.1.3.4.js",
+			"styles": "skins/FancyBox/jquery.fancybox.1.3.4.css",
+			"dependencies": [
+				"ext.pageforms.browser"
+			]
+		},
+		"ext.pageforms.fancybox.jquery3": {
+			"scripts": "libs/FancyBox/jquery.fancybox.3.2.10.js",
+			"styles": "skins/FancyBox/jquery.fancybox.3.2.10.css",
 			"dependencies": [
 				"ext.pageforms.browser"
 			]
@@ -336,6 +348,7 @@
 				"skins/jsgrid/theme.css"
 			],
 			"dependencies": [
+				"ext.pageforms.select2",
 				"jquery.ui.sortable"
 			],
 			"messages": [
@@ -424,6 +437,14 @@
 				"ext.visualEditor.mwtransclusion",
 				"oojs-ui.styles.icons-editing-advanced"
 			]
+		},
+		"ext.pageforms.PF_MultiPageEdit": {
+			"scripts": [
+				"libs/PF_MultiPageEdit.js"
+			],
+			"dependencies": [
+				"ext.pageforms.jsgrid"
+			]
 		}
 	},
 	"ResourceFileModulePaths": {
@@ -431,9 +452,6 @@
 		"remoteExtPath": "PageForms"
 	},
 	"Hooks": {
-		"LinkEnd": [
-			"PFFormLinker::setBrokenLink"
-		],
 		"SkinTemplateNavigation": [
 			"PFFormEditAction::displayTab",
 			"PFHelperFormAction::displayTab"
@@ -444,6 +462,7 @@
 		"PageContentSave": [
 			"PFFormUtils::purgeCache"
 		],
+		"PageContentSaveComplete": "PFHooks::setPostEditCookie",
 		"ParserFirstCallInit": [
 			"PFHooks::registerFunctions"
 		],
@@ -456,6 +475,7 @@
 		"EditPage::importFormData": [
 			"PFHooks::showFormPreview"
 		],
+		"CargoTablesActionLinks": "PFHooks::addToCargoTablesLinks",
 		"TinyMCEDisable": "PFHooks::disableTinyMCE",
 		"CanonicalNamespaces": [
 			"PFHooks::registerNamespaces"
@@ -490,6 +510,9 @@
 		"PageFormsAutocompleteValues": [],
 		"PageFormsGridValues": [],
 		"PageFormsGridParams": [],
+		"PageFormsContLangYes": null,
+		"PageFormsContLangNo": null,
+		"PageFormsContLangMonths": [],
 		"PageFormsFieldProperties": [],
 		"PageFormsCargoFields": [],
 		"PageFormsDependentFields": [],

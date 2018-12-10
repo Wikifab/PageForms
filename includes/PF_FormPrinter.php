@@ -921,7 +921,7 @@ END;
 					} else {
 						$previous_template_name = '';
 					}
-					$template_name = str_replace( '_', ' ', $tag_components[1] );
+					$template_name = str_replace( '_', ' ', $wgParser->recursiveTagParse( $tag_components[1] ) );
 					$is_new_template = ( $template_name != $previous_template_name );
 					if ( $is_new_template ) {
 						$template = PFTemplate::newFromName( $template_name );
@@ -964,10 +964,10 @@ END;
 					}
 
 					// We get values from the request,
-					// regardless of whether the the source
-					// is the page or a form submit, because
-					// even if the source is a page, values
-					// can still come from a query string.
+					// regardless of whether the source is the
+					// page or a form submit, because even if
+					// the source is a page, values can still
+					// come from a query string.
 					$tif->setFieldValuesFromSubmit();
 
 					$tif->checkIfAllInstancesPrinted( $form_submitted, $source_is_page );
@@ -1022,7 +1022,7 @@ END;
 					// If the user is editing a page, and that page contains a call to
 					// the template being processed, get the current field's value
 					// from the template call
-					if ( $source_is_page && ( $tif->getFullTextInPage() != '' && !$form_submitted ) ) {
+					if ( $source_is_page && ( $tif->getFullTextInPage() != '' ) && ( !$form_is_partial || !$form_submitted ) ) {
 						if ( $tif->hasValueFromPageForField( $field_name ) ) {
 							// Get value, and remove it,
 							// so that at the end we
@@ -1136,12 +1136,12 @@ END;
 							( $form_field->hasFieldArg( 'mapping template' ) ||
 							$form_field->hasFieldArg( 'mapping property' ) ||
 							( $form_field->hasFieldArg( 'mapping cargo table' ) &&
-							$form_field->hasFieldArg( 'mapping cargo field' ) ) ) ||
-							$form_field->getUseDisplayTitle() ) {
+							$form_field->hasFieldArg( 'mapping cargo field' ) ) ||
+							$form_field->getUseDisplayTitle() ) ) {
 							// If the input type is "tokens', the value is not
 							// an array, but the delimiter still needs to be set.
 							if ( !is_array( $cur_value ) ) {
-								if ( $form_field->hasFieldArg( 'delimiter' ) ) {
+								if ( $form_field->isList() ) {
 									$delimiter = $form_field->getFieldArg( 'delimiter' );
 								} else {
 									$delimiter = null;
@@ -1217,6 +1217,7 @@ END;
 							$options = $form_field->getFieldArgs();
 							$wiki_page->addTemplateParam( $template_name, $tif->getInstanceNum(), $field_name, $cur_value_in_template, $options);
 							$section = substr_replace( $section, $new_text, $brackets_loc, $brackets_end_loc + 3 - $brackets_loc );
+							$start_position = $brackets_loc + strlen( $new_text );
 						} else {
 							$start_position = $brackets_end_loc;
 						}
