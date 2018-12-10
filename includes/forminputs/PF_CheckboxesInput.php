@@ -87,7 +87,7 @@ class PFCheckboxesInput extends PFMultiEnumInput {
 			// Put a <label> tag around each checkbox, for CSS
 			// purposes as well as to clarify this element.
 			$text .= "\t" . Html::rawElement( 'label',
-				array( 'class' => $labelClass ),
+				array( 'class' => $labelClass, 'for' => $input_id ),
 				$checkbox_input . '&nbsp;' . $label
 			) . " ";
 			$wgPageFormsTabIndex++;
