@@ -1,14 +1,10 @@
 <?php
 /**
- * File holding the PFGoogleMapsInput class
- *
  * @file
  * @ingroup PF
  */
 
 /**
- * The PFGoogleMapsInput class.
- *
  * @ingroup PFFormInput
  */
 class PFGoogleMapsInput extends PFOpenLayersInput {
@@ -37,7 +33,6 @@ class PFGoogleMapsInput extends PFOpenLayersInput {
 		}
 		$wgOut->addHeadItem( $scriptsHTML, $scriptsHTML );
 		$wgOut->addModules( 'ext.pageforms.maps' );
-
 		$coordsInputAttrs = array(
 			'type' => 'text',
 			'tabindex' => $wgPageFormsTabIndex,
@@ -46,6 +41,13 @@ class PFGoogleMapsInput extends PFOpenLayersInput {
 			'value' => PFOpenLayersInput::parseCoordinatesString( $cur_value ),
 			'size' => 40
 		);
+		if ( array_key_exists( 'starting bounds', $other_args ) ) {
+			$boundCoords = $other_args['starting bounds'];
+			$boundCoords = explode( ";", $boundCoords );
+			$boundCoords[0] = PFOpenLayersInput::parseCoordinatesString( $boundCoords[0] );
+			$boundCoords[1] = PFOpenLayersInput::parseCoordinatesString( $boundCoords[1] );
+			$coordsInputAttrs['data-bound-coords'] = "$boundCoords[0];$boundCoords[1]";
+		}
 		$coordsInput = Html::element( 'input', $coordsInputAttrs );
 		$wgPageFormsTabIndex++;
 		// The address input box is not necessary if we are using other form inputs for the address.
@@ -77,6 +79,7 @@ END;
 
 	/**
 	 * Returns the HTML code to be included in the output page for this input.
+	 * @return string
 	 */
 	public function getHtmlText() {
 		return self::getHTML(

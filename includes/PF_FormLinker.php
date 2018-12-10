@@ -10,6 +10,8 @@
 
 class PFFormLinker {
 
+	private static $formPerNamespace = array();
+
 	static function getDefaultForm( $title ) {
 		// The title passed in can be null in at least one
 		// situation: if the "namespace page" is being checked, and
@@ -50,7 +52,7 @@ class PFFormLinker {
 		// Allow outside code to set/change the preloaded text.
 		Hooks::run( 'PageForms::EditFormPreloadText', array( &$preloadContent, $title, $formTitle ) );
 
-		list ( $formText, $pageText, $formPageTitle, $generatedPageName ) =
+		list( $formText, $pageText, $formPageTitle, $generatedPageName ) =
 			$wgPageFormsFormPrinter->formHTML( $formDefinition, false, false, null, $preloadContent, 'Some very long page name that will hopefully never get created ABCDEF123', null );
 		$params = array();
 
@@ -74,22 +76,78 @@ class PFFormLinker {
 
 	/**
 	 * Sets the URL for form-based creation of a nonexistent (broken-linked,
-	 * AKA red-linked) page
+	 * AKA red-linked) page, for MW < 1.28 only.
+	 *
+	 * @param Linker $linker
+	 * @param Title $target
+	 * @param array $options
+	 * @param string $text
+	 * @param array &$attribs
+	 * @param bool &$ret
+	 * @return true
 	 */
-	static function setBrokenLink( $linker, $target, $options, $text, &$attribs, &$ret ) {
+	static function setBrokenLinkOld( $linker, $target, $options, $text, &$attribs, &$ret ) {
 		// If it's not a broken (red) link, exit.
 		if ( !in_array( 'broken', $options, true ) ) {
 			return true;
 		}
 		// If the link is to a special page, exit.
-		if ( $target->getNamespace() == NS_SPECIAL ) {
+		$namespace = $target->getNamespace();
+		if ( $namespace == NS_SPECIAL ) {
 			return true;
 		}
 
 		global $wgPageFormsLinkAllRedLinksToForms;
-		// Don't do this is it it's a category page - it probably
+		// Don't do this if it's a category page - it probably
 		// won't have an associated form.
 		if ( $wgPageFormsLinkAllRedLinksToForms && $target->getNamespace() != NS_CATEGORY ) {
+			$attribs['href'] = $target->getLinkURL( array( 'action' => 'formedit', 'redlink' => '1' ) );
+			return true;
+		}
+
+		if ( self::getDefaultFormForNamespace( $namespace ) !== null ) {
+			$attribs['href'] = $target->getLinkURL( array( 'action' => 'formedit', 'redlink' => '1' ) );
+			return true;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Called by the HtmlPageLinkRendererEnd hook.
+	 * The $target argument is listed in the documentation as being of type
+	 * LinkTarget, but in practice it seems to sometimes be of type Title
+	 * and sometimes of type TitleValue. So we just leave out a type
+	 * declaration for that argument in the header.
+	 *
+	 * @param LinkRenderer $linkRenderer
+	 * @param Title $target
+	 * @param bool $isKnown
+	 * @param string &$text
+	 * @param array &$attribs
+	 * @param bool &$ret
+	 * @return true
+	 */
+	static function setBrokenLink( MediaWiki\Linker\LinkRenderer $linkRenderer, $target, $isKnown, &$text, &$attribs, &$ret ) {
+		// If it's not a broken (red) link, exit.
+		if ( $isKnown ) {
+			return true;
+		}
+		// If the link is to a special page, exit.
+		$namespace = $target->getNamespace();
+		if ( $namespace == NS_SPECIAL ) {
+			return true;
+		}
+
+		global $wgPageFormsLinkAllRedLinksToForms;
+		// Don't do this if it's a category page - it probably
+		// won't have an associated form.
+		if ( $wgPageFormsLinkAllRedLinksToForms && $target->getNamespace() != NS_CATEGORY ) {
+			$attribs['href'] = $target->getLinkURL( array( 'action' => 'formedit', 'redlink' => '1' ) );
+			return true;
+		}
+
+		if ( self::getDefaultFormForNamespace( $namespace ) !== null ) {
 			$attribs['href'] = $target->getLinkURL( array( 'action' => 'formedit', 'redlink' => '1' ) );
 			return true;
 		}
@@ -103,6 +161,8 @@ class PFFormLinker {
 	 * - the default form(s) for a category that this article belongs to,
 	 * if there are any; or
 	 * - the default form(s) for the article's namespace, if there are any.
+	 * @param Title $title
+	 * @return array
 	 */
 	static function getDefaultFormsForPage( $title ) {
 		// See if the page itself has a default form (or forms), and
@@ -156,8 +216,19 @@ class PFFormLinker {
 			return array();
 		}
 
-		// If we're still here, just return the default form for the
-		// namespace, which may well be null.
+		$default_form = self::getDefaultFormForNamespace( $namespace );
+		if ( $default_form != '' ) {
+			return array( $default_form );
+		}
+
+		return array();
+	}
+
+	public static function getDefaultFormForNamespace( $namespace ) {
+		if ( array_key_exists( $namespace, self::$formPerNamespace ) ) {
+			return self::$formPerNamespace[$namespace];
+		}
+
 		if ( NS_MAIN === $namespace ) {
 			// If it's in the main (blank) namespace, check for the
 			// file named with the word for "Main" in this language.
@@ -169,11 +240,8 @@ class PFFormLinker {
 		}
 
 		$namespacePage = Title::makeTitleSafe( NS_PROJECT, $namespace_label );
-		$default_form = self::getDefaultForm( $namespacePage );
-		if ( $default_form != '' ) {
-			return array( $default_form );
-		}
-
-		return array();
+		$defaultForm = self::getDefaultForm( $namespacePage );
+		self::$formPerNamespace[$namespace] = $defaultForm;
+		return $defaultForm;
 	}
 }

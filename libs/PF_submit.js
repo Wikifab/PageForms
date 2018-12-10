@@ -15,7 +15,7 @@
 
 	function setChanged( event ) {
 		sacButtons
-			.removeAttr( 'disabled' )
+			.prop( 'disabled', false )
 			.addClass( 'pf-save_and_continue-changed' );
 
 		return true;
@@ -192,8 +192,10 @@
 		.on( 'mousedown', '.rearrangerImage',setChanged );
 
 	}
+	
 	$('#wpSave').click(function(){
-		if (validateAll()){
+		form = document.getElementById('pfForm');
+		if (validateAll() && form.checkValidity()){
 			$(this).hide();
 			$('#loaderSave').show();
 		}

@@ -1,7 +1,7 @@
 {
 	"@Note": "When updating this file please also update PageForms.php with the same changes.",
 	"name": "Page Forms",
-	"version": "4.1.2",
+	"version": "4.4.1",
 	"author": [
 		"Yaron Koren",
 		"Stephan Gambke",
@@ -9,7 +9,7 @@
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:Page_Forms",
 	"descriptionmsg": "pageforms-desc",
-	"license-name": "GPL-2.0+",
+	"license-name": "GPL-2.0-or-later",
 	"type": "specialpage",
 	"namespaces": [
 		{
@@ -40,13 +40,15 @@
 			"editrestrictedfields": true
 		},
 		"user": {
-			"createclass": true
+			"createclass": true,
+			"multipageedit": true
 		}
 	},
 	"AvailableRights": [
 		"viewedittab",
 		"editrestrictedfields",
-		"createclass"
+		"createclass",
+		"multipageedit"
 	],
 	"Actions": {
 		"formedit": "PFFormEditAction",
@@ -56,6 +58,7 @@
 		"Forms": "PFForms",
 		"CreateForm": "PFCreateForm",
 		"Templates": "PFTemplates",
+		"MultiPageEdit": "PFMultiPageEdit",
 		"CreateTemplate": "PFCreateTemplate",
 		"CreateClass": "PFCreateClass",
 		"CreateCategory": "PFCreateCategory",
@@ -85,6 +88,7 @@
 		"PFForms": "specials/PF_Forms.php",
 		"PFCreateForm": "specials/PF_CreateForm.php",
 		"PFTemplates": "specials/PF_Templates.php",
+		"PFMultiPageEdit": "specials/PF_MultiPageEdit.php",
 		"PFCreateTemplate": "specials/PF_CreateTemplate.php",
 		"PFCreateClass": "specials/PF_CreateClass.php",
 		"PFCreateCategory": "specials/PF_CreateCategory.php",
@@ -96,6 +100,7 @@
 		"PFUploadWindow": "specials/PF_UploadWindow.php",
 		"PFTemplateField": "includes/PF_TemplateField.php",
 		"TemplatesPage": "specials/PF_Templates.php",
+		"SpreadsheetTemplatesPage": "specials/PF_MultiPageEdit.php",
 		"FormsPage": "specials/PF_Forms.php",
 		"PFForm": "includes/PF_Form.php",
 		"PFTemplate": "includes/PF_Template.php",
@@ -138,6 +143,7 @@
 		"PFTokensInput": "includes/forminputs/PF_TokensInput.php",
 		"PFGoogleMapsInput": "includes/forminputs/PF_GoogleMapsInput.php",
 		"PFOpenLayersInput": "includes/forminputs/PF_OpenLayersInput.php",
+		"PFLeafletInput": "includes/forminputs/PF_LeafletInput.php",
 		"PFRegExpInput": "includes/forminputs/PF_RegExpInput.php",
 		"PFRatingInput": "includes/forminputs/PF_RatingInput.php",
 		"PFWikiPage": "includes/wikipage/PF_WikiPage.php",
@@ -160,13 +166,12 @@
 			"dependencies": [
 				"jquery.ui.core",
 				"jquery.ui.autocomplete",
-				"jquery.ui.button",
 				"jquery.ui.sortable",
-				"jquery.ui.widget",
-				"ext.pageforms.fancybox",
 				"ext.pageforms.autogrow",
 				"mediawiki.util",
-				"ext.pageforms.select2"
+				"mediawiki.api",
+				"ext.pageforms.select2",
+				"ext.pageforms.wikieditor"
 			],
 			"messages": [
 				"pf_formerrors_header",
@@ -187,9 +192,16 @@
 				"libs/jquery.browser.js"
 			]
 		},
-		"ext.pageforms.fancybox": {
-			"scripts": "libs/jquery.fancybox.js",
-			"styles": "skins/jquery.fancybox.css",
+		"ext.pageforms.fancybox.jquery1": {
+			"scripts": "libs/FancyBox/jquery.fancybox.1.3.4.js",
+			"styles": "skins/FancyBox/jquery.fancybox.1.3.4.css",
+			"dependencies": [
+				"ext.pageforms.browser"
+			]
+		},
+		"ext.pageforms.fancybox.jquery3": {
+			"scripts": "libs/FancyBox/jquery.fancybox.3.2.10.js",
+			"styles": "skins/FancyBox/jquery.fancybox.3.2.10.css",
 			"dependencies": [
 				"ext.pageforms.browser"
 			]
@@ -268,21 +280,18 @@
 			"dependencies": [
 				"jquery.ui.datepicker",
 				"ext.pageforms.main"
-			],
-			"position": "bottom"
+			]
 		},
 		"ext.pageforms.timepicker": {
 			"scripts": "libs/PF_timepicker.js",
-			"styles": "skins/PF_Timepicker.css",
-			"position": "bottom"
+			"styles": "skins/PF_Timepicker.css"
 		},
 		"ext.pageforms.datetimepicker": {
 			"scripts": "libs/PF_datetimepicker.js",
 			"dependencies": [
 				"ext.pageforms.datepicker",
 				"ext.pageforms.timepicker"
-			],
-			"position": "bottom"
+			]
 		},
 		"ext.pageforms.regexp": {
 			"scripts": "libs/PF_regexp.js",
@@ -303,7 +312,7 @@
 			],
 			"messages": [
 				"pf_forminputs_change_file",
-				"upload-dialog-button-upload"
+				"pf-simpleupload"
 			]
 		},
 		"ext.pageforms.select2": {
@@ -339,6 +348,7 @@
 				"skins/jsgrid/theme.css"
 			],
 			"dependencies": [
+				"ext.pageforms.select2",
 				"jquery.ui.sortable"
 			],
 			"messages": [
@@ -350,6 +360,10 @@
 			"styles": [
 				"skins/balloon.css"
 			]
+		},
+		"ext.pageforms.wikieditor": {
+			"scripts": "libs/PF_wikieditor.js",
+			"styles": "skins/PF_wikieditor.css"
 		},
 		"ext.pageforms": {
 			"scripts": [
@@ -371,12 +385,16 @@
 				"libs/PF_CreateTemplate.js"
 			],
 			"messages": [
-				"pf_blank_error"
+				"pf_blank_error",
+				"pf_createtemplate_hierarchystructureplaceholder"
 			]
 		},
 		"ext.pageforms.PF_CreateClass": {
 			"scripts": [
 				"libs/PF_CreateClass.js"
+			],
+			"messages": [
+				"pf_createtemplate_hierarchystructureplaceholder"
 			]
 		},
 		"ext.pageforms.PF_CreateForm": {
@@ -419,6 +437,14 @@
 				"ext.visualEditor.mwtransclusion",
 				"oojs-ui.styles.icons-editing-advanced"
 			]
+		},
+		"ext.pageforms.PF_MultiPageEdit": {
+			"scripts": [
+				"libs/PF_MultiPageEdit.js"
+			],
+			"dependencies": [
+				"ext.pageforms.jsgrid"
+			]
 		}
 	},
 	"ResourceFileModulePaths": {
@@ -426,20 +452,17 @@
 		"remoteExtPath": "PageForms"
 	},
 	"Hooks": {
-		"LinkEnd": [
-			"PFFormLinker::setBrokenLink"
-		],
-		"SkinTemplateTabs": [
+		"SkinTemplateNavigation": [
 			"PFFormEditAction::displayTab",
 			"PFHelperFormAction::displayTab"
-		],
-		"SkinTemplateNavigation": [
-			"PFFormEditAction::displayTab2",
-			"PFHelperFormAction::displayTab2"
 		],
 		"ArticlePurge": [
 			"PFFormUtils::purgeCache"
 		],
+		"PageContentSave": [
+			"PFFormUtils::purgeCache"
+		],
+		"PageContentSaveComplete": "PFHooks::setPostEditCookie",
 		"ParserFirstCallInit": [
 			"PFHooks::registerFunctions"
 		],
@@ -452,6 +475,8 @@
 		"EditPage::importFormData": [
 			"PFHooks::showFormPreview"
 		],
+		"CargoTablesActionLinks": "PFHooks::addToCargoTablesLinks",
+		"TinyMCEDisable": "PFHooks::disableTinyMCE",
 		"CanonicalNamespaces": [
 			"PFHooks::registerNamespaces"
 		],
@@ -463,7 +488,7 @@
 		]
 	},
 	"config": {
-		"PageFormsUseDisplayTitle": false,
+		"PageFormsUseDisplayTitle": true,
 		"PageFormsSimpleUpload": false,
 		"PageFormsMaxAutocompleteValues": 1000,
 		"PageFormsMaxLocalAutocompleteValues": 100,
@@ -485,6 +510,9 @@
 		"PageFormsAutocompleteValues": [],
 		"PageFormsGridValues": [],
 		"PageFormsGridParams": [],
+		"PageFormsContLangYes": null,
+		"PageFormsContLangNo": null,
+		"PageFormsContLangMonths": [],
 		"PageFormsFieldProperties": [],
 		"PageFormsCargoFields": [],
 		"PageFormsDependentFields": [],

@@ -87,6 +87,14 @@ ve.init.sa.Target.prototype.setupToolbar = function ( surface ) {
 };
 
 ve.init.sa.Target.prototype.parseWikitextFragment = function ( wikitext, pst ) {
+
+	if( ! this.pageName) {
+		// if no page name, we are creating a new one
+		// wee took mw global page name and we must remove all chars before the last '/'
+		// todi : fix to use real page name, this can fait if we add / in page name
+		this.pageName = wgPageName.replace(/^.*(\\|\/|\:)/, '');
+	}
+
 	return new mw.Api().post( {
 		action: 'visualeditor',
 		paction: 'parsefragment',

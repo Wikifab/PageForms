@@ -1,14 +1,10 @@
 <?php
 /**
- * File holding the PFDateTimeInput class
- *
  * @file
  * @ingroup PF
  */
 
 /**
- * The PFDateTimeInput class.
- *
  * @ingroup PFFormInput
  */
 class PFDateTimeInput extends PFDateInput {
@@ -64,31 +60,25 @@ class PFDateTimeInput extends PFDateInput {
 				// Handle 'default=now'.
 				if ( $datetime == 'now' ) {
 					global $wgLocaltimezone;
-					if ( isset( $wgLocaltimezone ) ) {
-						$serverTimezone = date_default_timezone_get();
-						date_default_timezone_set( $wgLocaltimezone );
+					if ( $wgLocaltimezone == null ) {
+						$dateTimeObject = new DateTime( 'now' );
+					} else {
+						$dateTimeObject = new DateTime( 'now', new DateTimeZone( $wgLocaltimezone ) );
 					}
-					$actual_date = time();
 				} else {
-					$actual_date = strtotime( $datetime );
+					$dateTimeObject = new DateTime( $datetime );
 				}
 				if ( $wgPageForms24HourTime ) {
-					$hour = date( 'G', $actual_date );
+					$hour = $dateTimeObject->format( 'G' );
 				} else {
-					$hour = date( 'g', $actual_date );
+					$hour = $dateTimeObject->format( 'g' );
 				}
-				$minute = date( 'i', $actual_date );
-				$second = date( 's', $actual_date );
+				$minute = $dateTimeObject->format( 'i' );
+				$second = $dateTimeObject->format( 's' );
 				if ( !$wgPageForms24HourTime ) {
-					$ampm24h = date( 'A', $actual_date );
+					$ampm24h = $dateTimeObject->format( 'A' );
 				}
-				$timezone = date( 'T', $actual_date );
-				// Restore back to the server's timezone.
-				if ( $datetime == 'now' ) {
-					if ( isset( $wgLocaltimezone ) ) {
-						date_default_timezone_set( $serverTimezone );
-					}
-				}
+				$timezone = $dateTimeObject->format( 'T' );
 			}
 		} else {
 			$hour = null;
@@ -112,7 +102,9 @@ class PFDateTimeInput extends PFDateInput {
 			$ampm24h_options = array( '', 'AM', 'PM' );
 			foreach ( $ampm24h_options as $value ) {
 				$text .= "				<option value=\"$value\"";
-				if ( $value == $ampm24h ) { $text .= " selected=\"selected\""; }
+				if ( $value == $ampm24h ) {
+					$text .= " selected=\"selected\"";
+				}
 				$text .= ">$value</option>\n";
 			}
 			$text .= "	</select>\n";
@@ -138,6 +130,7 @@ class PFDateTimeInput extends PFDateInput {
 
 	/**
 	 * Returns the HTML code to be included in the output page for this input.
+	 * @return string
 	 */
 	public function getHtmlText() {
 		return self::getHTML(

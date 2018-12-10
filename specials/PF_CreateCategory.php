@@ -72,7 +72,7 @@ class PFCreateCategory extends SpecialPage {
 				// Redirect to wiki interface
 				$out->setArticleBodyOnly( true );
 				$title = Title::makeTitleSafe( NS_CATEGORY, $category_name );
-				$full_text = PFCreateCategory::createCategoryText( $default_form, $category_name, $parent_category );
+				$full_text = self::createCategoryText( $default_form, $category_name, $parent_category );
 				$text = PFUtils::printRedirectForm( $title, $full_text, "", $save_page, $preview_page, false, false, false, null, null );
 				$out->addHTML( $text );
 				return;
@@ -107,7 +107,7 @@ class PFCreateCategory extends SpecialPage {
 		$text .= Html::rawElement( 'p', null, $firstRow )  . "\n";
 		$secondRow = wfMessage( 'pf_createcategory_makesubcategory' )->escaped() . ' ';
 		$selectBody = "\t" . Html::element( 'option', null, null ). "\n";
-		$categories = PFValuesUtils::getCategoriesForPage();
+		$categories = PFValuesUtils::getAllCategories();
 		foreach ( $categories as $category ) {
 			$category = str_replace( '_', ' ', $category );
 			$selectBody .= "\t" . Html::element( 'option', null, $category ) . "\n";

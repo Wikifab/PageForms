@@ -64,7 +64,7 @@ class PFTemplate {
 				return;
 			}
 		}
-		return $this->loadTemplateFieldsSMWAndOther();
+		$this->loadTemplateFieldsSMWAndOther();
 	}
 
 	/**
@@ -177,6 +177,9 @@ class PFTemplate {
 	 * For a field name and its attached property name located in the
 	 * template text, create an PFTemplateField object out of it, and
 	 * add it to $this->mTemplateFields.
+	 * @param string $fieldName
+	 * @param string $propertyName
+	 * @param bool $isList
 	 */
 	function loadPropertySettingInTemplate( $fieldName, $propertyName, $isList ) {
 		global $wgContLang;
@@ -362,6 +365,7 @@ class PFTemplate {
 	 * Creates the text of a template, when called from
 	 * Special:CreateTemplate, Special:CreateClass or the Page Schemas
 	 * extension.
+	 * @return string
 	 */
 	public function createText() {
 		// Avoid PHP 7.1 warning from passing $this by reference
@@ -375,9 +379,13 @@ $templateHeader
 
 END;
 		$text .= '{{' . $this->mTemplateName;
-		if ( count( $this->mTemplateFields ) > 0 ) { $text .= "\n"; }
+		if ( count( $this->mTemplateFields ) > 0 ) {
+			$text .= "\n";
+		}
 		foreach ( $this->mTemplateFields as $field ) {
-			if ( $field->getFieldName() == '' ) continue;
+			if ( $field->getFieldName() == '' ) {
+				continue;
+			}
 			$text .= "|" . $field->getFieldName() . "=\n";
 		}
 		if ( defined( 'CARGO_VERSION' ) && !defined( 'SMW_VERSION' ) && $this->mCargoTable != '' ) {
@@ -421,7 +429,9 @@ END;
 		$setText = '';
 
 		// Topmost part of table depends on format.
-		if ( !$this->mTemplateFormat ) $this->mTemplateFormat = 'standard';
+		if ( !$this->mTemplateFormat ) {
+			$this->mTemplateFormat = 'standard';
+		}
 		if ( $this->mTemplateFormat == 'standard' ) {
 			$tableText = '{| class="wikitable"' . "\n";
 		} elseif ( $this->mTemplateFormat == 'infobox' ) {
@@ -439,7 +449,9 @@ END;
 		}
 
 		foreach ( $this->mTemplateFields as $i => $field ) {
-			if ( $field->getFieldName() == '' ) continue;
+			if ( $field->getFieldName() == '' ) {
+				continue;
+			}
 
 			$fieldParam = '{{{' . $field->getFieldName() . '|}}}';
 			if ( is_null( $field->getNamespace() ) ) {
@@ -448,11 +460,6 @@ END;
 				$fieldString = $field->getNamespace() . ':' . $fieldParam;
 			}
 			$separator = '';
-
-			$fieldStart = $this->mFieldStart;
-			Hooks::run('PageForms::TemplateFieldStart', array( $field, &$fieldStart ) );
-			$fieldEnd = $this->mFieldEnd;
-			Hooks::run('PageForms::TemplateFieldEnd', array( $field, &$fieldEnd ) );
 
 			$fieldLabel = $field->getLabel();
 			if ( $fieldLabel == '' ) {
@@ -497,7 +504,7 @@ END;
 			if ( $this->mTemplateFormat == 'standard' || $this->mTemplateFormat == 'infobox' ) {
 				if ( $fieldDisplay == 'hidden' ) {
 				} elseif ( $fieldDisplay == 'nonempty' ) {
-					//$tableText .= "{{!}} ";
+					// $tableText .= "{{!}} ";
 				} else {
 					$tableText .= "| ";
 				}
@@ -512,29 +519,16 @@ END;
 				if ( $separator != '' ) {
 					$tableText .= "$separator ";
 				}
-				if ( $fieldStart != '' ) {
-					$tableText .= "$fieldStart ";
-				}
-				if ( $cargoInUse && ( $field->getFieldType() == 'Page' || $field->getFieldType() == 'File' ) ) {
-					$tableText .= "[[$fieldString]]";
-				} else {
-					$tableText .= $fieldString;
-				}
-				if ( $fieldEnd != '' ) {
-					$tableText .= " $fieldEnd";
-				}
-				$tableText .= "\n";
+				$tableText .= $this->createTextForField( $field );
 				if ( $fieldDisplay == 'nonempty' ) {
 					$tableText .= " }}";
 				}
+				$tableText .= "\n";
 			} elseif ( !is_null( $internalObjText ) ) {
 				if ( $separator != '' ) {
 					$tableText .= "$separator ";
 				}
-				if ( $fieldStart != '' ) {
-					$tableText .= "$fieldStart ";
-				}
-				$tableText .= "$fieldString $fieldEnd";
+				$tableText .= $this->createTextForField( $field );
 				if ( $fieldDisplay == 'nonempty' ) {
 					$tableText .= " }}";
 				}
@@ -558,55 +552,9 @@ END;
 				if ( $this->mTemplateFormat == 'standard' || $this->mTemplateFormat == 'infobox' ) {
 					$tableText .= '{{!}} ';
 				}
-				if ( $fieldStart != '' ) {
-					$tableText .= $fieldStart . ' ';
-				}
-				if ( !is_null( $field->getNamespace() ) ) {
-					// Special handling is needed, for at
-					// least the File and Category namespaces.
-					$tableText .= "[[$fieldString]] {{#set:$fieldProperty=$fieldString}}";
-				} else {
-					$tableText .= "[[$fieldProperty::$fieldString]]";
-				}
-				$tableText .= "}} $fieldEnd\n";
-			} elseif ( $fieldIsList ) {
-				// If this field is meant to contain a list,
-				// add on an 'arraymap' function, that will
-				// call this semantic markup tag on every
-				// element in the list.
-				// Find a string that's not in the semantic
-				// field call, to be used as the variable.
-				$var = "x"; // default - use this if all the attempts fail
-				if ( strstr( $fieldProperty, $var ) ) {
-					$var_options = array( 'y', 'z', 'xx', 'yy', 'zz', 'aa', 'bb', 'cc' );
-					foreach ( $var_options as $option ) {
-						if ( ! strstr( $fieldProperty, $option ) ) {
-							$var = $option;
-							break;
-						}
-					}
-				}
-				$tableText .= "{{#arraymap:{{{" . $field->getFieldName() . '|}}}|' . $field->getDelimiter() . "|$var|[[";
-				if ( $cargoInUse ) {
-					$tableText .= "$var]]";
-				} elseif ( is_null( $field->getNamespace() ) ) {
-					$tableText .= "$fieldProperty::$var]]";
-				} else {
-					$tableText .= $field->getNamespace() . ":$var]] {{#set:" . $fieldProperty . "=$var}} ";
-				}
-				$tableText .= "}}\n";
+				$tableText .= $this->createTextForField( $field ) . "\n";
 			} else {
-				if ( $fieldStart != '' ) {
-					$tableText .= $fieldStart . ' ';
-				}
-				if ( !is_null( $field->getNamespace() ) ) {
-					// Special handling is needed, for at
-					// least the File and Category namespaces.
-					$tableText .= "[[$fieldString]] {{#set:$fieldProperty=$fieldString}}";
-				} else {
-					$tableText .= "[[$fieldProperty::$fieldString]]";
-				}
-				$tableText .= " $fieldEnd\n";
+				$tableText .= $this->createTextForField( $field ) . "\n";
 			}
 		}
 
@@ -664,4 +612,25 @@ END;
 
 		return $text;
 	}
+
+	function createTextForField( $field ) {
+		$text = '';
+		$fieldStart = $this->mFieldStart;
+		Hooks::run( 'PageForms::TemplateFieldStart', array( $field, &$fieldStart ) );
+		if ( $fieldStart != '' ) {
+			$text .= "$fieldStart ";
+		}
+
+		$cargoInUse = defined( 'CARGO_VERSION' ) && !defined( 'SMW_VERSION' ) && $this->mCargoTable != '';
+		$text .= $field->createText( $cargoInUse );
+
+		$fieldEnd = $this->mFieldEnd;
+		Hooks::run( 'PageForms::TemplateFieldEnd', array( $field, &$fieldEnd ) );
+		if ( $fieldEnd != '' ) {
+			$text .= " $fieldEnd";
+		}
+
+		return $text;
+	}
+
 }

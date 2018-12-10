@@ -12,9 +12,12 @@ module.exports = function ( grunt ) {
 			all: [
 				'**/*.js',
 				'!node_modules/**',
+				'!vendor/**',
 				'!libs/jquery.browser.js',
 				'!libs/jquery.dynatree.js',
-				'!libs/jquery.fancybox.js',
+				'!libs/FancyBox/jquery.fancybox.1.3.4.js',
+				'!libs/FancyBox/jquery.fancybox.3.2.10.js',
+				'!libs/jsgrid.js',
 				'!libs/select2.js',
 				'!libs/PF_maps.js'
 			]
@@ -25,7 +28,8 @@ module.exports = function ( grunt ) {
 		jsonlint: {
 			all: [
 				'**/*.json',
-				'!node_modules/**'
+				'!node_modules/**',
+				'!vendor/**'
 			]
 		}
 	} );

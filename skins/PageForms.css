@@ -163,10 +163,13 @@ form input.formInput,
 
 .ve-area-wrapper .oo-ui-toolbar-bar {
 	border-radius: 0 0px 3px 3px;
+	z-index: auto !important;
 }
 
 .ve-area-wrapper .oo-ui-toolbar-bar .oo-ui-tool-name-vefpgSwitchEditor .oo-ui-tool-link{
-	padding:9.5px;
+	padding: 9.5px;
+	width: 40px;
+    height: 40px;
 } 
 
 .select2-container .select2-choice .select2-arrow {
@@ -274,8 +277,6 @@ input.pfComboBoxActual {
 	display: none;
 	width: 94px;
 	text-align: center;
-    margin-left: 9px;
-    //background-color: var(--main-hover-color);
     color: #fff;
     padding: 7px 14px;
     border: none;
@@ -283,8 +284,13 @@ input.pfComboBoxActual {
     -moz-border-radius: 3px;
     border-radius: 3px;
     font-size: 0.7em;
-    float: right;
+    float: left;
     cursor: inherit;
+}
+
+.saving-menu #loaderSave {
+	float: right;
+	margin-left: 5px;
 }
 
 #loaderSave .fa {

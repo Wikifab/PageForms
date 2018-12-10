@@ -14,7 +14,8 @@
 			"Hudafu",
 			"NigelSoft",
 			"Apflu",
-			"아라"
+			"아라",
+			"夢蝶葬花"
 		]
 	},
 	"pageforms-desc": "用于创建和编辑wiki页面的表单",
@@ -78,6 +79,8 @@
 	"pf_createtemplate_sectionsformat": "小节",
 	"pf_createtemplate_addfield": "添加字段",
 	"pf_createtemplate_deletefield": "删除",
+	"multipageedit": "编辑多个页面：",
+	"pf_multipageedit_docu": "选择以下模板之一以编辑包含它的所有页面。也可以使用所选模板创建新页面。",
 	"forms": "表单",
 	"pf_forms_docu": "当前wiki之中存在下列表单。",
 	"pf_forminputs_mandatory": "必须为该输入项录入取值",
@@ -227,6 +230,7 @@
 	"pf_modified_input_error": "此修改应获通过或拒绝",
 	"pf_pipe_error": "除了在{{...}}或[[...]]之内外，不允许使用“|”",
 	"uploadwindow": "上传窗口",
+	"pf-simpleupload": "上传",
 	"pf_deletionlog": "删除日志",
 	"pf-preview-header": "表单预览",
 	"pf-preview-note": "这是该表单使用时的样子：",

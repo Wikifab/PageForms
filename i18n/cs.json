@@ -9,7 +9,10 @@
 			"Reaperman",
 			"Vks",
 			"Aktron",
-			"Cvanca"
+			"Cvanca",
+			"Ilimanaq29",
+			"Matěj Suchánek",
+			"Clon"
 		]
 	},
 	"createproperty": "Vytvořit vlastnost",
@@ -28,6 +31,7 @@
 	"pf_createtemplate_plainformat": "Prostý text",
 	"pf_createtemplate_addfield": "Přidat pole",
 	"pf_createtemplate_deletefield": "Smazat",
+	"multipageedit": "Editovat několik stránek",
 	"forms": "Formuláře",
 	"pf_createform_nameinput": "Název formuláře",
 	"pf_createform_template": "Šablona:",
@@ -44,6 +48,7 @@
 	"pf_createclass_success": "Uvedené stránky budou vytvořeny.",
 	"pf_createclass_create": "Založit",
 	"pf_formstart_createoredit": "Vytvořit nebo upravit",
+	"formedit": "Upravit pomocí formuláře",
 	"pf_formedit_remove": "Odstranit",
 	"pf_formedit_none": "Nic",
 	"pf_formedit_tooltip_saveandcontinueediting": "Uložit a pokračovat v úpravách",
