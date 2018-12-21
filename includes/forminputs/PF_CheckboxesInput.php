@@ -41,7 +41,7 @@ class PFCheckboxesInput extends PFMultiEnumInput {
 		if ( array_key_exists( 'class', $other_args ) ) {
 			$labelClass .= ' ' . $other_args['class'];
 		}
-		$input_id = "input_$wgPageFormsFieldNum";
+		$input_prefix_id = "input_$wgPageFormsFieldNum";
 		// get list delimiter - default is comma
 		if ( array_key_exists( 'delimiter', $other_args ) ) {
 			$delimiter = $other_args['delimiter'];
@@ -54,7 +54,10 @@ class PFCheckboxesInput extends PFMultiEnumInput {
 			$possible_values = array();
 		}
 		$text = '';
+		$valIndex = 0;
 		foreach ( $possible_values as $key => $possible_value ) {
+			$valIndex ++;
+			$input_id = $input_prefix_id . '_' . $valIndex;
 			$cur_input_name = $input_name . '[' . $key . ']';
 
 			if (
