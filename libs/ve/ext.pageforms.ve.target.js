@@ -12,7 +12,7 @@
 	 * @extends ve.init.sa.Target
 	 */
 	mw.pageForms.ve.Target = function PageFormsVeTarget(node, content) {
-		
+
 		this.$node = node;
 		var config = {};
 		config.toolbarConfig = {};
@@ -34,14 +34,14 @@
 
 		// HACK: stop VE's education popups from appearing (T116643)
 		this.dummyToolbar = true;
-		
+
 		this.init(content);
 	};
 
 	OO.inheritClass( mw.pageForms.ve.Target, ve.init.sa.Target );
-	
 
-	
+
+
 	mw.pageForms.ve.Target.prototype.init = function ( content ) {
 		this.convertToHtml(content);
 	}
@@ -92,7 +92,7 @@
 		// Special character toolbar
 		//{ include: [ 'specialCharacter' ] }
 	];
-	
+
 	mw.pageForms.ve.Target.static.actionGroups = [
 			{ include: [ 'vefpgSwitchEditor' ] }
 			/*{
@@ -105,7 +105,7 @@
 			},*/
 			//{ include: [ 'link' ] }
 	];
-	
+
 
 	// Allow pasting links
 	mw.pageForms.ve.Target.static.importRules = ve.copy( mw.pageForms.ve.Target.static.importRules );
@@ -130,7 +130,7 @@
 			mw.pageForms.ve.Target.static.actionGroups = [];
 		}
 	};
-	
+
 	/**
 	 * add listener to show or hide toolbar if the area get focus or loose it
 	 */
@@ -157,12 +157,12 @@
 			this.getToolbar().$element.hide(500);
 		}
 	}
-	
-	
+
+
 
 	/**
 	 * create a new surface with VisualEditor, and add it to the target
-	 * 
+	 *
 	 * @param String content text to initiate content, in html format
 	 */
 	mw.pageForms.ve.Target.prototype.createWithHtmlContent = function(content) {
@@ -177,7 +177,7 @@
 
 		// Append the target to the document
 		$( this.$node ).before( this.$element );
-		
+
 		$ (this.$node)
 			.hide()
 			.removeClass( 'oo-ui-texture-pending' )
@@ -191,7 +191,7 @@
 			console.log('switchEditor event');
 			target.switchEditor();
 		} );
-		
+
 		// show or hide toolbar when loose focus
 		this.getSurface().getView().on( 'blur', function (data) {
 			target.updateToolbarVisibility();
@@ -206,24 +206,24 @@
 		if ( $focusedElement.length && this.$node.is( $focusedElement ) ) {
 			this.getSurface().getView().focus();
 		}
-		
+
 
 		// fix BUG on initialisation of toolbar position :
 		target.getToolbar().onWindowResize();
 		target.onToolbarResize();
 		target.onContainerScroll();
 	}
-	
+
 
 	/**
-	 * update the original textarea value with the content of VisualEditor surface 
+	 * update the original textarea value with the content of VisualEditor surface
 	 * (converte the content into wikitext)
 	 */
 	mw.pageForms.ve.Target.prototype.updateContent = function () {
 
 		this.convertToWikiText(this.getSurface().getHtml());
 	}
-	
+
 	mw.pageForms.ve.Target.prototype.getPageName = function () {
 		return mw.config.get( 'wgPageName' ).split(/(\\|\/)/g).pop();
 	}
@@ -233,10 +233,17 @@
 		var oldFormat = 'html';
 		var newFormat = 'wikitext';
 
+		if (content == '') {
+			// if content empty, no need to do a conversion call
+			$( target.$node ).val('');
+			$( target.$node ).change();
+			return;
+		}
+
 		$(this.$node)
 			.prop( 'disabled', true )
 			.addClass( 'oo-ui-texture-pending' );
-		
+
 		var apiCall = new mw.Api().post( {
 				action: 'flow-parsoid-utils',
 				from: oldFormat,
@@ -246,7 +253,7 @@
 			} ).then( function (data) {
 				$( target.$node ).val(data[ 'flow-parsoid-utils' ].content);
 				$( target.$node ).change();
-				
+
 				$ (target.$node)
 					.removeClass( 'oo-ui-texture-pending' )
 					.prop( 'disabled', false );
@@ -254,15 +261,22 @@
 			.fail( function (data) {
 				console.log('Error converting to wikitext');
 			});
-		
+
 	}
-	
+
 	mw.pageForms.ve.Target.prototype.convertToHtml = function ( content ) {
 		var target = this;
 		var oldFormat = 'wikitext';
 		var newFormat = 'html';
-		
-		
+
+
+		if (content == '') {
+			// if content empty, no need to do a conversion call
+			target.createWithHtmlContent('');
+			return;
+		}
+
+
 		var apiCall = new mw.Api().post( {
 				action: 'flow-parsoid-utils',
 				from: oldFormat,
@@ -275,13 +289,13 @@
 			.fail( function (data) {
 				console.log('Error converting to html');
 			});
-		
+
 	}
-	
+
 	mw.pageForms.ve.Target.prototype.switchEditor = function ( content ) {
 
 		var textarea = this.$node;
-		
+
 		if ( $(textarea).is(":visible") ) {
 			// switch back to VE
 			this.clearSurfaces();
@@ -297,7 +311,7 @@
 		}
 	}
 
-	
+
 	/**
 	 * Attach the toolbar to the DOM
 	 * redifine attach Toolbar function to place on the bottom
