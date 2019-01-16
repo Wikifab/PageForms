@@ -1667,5 +1667,7 @@ $(document).ready( function() {
 	$('#pfForm').submit( function() {
 		return validateAll();
 	} );
+
+	mw.hook('pf.formInitializationEnd').fire();
 });
 }( jQuery, mediaWiki ) );

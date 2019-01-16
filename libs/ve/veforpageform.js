@@ -40,7 +40,7 @@
 								$(div).find('.createboxInput.form-textarea').each(function() {
 									activeVisualEditorOnTextArea(this);
 								});
-							}, 3);
+							}, 10);
 
 					} );
 			} );
@@ -110,7 +110,14 @@
 		veInstances.push( veEditor);
 	}
 
-	mw.loader.using( 'ext.pageforms.visualeditor.visualEditor', $.proxy( initVisualEditor ) );
+	// init VE when VisualEditor OK :
+	//mw.loader.using( 'ext.pageforms.visualeditor.visualEditor', $.proxy( initVisualEditor ) );
+
+
+	// init VE When PF is init :
+	mw.hook( 'pf.formInitializationEnd' ).add( function(div) {
+		mw.loader.using( 'ext.pageforms.visualeditor.visualEditor', $.proxy( initVisualEditor ) );
+	});
 
 }( jQuery , mw) );
 
