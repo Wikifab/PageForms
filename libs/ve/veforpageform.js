@@ -1,22 +1,22 @@
 /*!
- * VisualEditor for PageForm Initialization 
+ * VisualEditor for PageForm Initialization
  *
  * @author Pierre Boutet, Clement Flipo
  * @copyright Copyright © 2016-2017, Wikifab
  * @license https://mit-license.org/ MIT
  */
 ( function ( $ , mw) {
-	
+
 	/**
 	 * what does this file do :
 	 * - Load VisualEditor librairy
 	 * - look for every textearea where we must activate visual editor, and activate it
 	 * - watch click on save button, to defer the save request after all visualEditor requests are done.
-	 * 
+	 *
 	 */
-	
+
 	var veInstances = [];
-	
+
 	function initVisualEditor() {
 		// init VisualEditor Platform
 		new ve.init.mw.Platform( ).initialize()
@@ -28,33 +28,38 @@
 
 				// add i18n messages to VE
 				ve.init.platform.addMessages( mw.messages.get() );
-				
+
 				// init all VisualEditor areas
 				addVisualEditorOnTextareas();
-				
+
 				// add event on new step button, to appli VE on new steps
 				mw.hook( 'pf.addTemplateInstance' ).add( function(div) {
-						$(div).find('.createboxInput.form-textarea').each(function() {
-							activeVisualEditorOnTextArea(this);
-						});
+					// set time out enable to run it in a new 'thread',
+					// and to continue hook execution without wait for VE to be loaded
+						setTimeout(function(){
+								$(div).find('.createboxInput.form-textarea').each(function() {
+									activeVisualEditorOnTextArea(this);
+								});
+							}, 3);
+
 					} );
 			} );
-		
+
 
 		// we catch event on save button, to wait that every VE content is up to date
 		// (ie api calls triggered and received)
 		catchAndDelayClickEvent('wpSave');
 		catchAndDelayClickEvent('wpSaveAndContinue');
-		
+
 	}
-	
+
 	var clickCount = [];
-	
+
 	function catchAndDelayClickEvent(buttonId) {
 		if( ! clickCount[buttonId]) {
 			clickCount[buttonId] = 0;
 		}
-		
+
 		$('#'+buttonId).click( function(event) {
 			clickCount[buttonId] ++;
 			// the click count var is a security to avoid infinite loop if api calls do not end
@@ -69,7 +74,7 @@
 		    if ((updateNeeded || jQuery.active > 0) && clickCount[buttonId] < 2) {
 		    	// if update needed, stop event propagation, and delay before relaunch
 		    	event.preventDefault();
-		    	setTimeout( function () { 
+		    	setTimeout( function () {
 					clickWhenApiCallDone('#'+buttonId, 5);
 			    }, 100);
 		    } else {
@@ -78,35 +83,35 @@
 		    }
 		});
 	}
-	
+
 	function clickWhenApiCallDone(button, maxCount) {
 		if (jQuery.active > 0 && maxCount > 0) {
-			setTimeout( function () { 
+			setTimeout( function () {
 				clickWhenApiCallDone(button, maxCount -1);
 		    }, 500);
 		} else {
 		    $(button).click();
 		}
 	}
-	
+
 	function addVisualEditorOnTextareas() {
 		$('.createboxInput.form-textarea').not( ".multipleTemplateStarter .form-textarea" ).each(function() {
 			activeVisualEditorOnTextArea(this);
 		});
 	}
-	
+
 	function activeVisualEditorOnTextArea(textarea) {
 		var logo = $('<div class="ve-demo-logo"></div>');
 		var toolbar = $('<div class="ve-demo-toolbar ve-demo-targetToolbar"></div>');
 		var editor = $('<div class="ve-demo-editor"></div>');
-		
+
 		$(textarea).before(logo, editor, toolbar);
 		var veEditor = new mw.pageForms.ve.Editor(textarea, $(textarea).val());
 		veInstances.push( veEditor);
 	}
-	
+
 	mw.loader.using( 'ext.pageforms.visualeditor.visualEditor', $.proxy( initVisualEditor ) );
-	
+
 }( jQuery , mw) );
 
 $ = jQuery;

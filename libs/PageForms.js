@@ -917,7 +917,7 @@ $.fn.checkForPipes = function() {
 	if ( fieldVal.indexOf( '|' ) < 0 ) {
 		return true;
 	}
-	
+
 	if (mw.config.get( 'wgAllowPipesInForms' )) {
 		return true;
 	}
