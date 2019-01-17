@@ -40,7 +40,7 @@
 								$(div).find('.createboxInput.form-textarea').each(function() {
 									activeVisualEditorOnTextArea(this);
 								});
-							}, 10);
+							}, 20);
 
 					} );
 			} );
