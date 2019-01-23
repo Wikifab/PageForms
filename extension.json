@@ -397,6 +397,11 @@
 				"pf_createtemplate_hierarchystructureplaceholder"
 			]
 		},
+		"ext.pageforms.PF_UploadWindow": {
+			"styles": [
+				"skins/PF_UploadWindow.css"
+			]
+		},
 		"ext.pageforms.PF_CreateForm": {
 			"scripts": [
 				"libs/PF_CreateForm.js"
