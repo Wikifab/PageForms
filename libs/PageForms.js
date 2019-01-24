@@ -1197,9 +1197,18 @@ $.fn.addInstance = function( addAboveCurInstance ) {
 			// Add in a 'b' at the end of the name to reduce the
 			// chance of name collision with another field
 			if (this.name) {
+				var real_old_name = this.name;
 				var old_name = this.name.replace(/\[num\]/g, '');
 				$(this).attr('origName', old_name);
 				this.name = this.name.replace(/\[num\]/g, '[' + num_elements + 'b]');
+				var new_name = this.name;
+
+				// replace name in imput that reference it :
+				new_div.find("input[data-targetname='"+real_old_name + "']").each(
+					function () {
+						$(this).attr('data-targetname',new_name);
+					}
+				);
 			}
 
 			if (this.id) {
