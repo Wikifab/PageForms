@@ -116,6 +116,9 @@ class PFUploadWindow extends UnlistedSpecialPage {
 		$this->setHeaders();
 		$this->outputHeader();
 
+		# style
+		$this->getOutput()->addModules( 'ext.pageforms.PF_UploadWindow' );
+
 		# Check uploading enabled
 		if ( !UploadBase::isEnabled() ) {
 			throw new ErrorPageError( 'uploaddisabled', 'uploaddisabledtext' );
