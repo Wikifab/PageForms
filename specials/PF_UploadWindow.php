@@ -117,7 +117,7 @@ class PFUploadWindow extends UnlistedSpecialPage {
 		$this->outputHeader();
 
 		# style
-		$this->getOutput()->addModules( 'ext.pageforms.PF_UploadWindow' );
+		$this->getOutput()->addHTML('<link rel="stylesheet" href="' . $this->getOutput()->getResourceLoader()->getModule('ext.pageforms.PF_UploadWindow')->getStyleURLsForDebug(ResourceLoaderContext::newDummyContext())['all'][0] . '" >');
 
 		# Check uploading enabled
 		if ( !UploadBase::isEnabled() ) {
