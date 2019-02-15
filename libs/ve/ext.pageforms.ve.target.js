@@ -241,8 +241,12 @@
 		}
 
 		$(this.$node)
-			.prop( 'disabled', true )
+			//.prop( 'disabled', true )
 			.addClass( 'oo-ui-texture-pending' );
+
+		function onError() {
+
+		};
 
 		var apiCall = new mw.Api().post( {
 				action: 'flow-parsoid-utils',
@@ -259,6 +263,9 @@
 					.prop( 'disabled', false );
 			})
 			.fail( function (data) {
+				$ (target.$node)
+					.removeClass( 'oo-ui-texture-pending' )
+					.prop( 'disabled', false );
 				console.log('Error converting to wikitext');
 			});
 
