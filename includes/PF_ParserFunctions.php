@@ -225,6 +225,7 @@ class PFParserFunctions {
 	}
 
 	public static function renderFormInput( &$parser ) {
+
 		$params = func_get_args();
 		array_shift( $params ); // don't need the parser
 
@@ -236,6 +237,7 @@ class PFParserFunctions {
 		$classStr = "pfFormInput";
 		$inPlaceholder = null;
 		$inAutofocus = true;
+		$languageSelector = false;
 
 		// Assign params.
 		foreach ( $params as $i => $param ) {
@@ -364,7 +366,19 @@ class PFParserFunctions {
 
 		if ($languageSelector) {
 
-			$languages = Language::fetchLanguageNames( null, 'mwfile' );
+			global $wgLang, $wgPageFormsLangCodes;
+
+			if (isset($wgPageFormsLangCodes) && $wgPageFormsLangCodes) {
+
+				$languages = [];
+
+				foreach ($wgPageFormsLangCodes as $langcode) {
+					$languages[$langcode] = Language::fetchLanguageName( $langcode, $wgLang->getCode(), 'mw' );
+	 			}
+			} else {
+				$languages = Language::fetchLanguageNames( $wgLang->getCode(), 'mw' );
+			}
+
 			ksort( $languages );
 
 			foreach ( $languages as $code => $name ) {
@@ -376,7 +390,7 @@ class PFParserFunctions {
 				);
 			}
 
-			$formContents .= Html::openElement( 'select', ['name' => "Page Lang[Languages]"] )
+			$formContents .= Html::openElement( 'select', ['name' => "PageLang[Languages]"] )
 			. "\n"
 			. implode( "\n", $optionsHtml )
 			. "\n"
