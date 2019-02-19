@@ -279,6 +279,8 @@ class PFParserFunctions {
 				$classStr .= ' reload';
 			} elseif ( $paramName == 'no autofocus' ) {
 				$inAutofocus = false;
+			} elseif ( $paramName == 'language selector' ) {
+				$languageSelector = true;
 			} else {
 				$value = urlencode( $value );
 				parse_str( "$paramName=$value", $arr );
@@ -359,6 +361,28 @@ class PFParserFunctions {
 				}
 			}
 		}
+
+		if ($languageSelector) {
+
+			$languages = Language::fetchLanguageNames( null, 'mwfile' );
+			ksort( $languages );
+
+			foreach ( $languages as $code => $name ) {
+
+				$optionsHtml[] = Html::element(
+					'option', [
+						'value' => $code
+					], "$code - $name"
+				);
+			}
+
+			$formContents .= Html::openElement( 'select', ['name' => "Page Lang[Languages]"] )
+			. "\n"
+			. implode( "\n", $optionsHtml )
+			. "\n"
+			. Html::closeElement( 'select' );
+		}
+
 
 		$buttonStr = ( $inButtonStr != '' ) ? $inButtonStr : wfMessage( 'pf_formstart_createoredit' )->escaped();
 		$formContents .= "&nbsp;" . Html::input( null, $buttonStr, 'submit',
