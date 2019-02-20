@@ -255,8 +255,12 @@
 				content: content,
 				title: this.getPageName()
 			} ).then( function (data) {
-				$( target.$node ).val(data[ 'flow-parsoid-utils' ].content);
-				$( target.$node ).change();
+				if (data[ 'flow-parsoid-utils' ].content) {
+					$( target.$node ).val(data[ 'flow-parsoid-utils' ].content);
+					$( target.$node ).change();
+				} else {
+					console.log('Error converting to wikitext : empty content');
+				}
 
 				$ (target.$node)
 					.removeClass( 'oo-ui-texture-pending' )
@@ -266,7 +270,7 @@
 				$ (target.$node)
 					.removeClass( 'oo-ui-texture-pending' )
 					.prop( 'disabled', false );
-				console.log('Error converting to wikitext');
+				console.log('Error converting to wikitext : call fails');
 			});
 
 	}
