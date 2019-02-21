@@ -390,7 +390,7 @@ class PFParserFunctions {
 				);
 			}
 
-			$formContents .= Html::openElement( 'select', ['name' => "PageLang[Languages]"] )
+			$formContents .= Html::openElement( 'select', ['name' => "PageLang[Language]"] )
 			. "\n"
 			. implode( "\n", $optionsHtml )
 			. "\n"
