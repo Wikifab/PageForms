@@ -281,7 +281,7 @@ class PFParserFunctions {
 				$classStr .= ' reload';
 			} elseif ( $paramName == 'no autofocus' ) {
 				$inAutofocus = false;
-			} elseif ( $paramName == 'language selector' ) {
+			} elseif ( $paramName == 'language selector' && defined('TRANSLATE_VERSION') ) {
 				$languageSelector = true;
 			} else {
 				$value = urlencode( $value );
