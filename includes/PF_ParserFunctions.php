@@ -384,11 +384,24 @@ class PFParserFunctions {
 
 			foreach ( $languages as $code => $name ) {
 
-				$optionsHtml[] = Html::element(
-					'option', [
-						'value' => $code
-					], "$code - $name"
-				);
+				if ( $wgLang->getCode() == $code ) {
+
+					$optionsHtml[] = Html::element(
+						'option', [
+							'value' => $code,
+							'selected' => 'selected'
+						], "$code - $name"
+					);
+				} else {
+
+					$optionsHtml[] = Html::element(
+						'option', [
+							'value' => $code
+						], "$code - $name"
+					);
+				}
+
+				
 			}
 
 			$languageSelectorSelect = Html::label( wfMessage( 'pf_formstart_pagelanguage' ), '' )
