@@ -327,6 +327,7 @@ class PFParserFunctions {
 		// double-encoding.
 		$inValue = html_entity_decode( $inValue );
 		$formContents = Html::input( 'page_name', $inValue, 'text', $formInputAttrs );
+		$languageSelectorContent = '';
 
 		// If the form start URL looks like "index.php?title=Special:FormStart"
 		// (i.e., it's in the default URL style), add in the title as a
@@ -390,11 +391,18 @@ class PFParserFunctions {
 				);
 			}
 
-			$formContents .= Html::openElement( 'select', ['name' => "PageLang[Language]"] )
+			$languageSelectorSelect = Html::label( wfMessage( 'pf_formstart_pagelanguage' ), '' )
+			. Html::openElement( 'select', ['name' => "PageLang[Language]"] )
 			. "\n"
 			. implode( "\n", $optionsHtml )
 			. "\n"
 			. Html::closeElement( 'select' );
+
+			$languageSelectorContent .= Html::openElement( 'div', ['class' => "form-inline"] )
+			. $languageSelectorSelect
+			. Html::closeElement( 'div' );
+
+
 		}
 
 
@@ -411,7 +419,7 @@ class PFParserFunctions {
 				'action' => $fsURL,
 				'method' => 'get',
 				'class' => $classStr
-			), '<p>' . $formContents . '</p>'
+			), '<p>' . $formContents . '</p>' . $languageSelectorContent
 		) . "\n";
 
 		if ( ! empty( $inAutocompletionSource ) ) {
