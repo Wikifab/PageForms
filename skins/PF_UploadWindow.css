@@ -26,3 +26,56 @@ fieldset {
     border: 0;
     margin-bottom: 15px;
 }
+
+.mw-htmlform-field-HTMLInfoField .mw-label,
+.mw-htmlform-field-HTMLTextAreaField {
+    display:none;
+}
+
+.mw-htmlform-field-HTMLInfoField {
+    font-size: 0.89em;
+}
+
+.mw-htmlform-field-PFUploadSourceField {
+    display: flex;
+}
+.mw-htmlform-field-Licenses {
+    display: none;
+}
+input#wpDestFile {
+    height: 30px;
+    border-radius: 3px;
+    border: 2px solid #ddd;
+    padding: 0 7px;
+}
+
+input#wpDestFile:hover {
+    border: 2px solid #ccc;
+}
+
+input#wpDestFile:active {
+    border: 2px solid #52bad5;
+}
+
+input#wpDestFile:focus {
+    outline: none;
+    box-shadow: none;
+    outline-offset: 0;
+}
+
+.mw-htmlform-submit-buttons input {
+    background-color: #52bad5;
+    color: #fff;
+    padding: 7px 12px;
+    border: none;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    transition: all ease .25s;
+    font-size: 1em;
+    cursor:pointer;
+}
+
+.mw-htmlform-submit-buttons input:hover {
+    background-color: #2c9ab7;
+}
