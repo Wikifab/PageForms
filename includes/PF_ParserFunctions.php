@@ -404,7 +404,7 @@ class PFParserFunctions {
 				
 			}
 
-			$languageSelectorSelect = Html::label( wfMessage( 'pf_formstart_pagelanguage' ), '' )
+			$languageSelectorSelect = '<label>' . wfMessage( 'pf_formstart_pagelanguage' ) . '</label>'
 			. Html::openElement( 'select', ['name' => "PageLang[Language]"] )
 			. "\n"
 			. implode( "\n", $optionsHtml )
