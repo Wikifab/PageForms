@@ -367,13 +367,13 @@ class PFParserFunctions {
 
 		if ($languageSelector) {
 
-			global $wgLang, $wgPageFormsLangCodes;
+			global $wgLang, $wgSimpleLangageSelectionLangList;
 
-			if (isset($wgPageFormsLangCodes) && $wgPageFormsLangCodes) {
+			if (isset($wgSimpleLangageSelectionLangList) && $wgSimpleLangageSelectionLangList) {
 
 				$languages = [];
 
-				foreach ($wgPageFormsLangCodes as $langcode) {
+				foreach ($wgSimpleLangageSelectionLangList as $langcode) {
 					$languages[$langcode] = Language::fetchLanguageName( $langcode, $wgLang->getCode(), 'mw' );
 	 			}
 			} else {
@@ -400,8 +400,6 @@ class PFParserFunctions {
 						], "$code - $name"
 					);
 				}
-
-				
 			}
 
 			$languageSelectorSelect = '<label>' . wfMessage( 'pf_formstart_pagelanguage' ) . '</label>'
@@ -414,10 +412,7 @@ class PFParserFunctions {
 			$languageSelectorContent .= Html::openElement( 'div', ['class' => "form-inline"] )
 			. $languageSelectorSelect
 			. Html::closeElement( 'div' );
-
-
 		}
-
 
 		$buttonStr = ( $inButtonStr != '' ) ? $inButtonStr : wfMessage( 'pf_formstart_createoredit' )->escaped();
 		$formContents .= "&nbsp;" . Html::input( null, $buttonStr, 'submit',
