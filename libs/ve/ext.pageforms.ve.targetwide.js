@@ -12,7 +12,7 @@
 	 * @extends ve.init.sa.Target
 	 */
 	mw.pageForms.ve.Targetwide = function PageFormsVeTargetwide(node, content) {
-		
+
 
 		mw.pageForms.ve.Targetwide.parent.call( this, node, content );
 	};
@@ -57,12 +57,12 @@
 			type: 'list',
 			icon: 'add',
 			label: '',
-			include: [ 'media', 'insertTable', 'specialCharacter', 'warningblock','preformatted','infoblock', 'ideablock', 'dontblock', 'pinblock']
+			include: [ 'media', 'insertTable', 'specialCharacter', 'warningblock','preformatted','infoblock', 'ideablock', 'dontblock', 'pinblock', 'iatemplateblock', 'mediapmg']
 		},
 		// Special character toolbar
 		//{ include: [ 'specialCharacter' ] }
 	];
-	
+
 	ve.init.mw.targetFactory.register( mw.pageForms.ve.Targetwide );
 
 }( mediaWiki, OO, ve ) );
