@@ -523,6 +523,7 @@
 		"PageFormsDependentFields": [],
 		"PageFormsCheckboxesSelectAllMinimum": 10,
 		"PageFormsMapsWithFeeders": [],
+		"PageFormsLangCodes": [],
 		"PageFormsDatePickerSettings": {
 			"@note": "See PF_DefaultInputSettings.php for allowed values",
 			"FirstDate": null,

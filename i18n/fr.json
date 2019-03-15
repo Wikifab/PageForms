@@ -189,6 +189,7 @@
 	"pf_formstart_docu": "Entrez ici un nom de page, destinée à être modifiée avec le formulaire « $1 ». \nSi cette page existe déjà, vous serez dirigé vers son formulaire de modification. \nDans le cas contraire, vous serez redirigé vers le formulaire de création de page.",
 	"pf_formstart_noform_docu": "Entrez ici un nom de page, puis sélectionnez le formulaire qui servira à la modifier. \nSi cette page existe déjà, vous serez dirigé vers son formulaire de modification. \nDans le cas contraire, vous serez redirigé vers le formulaire de création de page.",
 	"pf_formstart_createoredit": "Créer ou modifier",
+	"pf_formstart_pagelanguage": "Langue de la page :",
 	"formedit": "Modifier avec formulaire",
 	"pf-formedit-selectform": "Sélectionnez un formulaire pour créer cette page:",
 	"pf-formedit-mainforms": "Formulaires principaux :",

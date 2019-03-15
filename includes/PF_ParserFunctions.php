@@ -225,6 +225,7 @@ class PFParserFunctions {
 	}
 
 	public static function renderFormInput( &$parser ) {
+
 		$params = func_get_args();
 		array_shift( $params ); // don't need the parser
 
@@ -236,6 +237,7 @@ class PFParserFunctions {
 		$classStr = "pfFormInput";
 		$inPlaceholder = null;
 		$inAutofocus = true;
+		$languageSelector = false;
 
 		// Assign params.
 		foreach ( $params as $i => $param ) {
@@ -279,6 +281,8 @@ class PFParserFunctions {
 				$classStr .= ' reload';
 			} elseif ( $paramName == 'no autofocus' ) {
 				$inAutofocus = false;
+			} elseif ( $paramName == 'language selector' && defined('TRANSLATE_VERSION') ) {
+				$languageSelector = true;
 			} else {
 				$value = urlencode( $value );
 				parse_str( "$paramName=$value", $arr );
@@ -323,6 +327,7 @@ class PFParserFunctions {
 		// double-encoding.
 		$inValue = html_entity_decode( $inValue );
 		$formContents = Html::input( 'page_name', $inValue, 'text', $formInputAttrs );
+		$languageSelectorContent = '';
 
 		// If the form start URL looks like "index.php?title=Special:FormStart"
 		// (i.e., it's in the default URL style), add in the title as a
@@ -360,6 +365,60 @@ class PFParserFunctions {
 			}
 		}
 
+		if ($languageSelector) {
+
+			global $wgLang, $wgPageFormsLangCodes;
+
+			if (isset($wgPageFormsLangCodes) && $wgPageFormsLangCodes) {
+
+				$languages = [];
+
+				foreach ($wgPageFormsLangCodes as $langcode) {
+					$languages[$langcode] = Language::fetchLanguageName( $langcode, $wgLang->getCode(), 'mw' );
+	 			}
+			} else {
+				$languages = Language::fetchLanguageNames( $wgLang->getCode(), 'mw' );
+			}
+
+			ksort( $languages );
+
+			foreach ( $languages as $code => $name ) {
+
+				if ( $wgLang->getCode() == $code ) {
+
+					$optionsHtml[] = Html::element(
+						'option', [
+							'value' => $code,
+							'selected' => 'selected'
+						], "$code - $name"
+					);
+				} else {
+
+					$optionsHtml[] = Html::element(
+						'option', [
+							'value' => $code
+						], "$code - $name"
+					);
+				}
+
+				
+			}
+
+			$languageSelectorSelect = '<label>' . wfMessage( 'pf_formstart_pagelanguage' ) . '</label>'
+			. Html::openElement( 'select', ['name' => "PageLang[Language]"] )
+			. "\n"
+			. implode( "\n", $optionsHtml )
+			. "\n"
+			. Html::closeElement( 'select' );
+
+			$languageSelectorContent .= Html::openElement( 'div', ['class' => "form-inline"] )
+			. $languageSelectorSelect
+			. Html::closeElement( 'div' );
+
+
+		}
+
+
 		$buttonStr = ( $inButtonStr != '' ) ? $inButtonStr : wfMessage( 'pf_formstart_createoredit' )->escaped();
 		$formContents .= "&nbsp;" . Html::input( null, $buttonStr, 'submit',
 			array(
@@ -373,7 +432,7 @@ class PFParserFunctions {
 				'action' => $fsURL,
 				'method' => 'get',
 				'class' => $classStr
-			), '<p>' . $formContents . '</p>'
+			), '<p>' . $formContents . '</p>' . $languageSelectorContent
 		) . "\n";
 
 		if ( ! empty( $inAutocompletionSource ) ) {
