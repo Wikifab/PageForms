@@ -209,7 +209,7 @@ class PFTreeInput extends PFFormInput {
 
 			$text .= Html::input( $cur_input_name, $node->title, $inputType, $nodeAttribs );
 
-			$text .= $node->title . "\n";
+			$text .= wfMessage("dokit-category-title-".$node->title) . "\n";
 		}
 
 		if ( array_key_exists( 'children', $node ) ) {
