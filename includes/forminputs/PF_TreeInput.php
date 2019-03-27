@@ -68,7 +68,7 @@ class PFTreeInput extends PFFormInput {
 		} else {
 			$is_list = ( array_key_exists( 'is_list', $other_args ) && $other_args['is_list'] == true );
 			if ( $is_list ) {
-				$inputType = "checkbox";
+                $inputType = "checkbox";
 				self::$multipleSelect = true;
 			} else {
 				$inputType = "radio";
@@ -119,8 +119,8 @@ class PFTreeInput extends PFFormInput {
 			// Escape - we can't do anything.
 			return null;
 		}
-
-		$inputText = self::treeToHTML( $tree, $input_name, $cur_values, $hideroot, $depth, $inputType );
+		
+        $inputText = self::treeToHTML( $tree, $input_name, $cur_values, $hideroot, $depth, $inputType );
 
 		// Replace values one at a time, by an incrementing index -
 		// inspired by http://bugs.php.net/bug.php?id=11457
@@ -209,7 +209,8 @@ class PFTreeInput extends PFFormInput {
 
 			$text .= Html::input( $cur_input_name, $node->title, $inputType, $nodeAttribs );
 
-			$text .= wfMessage("dokit-category-title-".$node->title) . "\n";
+			$key = self::clean($node->title);
+    		$text .= wfMessage("dokit-category-title-".$key) . "\n";
 		}
 
 		if ( array_key_exists( 'children', $node ) ) {
@@ -296,5 +297,18 @@ class PFTreeInput extends PFFormInput {
 		}
 		return $t;
 	}
+
+    /**
+     * Clean the $string of special characters
+     * @param $string
+     * @return mixed|string|string[]|null cleand string
+     */
+    public static function clean($string)
+    {
+        $accents = 'ŠšŽžÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûýþÿ';
+        $string = str_replace ( " ", '_', $string ); // Replaces all spaces with underscores.
+
+        return preg_replace ( '/[^'.$accents.'A-Za-z0-9\-_]/', '', $string ); // Removes special chars.
+    }
 
 }
