@@ -36,6 +36,7 @@
 		this.dummyToolbar = true;
 
 		this.init(content);
+
 	};
 
 	OO.inheritClass( mw.pageForms.ve.Target, ve.init.sa.Target );
@@ -44,6 +45,8 @@
 
 	mw.pageForms.ve.Target.prototype.init = function ( content ) {
 		this.convertToHtml(content);
+
+		this.autoUpdate();
 	}
 
 	// Static
@@ -141,6 +144,8 @@
 		} );
 		this.getSurface().getView().on( 'focus', function (data) {
 			target.updateToolbarVisibility();
+
+			target.autoUpdate();
 		} );
 		this.updateToolbarVisibility();
 	}
@@ -156,8 +161,29 @@
 		} else {
 			this.getToolbar().$element.hide(500);
 		}
+
 	}
 
+	mw.pageForms.ve.Target.prototype.autoUpdate = function () {
+
+		var target = this;
+		if (target.autoUpdateWaiting) {
+			return;
+		}
+		target.autoUpdateWaiting = true;
+		setTimeout(function(){
+			target.autoUpdateWaiting = false;
+			var isActive = target.getSurface().getView().focused;
+			if (isActive) {
+				console.log("auto-update");
+				target.updateContent();
+			} else {
+
+				console.log("no auto-update");
+			}
+			target.autoUpdate();
+		}, 60000 * 4);
+	}
 
 
 	/**
