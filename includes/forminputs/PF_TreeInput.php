@@ -167,7 +167,7 @@ class PFTreeInput extends PFFormInput {
 	}
 
 	private static function nodeToHTML( $node, $key_prefix, $input_name, $current_selection, $hidenode, $depth, $inputType, $index = 1 ) {
-		global $wgPageFormsTabIndex;
+		global $wgPageFormsTabIndex, $wgEnableCategoryInternationalization;
 
 		$text = '';
 
@@ -209,8 +209,13 @@ class PFTreeInput extends PFFormInput {
 
 			$text .= Html::input( $cur_input_name, $node->title, $inputType, $nodeAttribs );
 
-			$key = self::clean($node->title);
-    		$text .= wfMessage("dokit-category-title-".$key) . "\n";
+            $key = $node->title;
+            $key = CategoryManagerCore::clean($key);
+            if($wgEnableCategoryInternationalization && wfMessage("dokit-category-title-".$key)->exists()){
+                $text .= wfMessage("dokit-category-title-".$key) . "\n";
+            } else {
+                $text .= $node->title . "\n";
+            }
 		}
 
 		if ( array_key_exists( 'children', $node ) ) {
@@ -297,18 +302,4 @@ class PFTreeInput extends PFFormInput {
 		}
 		return $t;
 	}
-
-    /**
-     * Clean the $string of special characters
-     * @param $string
-     * @return mixed|string|string[]|null cleand string
-     */
-    public static function clean($string)
-    {
-        $accents = 'ŠšŽžÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûýþÿ';
-        $string = str_replace ( " ", '_', $string ); // Replaces all spaces with underscores.
-
-        return preg_replace ( '/[^'.$accents.'A-Za-z0-9\-_]/', '', $string ); // Removes special chars.
-    }
-
 }
