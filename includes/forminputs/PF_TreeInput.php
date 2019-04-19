@@ -169,6 +169,11 @@ class PFTreeInput extends PFFormInput {
 	private static function nodeToHTML( $node, $key_prefix, $input_name, $current_selection, $hidenode, $depth, $inputType, $index = 1 ) {
 		global $wgPageFormsTabIndex, $wgEnableCategoryInternationalization;
 
+		$enableCategoryInternationalization = false;
+		if(class_exists('CategoryManagerCore')){
+		    $enableCategoryInternationalization = $wgEnableCategoryInternationalization;
+        }
+
 		$text = '';
 
 		$key_id = "$key_prefix-$index";
@@ -208,14 +213,16 @@ class PFTreeInput extends PFFormInput {
 			}
 
 			$text .= Html::input( $cur_input_name, $node->title, $inputType, $nodeAttribs );
-
-            $key = $node->title;
-            $key = CategoryManagerCore::clean($key);
-            if($wgEnableCategoryInternationalization && wfMessage("dokit-category-title-".$key)->exists()){
-                $text .= wfMessage("dokit-category-title-".$key) . "\n";
-            } else {
-                $text .= $node->title . "\n";
+			
+            $categoryTitle = $node->title;
+            if($enableCategoryInternationalization){
+                $key = $node->title;
+                $key = CategoryManagerCore::clean($key);
+                if(wfMessage("dokit-category-title-".$key)->exists()) {
+                    $categoryTitle = wfMessage("dokit-category-title-" . $key);
+                }
             }
+            $text .= $categoryTitle . "\n";
 		}
 
 		if ( array_key_exists( 'children', $node ) ) {
