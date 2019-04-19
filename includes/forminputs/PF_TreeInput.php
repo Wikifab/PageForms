@@ -68,7 +68,7 @@ class PFTreeInput extends PFFormInput {
 		} else {
 			$is_list = ( array_key_exists( 'is_list', $other_args ) && $other_args['is_list'] == true );
 			if ( $is_list ) {
-				$inputType = "checkbox";
+                $inputType = "checkbox";
 				self::$multipleSelect = true;
 			} else {
 				$inputType = "radio";
@@ -119,8 +119,8 @@ class PFTreeInput extends PFFormInput {
 			// Escape - we can't do anything.
 			return null;
 		}
-
-		$inputText = self::treeToHTML( $tree, $input_name, $cur_values, $hideroot, $depth, $inputType );
+		
+        $inputText = self::treeToHTML( $tree, $input_name, $cur_values, $hideroot, $depth, $inputType );
 
 		// Replace values one at a time, by an incrementing index -
 		// inspired by http://bugs.php.net/bug.php?id=11457
@@ -167,7 +167,12 @@ class PFTreeInput extends PFFormInput {
 	}
 
 	private static function nodeToHTML( $node, $key_prefix, $input_name, $current_selection, $hidenode, $depth, $inputType, $index = 1 ) {
-		global $wgPageFormsTabIndex;
+		global $wgPageFormsTabIndex, $wgEnableCategoryInternationalization;
+
+		$enableCategoryInternationalization = false;
+		if(class_exists('CategoryManagerCore')){
+		    $enableCategoryInternationalization = $wgEnableCategoryInternationalization;
+        }
 
 		$text = '';
 
@@ -208,8 +213,16 @@ class PFTreeInput extends PFFormInput {
 			}
 
 			$text .= Html::input( $cur_input_name, $node->title, $inputType, $nodeAttribs );
-
-			$text .= $node->title . "\n";
+			
+            $categoryTitle = $node->title;
+            if($enableCategoryInternationalization){
+                $key = $node->title;
+                $key = CategoryManagerCore::clean($key);
+                if(wfMessage("dokit-category-title-".$key)->exists()) {
+                    $categoryTitle = wfMessage("dokit-category-title-" . $key);
+                }
+            }
+            $text .= $categoryTitle . "\n";
 		}
 
 		if ( array_key_exists( 'children', $node ) ) {
@@ -296,5 +309,4 @@ class PFTreeInput extends PFFormInput {
 		}
 		return $t;
 	}
-
 }
