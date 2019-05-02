@@ -1079,7 +1079,8 @@ END;
 							}
 						}
 						$free_text_was_included = true;
-						$wiki_page->addFreeTextSection();
+						$options = $form_field->getFieldArgs();
+						$wiki_page->addFreeTextSection($options);
 					}
 
 					if ( $tif->getTemplateName() === '' || $field_name == '#freetext#' ) {

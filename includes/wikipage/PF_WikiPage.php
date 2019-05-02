@@ -51,8 +51,8 @@ class PFWikiPage {
 		$this->mComponents[] = new PFWikiPageSection( $sectionName, $headerLevel, $sectionText, $sectionOptions );
 	}
 
-	function addFreeTextSection() {
-		$this->mComponents[] = new PFWikiPageFreeText();
+	function addFreeTextSection($options = []) {
+		$this->mComponents[] = new PFWikiPageFreeText($options);
 	}
 
 	function setFreeText( $text ) {

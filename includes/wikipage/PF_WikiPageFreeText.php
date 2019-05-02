@@ -11,12 +11,37 @@
  */
 class PFWikiPageFreeText {
 	private $mText;
+	private $mOptions;
+
+	function __construct( $options = [] ) {
+		$this->mOptions = $options;
+	}
 
 	function setText( $text ) {
 		$this->mText = $text;
 	}
 
+	function isTranslateEnabled() {
+		return class_exists('SpecialTranslate');
+	}
+
 	function getText() {
-		return $this->mText;
+		$text = $this->mText;
+		if ( $this->isTranslateEnabled() && isset($this->mOptions['translatable']) && $this->mOptions['translatable']) {
+
+			//first remove any occurences of <translate> or </translate>
+			$text = str_replace(['<translate>', '</translate>'], '', $text);
+			//add translate tag
+			$text = '<translate>' . $text .'</translate>';
+		}
+		return $text;
+	}
+
+	function getOptions() {
+		return $this->mOptions;
+	}
+
+	function setOptions( $options ) {
+		$this->mOptions = $options;
 	}
 }
