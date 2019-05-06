@@ -279,6 +279,8 @@
 				markup += text;
 			}
 
+			console.log(markup);
+
 			return markup;
 		},
 	};

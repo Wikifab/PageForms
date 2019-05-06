@@ -116,8 +116,6 @@ the specific language governing permissions and limitations under the Apache Lic
     function stripDiacritics(str) {
         var ret, i, l, c;
 
-        console.log(str);
-
         if (!str || str.length < 1) return str;
 
         ret = "";
@@ -125,8 +123,6 @@ the specific language governing permissions and limitations under the Apache Lic
             c = str.charAt(i);
             ret += DIACRITICS[c] || c;
         }
-
-        console.log(ret);
         return ret;
     }
 
