@@ -72,6 +72,7 @@
 		 *
 		 */
 		formatResult: function(value, container, query) {
+			console.log(query);
 			var term = query.term;
 			var text = value.text;
 			var image = value.image;
@@ -262,7 +263,6 @@
 			var markup = "";
 			var remove_diacritics = pf.select2.base.prototype.removeDiacritics;
 			var no_diac_text = remove_diacritics(text);
-			console.log(term);
 			var start = no_diac_text.toUpperCase().indexOf(term.toUpperCase());
 			if (start !== 0 && !mw.config.get( 'wgPageFormsAutocompleteOnAllChars' )) {
 				start = no_diac_text.toUpperCase().indexOf(" " + term.toUpperCase());
