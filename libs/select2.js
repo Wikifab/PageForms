@@ -1692,6 +1692,8 @@ the specific language governing permissions and limitations under the Apache Lic
             }
 
             this.resultsPage = 1;
+            
+            console.log(search.val() + ' ' + opts.matcher);
 
             opts.query({
                 element: opts.element,
