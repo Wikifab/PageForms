@@ -1693,8 +1693,6 @@ the specific language governing permissions and limitations under the Apache Lic
 
             this.resultsPage = 1;
 
-            console.log(search.val() + ' ' + opts.element);
-
             opts.query({
                 element: opts.element,
                     term: stripDiacritics(search.val()),
@@ -1704,7 +1702,7 @@ the specific language governing permissions and limitations under the Apache Lic
                     callback: this.bind(function (data) {
                 var def; // default choice
 
-                console.log('data : ' + data);
+                console.log(data);
 
                 // ignore old responses
                 if (queryNumber != this.queryCount) {
