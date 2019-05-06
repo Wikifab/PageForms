@@ -72,7 +72,6 @@
 		 *
 		 */
 		formatResult: function(value, container, query) {
-			console.log(query);
 			var term = query.term;
 			var text = value.text;
 			var image = value.image;
