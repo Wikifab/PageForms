@@ -1704,6 +1704,8 @@ the specific language governing permissions and limitations under the Apache Lic
                     callback: this.bind(function (data) {
                 var def; // default choice
 
+                console.log('data : ' + data);
+
                 // ignore old responses
                 if (queryNumber != this.queryCount) {
                   return;
