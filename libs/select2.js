@@ -1693,8 +1693,6 @@ the specific language governing permissions and limitations under the Apache Lic
 
             this.resultsPage = 1;
 
-            console.log(opts.element);
-
             opts.query({
                 element: opts.element,
                     term: stripDiacritics(search.val()),
