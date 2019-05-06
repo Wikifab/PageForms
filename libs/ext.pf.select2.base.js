@@ -262,6 +262,7 @@
 			var markup = "";
 			var remove_diacritics = pf.select2.base.prototype.removeDiacritics;
 			var no_diac_text = remove_diacritics(text);
+			console.log(no_diac_text);
 			var start = no_diac_text.toUpperCase().indexOf(term.toUpperCase());
 			if (start !== 0 && !mw.config.get( 'wgPageFormsAutocompleteOnAllChars' )) {
 				start = no_diac_text.toUpperCase().indexOf(" " + term.toUpperCase());
@@ -278,8 +279,6 @@
 			} else {
 				markup += text;
 			}
-
-			console.log(markup);
 
 			return markup;
 		},
