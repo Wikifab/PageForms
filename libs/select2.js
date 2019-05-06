@@ -371,6 +371,10 @@ the specific language governing permissions and limitations under the Apache Lic
         var match=stripDiacritics(text.toUpperCase()).indexOf(stripDiacritics(term.toUpperCase())),
             tl=term.length;
 
+        console.log(text);
+        console.log(term);
+        console.log(match);
+
         if (match<0) {
             markup.push(escapeMarkup(text));
             return;
@@ -1701,8 +1705,6 @@ the specific language governing permissions and limitations under the Apache Lic
                     matcher: opts.matcher,
                     callback: this.bind(function (data) {
                 var def; // default choice
-
-                console.log(data);
 
                 // ignore old responses
                 if (queryNumber != this.queryCount) {
