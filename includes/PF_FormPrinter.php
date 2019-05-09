@@ -1606,7 +1606,7 @@ END;
 		// text.
 		// The page text needs to be created whether or not the form
 		// was submitted, in case this is called from #formredlink.
-		$wiki_page->setFreeText( $free_text );
+		$wiki_page->setFreeText( $free_text, $wgRequest->getCheck( 'pf_free_text' ) );
 		$page_text = $wiki_page->createPageText();
 
 		// Also substitute the free text into the form.

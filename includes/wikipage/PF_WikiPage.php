@@ -55,10 +55,13 @@ class PFWikiPage {
 		$this->mComponents[] = new PFWikiPageFreeText($options);
 	}
 
-	function setFreeText( $text ) {
+	function setFreeText( &$text, $form_submitted = FALSE ) {
 		foreach ( $this->mComponents as $i => $component ) {
 			if ( get_class( $component ) == 'PFWikiPageFreeText' ) {
-				$this->mComponents[$i]->setText( $text );
+				// call to PFWikiPageFreeText->setText()
+				// we pass $text by reference, so that translate tags get removed for displaying and put back
+				// when submitting the form
+				$this->mComponents[$i]->setText( $text, $form_submitted );
 				return;
 			}
 		}

@@ -17,7 +17,21 @@ class PFWikiPageFreeText {
 		$this->mOptions = $options;
 	}
 
-	function setText( $text ) {
+	function setText( &$text, $form_submitted = FALSE ) {
+
+		if ( $this->isTranslateEnabled() && isset($this->mOptions['translatable']) && $this->mOptions['translatable']) {
+
+			if (!$form_submitted) {
+				// remove translate tags when displaying the form as it messes up with VE
+				if(preg_match('#^<translate>([\S\s]*)<\/translate>$#m', $text, $matches)) {
+					$text = $matches[1];
+				}
+			} else {
+				// put them back
+				$text = '<translate>' . $text .'</translate>';
+			}
+		}
+
 		$this->mText = $text;
 	}
 
@@ -26,15 +40,7 @@ class PFWikiPageFreeText {
 	}
 
 	function getText() {
-		$text = $this->mText;
-		if ( $this->isTranslateEnabled() && isset($this->mOptions['translatable']) && $this->mOptions['translatable']) {
-
-			//first remove any occurences of <translate> or </translate>
-			$text = str_replace(['<translate>', '</translate>'], '', $text);
-			//add translate tag
-			$text = '<translate>' . $text .'</translate>';
-		}
-		return $text;
+		return $this->mText;
 	}
 
 	function getOptions() {
