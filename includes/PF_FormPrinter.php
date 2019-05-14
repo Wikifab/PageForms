@@ -1079,7 +1079,8 @@ END;
 							}
 						}
 						$free_text_was_included = true;
-						$wiki_page->addFreeTextSection();
+						$options = $form_field->getFieldArgs();
+						$wiki_page->addFreeTextSection($options);
 					}
 
 					if ( $tif->getTemplateName() === '' || $field_name == '#freetext#' ) {
@@ -1605,7 +1606,7 @@ END;
 		// text.
 		// The page text needs to be created whether or not the form
 		// was submitted, in case this is called from #formredlink.
-		$wiki_page->setFreeText( $free_text );
+		$wiki_page->setFreeText( $free_text, $wgRequest->getCheck( 'pf_free_text' ) );
 		$page_text = $wiki_page->createPageText();
 
 		// Also substitute the free text into the form.
