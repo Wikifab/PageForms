@@ -238,6 +238,7 @@ class PFParserFunctions {
 		$inPlaceholder = null;
 		$inAutofocus = true;
 		$languageSelector = false;
+		$namespaceSelector = false;
 
 		// Assign params.
 		foreach ( $params as $i => $param ) {
@@ -283,6 +284,8 @@ class PFParserFunctions {
 				$inAutofocus = false;
 			} elseif ( $paramName == 'language selector' && defined('TRANSLATE_VERSION') ) {
 				$languageSelector = true;
+			} elseif ($paramName == 'namespace selector'){
+				$namespaceSelector = true;
 			} else {
 				$value = urlencode( $value );
 				parse_str( "$paramName=$value", $arr );
@@ -328,6 +331,7 @@ class PFParserFunctions {
 		$inValue = html_entity_decode( $inValue );
 		$formContents = Html::input( 'page_name', $inValue, 'text', $formInputAttrs );
 		$languageSelectorContent = '';
+		$namespaceSelectorContent = '';
 
 		// If the form start URL looks like "index.php?title=Special:FormStart"
 		// (i.e., it's in the default URL style), add in the title as a
@@ -414,6 +418,33 @@ class PFParserFunctions {
 			. Html::closeElement( 'div' );
 		}
 
+		if($namespaceSelector) {
+
+			global $wgAvailableNamespaces;
+
+			if(isset($wgAvailableNamespaces)){
+				foreach ($wgAvailableNamespaces as $availableNamespace){
+
+					$optionsHtmlNamespace[] = Html::element(
+						'option', [
+							'value' => $availableNamespace,
+						], $availableNamespace
+					);
+				}
+
+				$namespaceSelectorSelect = Html::label(wfMessage('pf_formstart_pagenamespace'), '')
+				. Html::openElement('select', ['name' => "namespace"])
+				. "\n"
+				.implode( "\n", $optionsHtmlNamespace)
+				. "\n"
+				. Html::closeElement('select');
+
+				$namespaceSelectorContent .= Html::openElement('div', ['class' => "form-inline"] )
+				.$namespaceSelectorSelect
+				.Html::closeElement('div');
+			}
+		}
+
 		$buttonStr = ( $inButtonStr != '' ) ? $inButtonStr : wfMessage( 'pf_formstart_createoredit' )->escaped();
 		$formContents .= "&nbsp;" . Html::input( null, $buttonStr, 'submit',
 			array(
@@ -427,7 +458,7 @@ class PFParserFunctions {
 				'action' => $fsURL,
 				'method' => 'get',
 				'class' => $classStr
-			), '<p>' . $formContents . '</p>' . $languageSelectorContent
+			), '<p>' . $formContents . '</p>' . $languageSelectorContent . $namespaceSelectorContent
 		) . "\n";
 
 		if ( ! empty( $inAutocompletionSource ) ) {
