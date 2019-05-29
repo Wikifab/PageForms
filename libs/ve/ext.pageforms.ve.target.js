@@ -259,7 +259,7 @@
 		var oldFormat = 'html';
 		var newFormat = 'wikitext';
 
-		if (content == '') {
+		if (content == '' || content.includes('><')) {
 			// if content empty, no need to do a conversion call
 			$( target.$node ).val('');
 			$( target.$node ).change();
