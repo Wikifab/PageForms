@@ -420,10 +420,10 @@ class PFParserFunctions {
 
 		if($namespaceSelector) {
 
-			global $wgAvailableNamespaces;
+			global $wgPageFormsAvailableNamespaces;
 
-			if(isset($wgAvailableNamespaces)){
-				foreach ($wgAvailableNamespaces as $availableNamespace){
+			if(isset($wgPageFormsAvailableNamespaces)){
+				foreach ($wgPageFormsAvailableNamespaces as $availableNamespace){
 
 					$optionsHtmlNamespace[] = Html::element(
 						'option', [
