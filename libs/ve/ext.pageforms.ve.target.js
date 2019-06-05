@@ -259,15 +259,16 @@
 		var oldFormat = 'html';
 		var newFormat = 'wikitext';
 
-		if (content.replace(/<(?:.|\n)*?>/gm, '') === '') {
+		var paragraphRegex = new RegExp("<\/?p( [^><]*)?\/?>", "gm");
+		if (content.replace(paragraphRegex, '').trim() === '') {
 			// if content empty, no need to do a conversion call
 			$( target.$node ).val('');
 			$( target.$node ).change();
 			return;
 		}
 
-		console.log("convert to wikitext : ");
-		console.log(content);
+		//console.log("convert to wikitext : ");
+		//console.log(content);
 
 		$(this.$node)
 			//.prop( 'disabled', true )
