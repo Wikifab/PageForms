@@ -259,7 +259,7 @@
 		var oldFormat = 'html';
 		var newFormat = 'wikitext';
 
-		var paragraphRegex = new RegExp("<\/?p( [^><]*)?\/?>", "gm");
+		var paragraphRegex = new RegExp("<\/?(p|span)( [^><]*)?\/?>", "gm");
 		if (content.replace(paragraphRegex, '').trim() === '') {
 			// if content empty, no need to do a conversion call
 			$( target.$node ).val('');
