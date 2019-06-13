@@ -211,11 +211,8 @@ class PFTreeInput extends PFFormInput {
 			
             $categoryTitle = $node->title;
 			if(class_exists('CategoryManagerCore')){
-				$key = CategoryManagerCore::clean($node->title);
-				$messageKey = "dokit-category-title-".$key;
-				if(wfMessage($messageKey)->exists()){
-					$categoryTitle = wfMessage($messageKey);
-				}
+				$title = Title::makeTitleSafe(NS_CATEGORY, $node->title);
+				$categoryTitle = CategoryManagerCore::getTranslatedCategoryTitle($title);
 			}
             $text .= $categoryTitle . "\n";
 		}
