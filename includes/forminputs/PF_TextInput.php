@@ -142,7 +142,7 @@ class PFTextInput extends PFFormInput {
 			if (in_array ( $extension, $videoExtensions )) {
 				$previewImage = Html::element ('video', array ('src' => $url, 'width' => '100%'));
 			} else {
-				$previewImage = Html::element ('img', array ('src' => $url, 'class' => 'canvas-img'));
+				$previewImage = Html::element ('img', array ('src' => $url, 'class' => 'canvas-img', 'style' => 'filter: blur(3px)'));
 			}
 		}
 
