@@ -260,7 +260,8 @@
 		var newFormat = 'wikitext';
 
 		var paragraphRegex = new RegExp("<\/?(p|span)( [^><]*)?\/?>", "gm");
-		if (content.replace(paragraphRegex, '').trim() === '') {
+		var paragraphTypeOfRegex = new RegExp("typeof=", "gm");
+		if (content.replace(paragraphRegex, '').trim() === '' && ! content.match(paragraphTypeOfRegex)) {
 			// if content empty, no need to do a conversion call
 			$( target.$node ).val('');
 			$( target.$node ).change();
