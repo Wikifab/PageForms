@@ -1666,6 +1666,10 @@ $(document).ready( function() {
 	$('.multipleTemplateInstance').initializeJSElements(true);
 	$('.multipleTemplateAdder').click( function() {
 		$(this).addInstance( false );
+		$('.addFileAttachment').on('click', function () {
+			var container = $(this).prev('.inputSpan').get(0);
+			mw.hook('pf.addSimpleTemplateInstance').fire(container);
+		});
 	});
 	$('.multipleTemplateList').sortable({
 		axis: 'y',
