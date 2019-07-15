@@ -1329,7 +1329,7 @@ $.fn.addInstance = function( addAboveCurInstance ) {
 	if($(new_div).find('.msuploadContainer').length > 0){
 		mw.hook('pf.addTemplateInstance').fire(new_div);
 	} else if ($(new_div).parents('.simplePMG').length > 0){
-		mw.hook('pf.addSimpleTemplateInstance').fire($(new_div).find('.inputSpan').get(0));
+		mw.hook('pf.addSimplePMG').fire($(new_div).find('.inputSpan').get(0));
 	}
 };
 
