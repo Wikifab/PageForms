@@ -1326,7 +1326,11 @@ $.fn.addInstance = function( addAboveCurInstance ) {
 
 	// Hook that fires each time a new template instance is added.
 	// The first parameter is a jQuery selection of the newly created instance div.
-	mw.hook('pf.addTemplateInstance').fire(new_div);
+	if($(new_div).find('.msuploadContainer').length > 0){
+		mw.hook('pf.addTemplateInstance').fire(new_div);
+	} else if ($(new_div).parents('.simplePMG').length > 0){
+		mw.hook('pf.addSimpleTemplateInstance').fire($(new_div).find('.inputSpan').get(0));
+	}
 };
 
 // The first argument is needed, even though it's an attribute of the element
@@ -1666,10 +1670,6 @@ $(document).ready( function() {
 	$('.multipleTemplateInstance').initializeJSElements(true);
 	$('.multipleTemplateAdder').click( function() {
 		$(this).addInstance( false );
-		$('.addFileAttachment').on('click', function () {
-			var container = $(this).prev().get(0);
-			mw.hook('pf.addSimpleTemplateInstance').fire(container);
-		});
 	});
 	$('.multipleTemplateList').sortable({
 		axis: 'y',
