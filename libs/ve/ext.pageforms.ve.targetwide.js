@@ -57,7 +57,7 @@
 			type: 'list',
 			icon: 'add',
 			label: '',
-			include: [ 'mediapmg', 'insertTable', 'specialCharacter', 'warningblock','preformatted','infoblock', 'ideablock', 'dontblock', 'pinblock', 'iatemplateblock']
+			include: [ 'mediapmg', 'insertTable', 'specialCharacter', 'syntaxhighlightDialog', 'warningblock','preformatted','infoblock', 'ideablock', 'dontblock', 'pinblock', 'iatemplateblock']
 		},
 		// Special character toolbar
 		//{ include: [ 'specialCharacter' ] }
