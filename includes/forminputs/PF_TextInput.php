@@ -142,7 +142,7 @@ class PFTextInput extends PFFormInput {
 			if (in_array ( $extension, $videoExtensions )) {
 				$previewImage = Html::element ('video', array ('src' => $url, 'width' => '100%'));
 			} else {
-				$previewImage = Html::element ('img', array ('src' => $url, 'class' => 'canvas-img', 'style' => 'filter: blur(3px)'));
+				$previewImage = Html::element ('img', array ('src' => $url, 'class' => 'canvas-img'/*, 'style' => 'filter: blur(3px)'*/));
 			}
 		}
 
@@ -224,7 +224,8 @@ class PFTextInput extends PFFormInput {
 			$text .= Html::rawElement(
 				'div',
 				array( 'id' => $input_id . '_imagepreview', 'class' => 'pfImagePreviewWrapper' ),
-				self::getPreviewImage( $cur_value ). '<div class="lds-grid"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>'
+				self::getPreviewImage( $cur_value )
+					//. '<div class="lds-grid"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>'
 			);
 		}
 

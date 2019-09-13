@@ -71,9 +71,9 @@ class PFFormEditAction extends Action {
 		// /!\ if page is just been created, link to forms may not be recorded yet, so we double check
 		if ( count( $form_names) == 0 && $wgPageFormsDefaultFormForNamespace ) {
 			$firstTimestamp = $title->getEarliestRevTime();
-			// if created less than 30seconds ago, link to form may not be presents
+			// if created less than 60seconds ago, link to form may not be presents
 			// strange to diff string like that, but it does the job
-			if (wfTimestamp( TS_MW) - $firstTimestamp < 30 ) {
+			if (wfTimestamp( TS_MW) - $firstTimestamp < 60 ) {
 				if (isset($wgPageFormsDefaultFormForNamespace[$title->getNamespace()])) {
 					$form_names = [ $wgPageFormsDefaultFormForNamespace[$title->getNamespace()] ];
 				}
