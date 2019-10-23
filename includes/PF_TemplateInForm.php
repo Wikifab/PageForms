@@ -350,6 +350,7 @@ class PFTemplateInForm {
 			// except when that pipe is part of a piped link.
 			$field = "";
 			$uncompleted_square_brackets = 0;
+			$uncompleted_table_brackets = 0;
 			$uncompleted_curly_brackets = 2;
 			$template_ended = false;
 			for ( $i = $fields_start_char; ! $template_ended && ( $i < strlen( $existing_page_content ) ); $i++ ) {
@@ -372,10 +373,14 @@ class PFTemplateInForm {
 					$uncompleted_curly_brackets++;
 				} elseif ( $c == '}' && ( $nextc == '}' || $prevc == '}' ) && $uncompleted_curly_brackets > 0 ) {
 					$uncompleted_curly_brackets--;
+				} elseif ( $c == '{' &&  $nextc == '|' ) {
+					$uncompleted_table_brackets++;
+				} elseif ( $c == '}' &&  $prevc == '|' && $uncompleted_table_brackets > 0 ) {
+					$uncompleted_table_brackets--;
 				}
 				// handle an end to a field and/or template declaration
 				$template_ended = ( $uncompleted_curly_brackets == 0 && $uncompleted_square_brackets == 0 );
-				$field_ended = ( $c == '|' && $uncompleted_square_brackets == 0 && $uncompleted_curly_brackets <= 2 );
+				$field_ended = ( $c == '|' && $uncompleted_square_brackets == 0 && $uncompleted_curly_brackets <= 2 && $uncompleted_table_brackets == 0);
 				if ( $template_ended || $field_ended ) {
 					// If this was the last character in the template, remove
 					// the closing curly brackets.
