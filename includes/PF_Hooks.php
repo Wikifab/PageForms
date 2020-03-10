@@ -34,7 +34,10 @@ class PFHooks {
 		}
 
 		// Allow for popup windows for file upload
-		$GLOBALS['wgEditPageFrameOptions'] = 'SAMEORIGIN';
+		if ( $GLOBALS['wgEditPageFrameOptions'] == 'DENY' ) {
+			// we must not change it if it is set to false in local configuration
+			$GLOBALS['wgEditPageFrameOptions'] = 'SAMEORIGIN';
+		}
 
 		// Necessary setting for SMW 1.9+
 		$GLOBALS['smwgEnabledSpecialPage'][] = 'RunQuery';
