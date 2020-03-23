@@ -23,6 +23,9 @@ class PFWikiPageFreeText {
 
 			if (!$form_submitted) {
 				// remove translate tags when displaying the form as it messes up with VE
+				if(preg_match('#^<noinclude><translate><\/noinclude>([\S\s]*)<noinclude><\/translate><\/noinclude>$#m', $text, $matches)) {
+					$text = $matches[1];
+				}
 				if(preg_match('#^<translate>([\S\s]*)<\/translate>$#m', $text, $matches)) {
 					$text = $matches[1];
 				}
@@ -51,7 +54,7 @@ class PFWikiPageFreeText {
 				$text = preg_replace($regexs, $replacements, $text);
 
 				// put translate tags back
-				$text = '<translate>' . $text .'</translate>';
+				$text = '<noinclude><translate></noinclude>' . $text .'<noinclude></translate></noinclude>';
 			}
 		}
 

@@ -1784,6 +1784,15 @@ END;
 				$cur_value = substr($cur_value, strlen('<translate>'), -1* strlen('</translate>'));
 			}
 
+			//same than above, with noinclude tags :
+			if(preg_match('#^<noinclude><translate></noinclude>(.*)<noinclude></translate></noinclude>$#', $cur_value, $matches)) {
+				$cur_value = $matches[1];
+			} else if(substr($cur_value, 0, strlen('<noinclude><translate></noinclude>')) == '<noinclude><translate></noinclude>'
+					&& substr($cur_value, -1 * strlen('<noinclude></translate></noinclude>')) == '<noinclude></translate></noinclude>') {
+				// for unknown reason, the pregmatch regex does not work every time !! :(
+				$cur_value = substr($cur_value, strlen('<noinclude><translate></noinclude>'), -1* strlen('<noinclude></translate></noinclude>'));
+			}
+
 			$isVEForm = $form_field->hasFieldArg( 'class' ) && strpos($form_field->getFieldArg( 'class'),'form-textarea') !== false;
 			if ( substr($cur_value, 0,6) == '<!--T:' /*&& ! $isVEForm*/) {
 				// hide the tag <!-- T:X --> in an other input

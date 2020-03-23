@@ -454,7 +454,15 @@ class PFFormField {
 				break;
 			}
 		}
-		// if there is  a tag ("<!--T:X-->") no separated from a template "{{ ...", aad a new line between
+		// same than right obave, whith noinclude tags
+		while (preg_match('#(<!--T:[0-9]+-->\s*)(<noinclude></translate></noinclude>)#', $value, $matches)){
+			$value = str_replace($matches[1], '', $value);
+			if($i++ > 200) {
+				//security : is it usefull ?
+				break;
+			}
+		}
+		// if there is  a tag ("<!--T:X-->") no separated from a template "{{ ...", add a new line between
 		while (preg_match('/(<!--T:[0-9]+-->)({{[^}]+}}\s*)/', $value, $matches)){
 			$value = str_replace($matches[1], $matches[1] . "\n", $value);
 			if($i++ > 200) {
