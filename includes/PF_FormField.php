@@ -564,6 +564,11 @@ class PFFormField {
 			return $cur_value;
 		}
 
+		// default when noempty params is passed
+		if ( $source_is_page && empty($cur_value) && $this->mDefaultValue && $this->hasFieldArg( 'noempty' ) ) {
+			return $this->mDefaultValue;
+		}
+
 		// Default values in new instances of multiple-instance
 		// templates should always be set, even for existing pages.
 		$part_of_multiple = array_key_exists( 'part_of_multiple', $this->mFieldArgs );
